@@ -1,4 +1,7 @@
 package com.amazonaws.lambda.model;
+
+import java.util.ArrayList;
+
 public class Schedule {
 	public String id;
 	public String startdate;
