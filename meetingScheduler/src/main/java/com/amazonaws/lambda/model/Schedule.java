@@ -1,5 +1,4 @@
 package com.amazonaws.lambda.model;
-
 public class Schedule {
 	public String id;
 	public String startdate;
@@ -19,9 +18,9 @@ public class Schedule {
 		this.organizer = organizer;
 		this.id = id;
 	}
-	
+
 	public String getsecretcode() {
 		return this.secretcode;
 	}
-	
+
 }
