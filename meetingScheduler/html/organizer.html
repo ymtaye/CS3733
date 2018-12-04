@@ -1,0 +1,69 @@
+<html><head><script type="text/javascript">
+var add_url = "";
+
+function processAddResponse(startdate, enddate, daystarthour, dayendhour, organizer, result) {
+  // Can grab any DIV or SPAN HTML element and can then manipulate its
+  // contents dynamically via javascript
+  console.log("result:" + result);
+  var js = JSON.parse(result);
+
+  // Update computation result
+  document.getElementById('message').innerHTML = result;
+}
+
+function handleAddClick(e) {
+  var form = document.addForm;
+  var startdate = form.startdate.value;
+  var enddate = form.enddate.value;
+  var daystarthour = form.daystarthour.value;
+  var dayendhour = form.dayendhour.value;
+  var organizer = form.organizer.value;
+
+  var data = {};
+  data["startdate"] = startdate;
+  data["enddate"] = enddate;
+  data["daystarthour"] = daystarthour;
+  data["dayendhour"] = dayendhour;
+  data["organizer"] = organizer;
+
+  var js = JSON.stringify(data);
+  console.log("JS:" + js);
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", add_url, true);
+
+  // send the collected data as JSON
+  xhr.send(js);
+
+  // This will process results and update HTML as appropriate.
+  xhr.onloadend = function () {
+    console.log(xhr);
+    console.log(xhr.request);
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+      console.log ("XHR:" + xhr.responseText);
+      processAddResponse(startdate, enddate, daystarthour, daystarthour, dayendhour, organizer, xhr.responseText);
+    } else {
+      processAddResponse(startdate, enddate, daystarthour, daystarthour, dayendhour, organizer, "N/A");
+    }
+  };
+}
+
+</script></head><body>
+
+<h1>Request to create a calendar </h1>
+
+<form name="addForm" method="post" name="addValues">
+  Start date (YYYY:MM:DD): <input name="startdate" value="" /><br>
+  End date (YYYY:MM:DD): <input name="enddate" value="" /><br>
+  Start time for each day (HH:MM:SS): <input name="daystarthour" value="" /><br>
+  End time for each day (HH:MM:SS): <input name="dayendhour" value="" /><br>
+  Your name: <input name="organizer" value="" /><br>
+  <input type="button" value="Submit"  onClick="JavaScript:handleAddClick(this)">
+</form>
+
+<h3>Response Text:</h3>
+
+<div id="message">
+</div>
+
+</body>
+</html>
