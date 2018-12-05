@@ -1,4 +1,7 @@
 package com.amazonaws.lambda.model;
+
+import java.util.ArrayList;
+
 public class Schedule {
 	public String id;
 	public String startdate;
@@ -9,7 +12,7 @@ public class Schedule {
 	String secretcode;
 	public ArrayList<TimeSlot> timeslots;
 
-	public Schedule (String id, String secretcode, String startdate, String enddate, String starttime, String endtime, String organizer) {
+	public Schedule (String id, String startdate, String enddate, String starttime, String endtime, String organizer, String secretcode) {
 		this.secretcode = secretcode;
 		this.startdate = startdate;
 		this.enddate = enddate;
@@ -22,5 +25,12 @@ public class Schedule {
 	public String getsecretcode() {
 		return this.secretcode;
 	}
+	
+	public void initTimeSlots(ArrayList<TimeSlot> timeslots) {
+		for(int i=0;i<timeslots.size();i++) {
+			
+		}
+	}
+	
 
 }

@@ -16,7 +16,7 @@ import com.google.gson.Gson;
 /**
  * A simple test harness for locally invoking your Lambda function handler.
  */
-public class LambdaFunctionHandlerTest {
+public class ShowScheduleHandlerTest {
 
 	Context createContext(String apiCall) {
         TestContext ctx = new TestContext();
@@ -25,10 +25,10 @@ public class LambdaFunctionHandlerTest {
     }
 
     @Test
-    public void testAddTwoNumbers() throws IOException {
-        CreateScheduleHandler handler = new CreateScheduleHandler();
+    public void testshow() throws IOException {
+        ShowScheduleHandler handler = new ShowScheduleHandler();
 
-        AddRequest ar = new AddRequest("10.24", "15.7");
+        ShowScheduleRequest ar = new ShowScheduleRequest("7X6R900HAH58YUODR6");
         String addRequest = new Gson().toJson(ar);
         String jsonRequest = new Gson().toJson(new PostRequest(addRequest));
         
@@ -38,8 +38,8 @@ public class LambdaFunctionHandlerTest {
         handler.handleRequest(input, output, createContext("add"));
 
         PostResponse post = new Gson().fromJson(output.toString(), PostResponse.class);
-        AddResponse resp = new Gson().fromJson(post.body, AddResponse.class);
-        Assert.assertEquals(25.94, resp.value, 0.00001);
+        ShowScheduleRequest resp = new Gson().fromJson(post.body, ShowScheduleRequest.class);
+        Assert.assertTrue(resp.scheduleid == "7X6R900HAH58YUODR6");
     }
 
 }

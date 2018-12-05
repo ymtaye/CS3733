@@ -1,5 +1,7 @@
 package com.amazonaws.lambda.db;
 
+// testksing 
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,40 @@ public class DAO {
 //        	e.printStackTrace();
             throw new Exception("Failed to insert schedule: " + e.getMessage());
         }
+    }
+    
+    public ArrayList<TimeSlot> getTimeSlots(String scheduleid) throws Exception {
+    	try {
+            ArrayList<TimeSlot> timeslots = new ArrayList<TimeSlot>();
+            PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE scheduleid = ?;");
+            ps.setString(1,  scheduleid);
+            ResultSet resultSet = ps.executeQuery();
+            
+            while (resultSet.next()) {
+                timeslots.add(generateTimeSlot(resultSet));
+            }
+            resultSet.close();
+            ps.close();
+            
+            return timeslots;
+
+        } catch (Exception e) {
+        	e.printStackTrace();
+            throw new Exception("Failed in getting schedule: " + e.getMessage());
+        }
+    	
+    }
+    
+    private TimeSlot generateTimeSlot(ResultSet resultSet) throws Exception {
+    	String id = resultSet.getString("id");
+    	String secretcode = resultSet.getString("secretcode");
+    	String startdate = resultSet.getString("startdate");
+    	String enddate = resultSet.getString("enddate");
+    	String starttime = resultSet.getString("starttime");
+    	String endtime = resultSet.getString("endtime");
+    	String participant  = resultSet.getString("participant");
+    	String scheduleid = resultSet.getString("scheduleid");
+        return new TimeSlot (secretcode, startdate, enddate, starttime, endtime, participant, scheduleid);
     }
 
 }
