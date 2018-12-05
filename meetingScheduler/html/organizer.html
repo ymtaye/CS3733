@@ -1,10 +1,57 @@
 <html><head><script type="text/javascript">
-var add_url = "";
+var add_url = "https://1m7vgd21ee.execute-api.us-east-2.amazonaws.com/Alpha/schedule";
+
+function drawSchedule(startdate, enddate, daystarthour, dayendhour, slotlength){
+  document.getElementById("schedule").innerHTML = "";
+
+  var table = document.getElementById("schedule");
+  var header = table.createTHead();
+  var row = header.insertRow(0);
+  var timeh = row.insertCell(0);
+  timeh.innerHTML = "<b>Meeting Times</b>";
+  var day;
+
+  var date = new Date(startdate+"T"+daystarthour+"Z");
+  //console.log(date.toUTCString());
+  var date2 = new Date(enddate+"T"+dayendhour+"Z");
+  //console.log(date2.toUTCString());
+  var DOWdate = new Date(startdate+"T"+daystarthour+"Z");
+  // Days of the Week at the top of the table
+  for(var i=0;i<8;i++){
+    day = row.insertCell(i+1);
+    DOWdate.setDate(date.getDate()+i);
+    var string = DOWdate.toUTCString().slice(0, 12);
+    day.innerHTML = "<b>" + string + "</b>";
+  }
+
+  // Insert rows for every meeting slot
+  var slot;
+  date = new Date(startdate+"T"+daystarthour+"Z");
+  //console.log(date.toUTCString());
+  date2 = new Date(startdate+"T"+dayendhour+"Z");
+  var meetingStartDate = new Date(startdate+"T"+daystarthour+"Z");
+  var meetingEndDate = new Date(startdate+"T"+daystarthour+"Z");
+  var numcolumns = parseInt((date.getTime()-date2.getTime())/(slotlength*60000));
+  for(var i=0;i<Math.abs(numcolumns);i++){
+    row = table.insertRow();
+    slot = row.insertCell(0);
+
+    var meetingStart = date.getTime()+((slotlength*60000)*i);
+    var meetingEnd = date.getTime()+((slotlength*60000)*(i+1));
+
+    meetingStartDate.setTime(meetingStart);
+    //console.log(meetingStartDate.toUTCString());
+    meetingEndDate.setTime(meetingEnd);
+    //console.log(meetingEndDate.toUTCString());
+    slot.innerHTML = "<b>" + meetingStartDate.toUTCString().slice(17,25) + " - " + meetingEndDate.toUTCString().slice(17,25) + "</b>";
+  }
+
+}
 
 function processAddResponse(startdate, enddate, daystarthour, dayendhour, organizer, result) {
   // Can grab any DIV or SPAN HTML element and can then manipulate its
   // contents dynamically via javascript
-  console.log("result:" + result);
+  //console.log("result:" + result);
   var js = JSON.parse(result);
 
   // Update computation result
@@ -18,6 +65,7 @@ function handleAddClick(e) {
   var daystarthour = form.daystarthour.value;
   var dayendhour = form.dayendhour.value;
   var organizer = form.organizer.value;
+  var slotlength = form.slotlength.value;
 
   var data = {};
   data["startdate"] = startdate;
@@ -40,9 +88,12 @@ function handleAddClick(e) {
     console.log(xhr.request);
     if (xhr.readyState == XMLHttpRequest.DONE) {
       console.log ("XHR:" + xhr.responseText);
-      processAddResponse(startdate, enddate, daystarthour, daystarthour, dayendhour, organizer, xhr.responseText);
+      if(xhr.status == 200){
+        drawSchedule(startdate, enddate, daystarthour, dayendhour, slotlength);
+      }
+      processAddResponse(startdate, enddate, daystarthour, dayendhour, organizer, xhr.responseText);
     } else {
-      processAddResponse(startdate, enddate, daystarthour, daystarthour, dayendhour, organizer, "N/A");
+      processAddResponse(startdate, enddate, daystarthour, dayendhour, organizer, "N/A");
     }
   };
 }
@@ -52,10 +103,11 @@ function handleAddClick(e) {
 <h1>Request to create a calendar </h1>
 
 <form name="addForm" method="post" name="addValues">
-  Start date (YYYY:MM:DD): <input name="startdate" value="" /><br>
-  End date (YYYY:MM:DD): <input name="enddate" value="" /><br>
+  Start date (YYYY-MM-DD): <input name="startdate" value="" /><br>
+  End date (YYYY-MM-DD): <input name="enddate" value="" /><br>
   Start time for each day (HH:MM:SS): <input name="daystarthour" value="" /><br>
   End time for each day (HH:MM:SS): <input name="dayendhour" value="" /><br>
+  Meeting Length (minutes): <input name="slotlength" value="" /><br>
   Your name: <input name="organizer" value="" /><br>
   <input type="button" value="Submit"  onClick="JavaScript:handleAddClick(this)">
 </form>
@@ -65,7 +117,10 @@ function handleAddClick(e) {
 <div id="message">
 </div>
 
-<div id= "test"></div>
+<h3>Schedule</h3>
+
+<table id="schedule" border="black">
+</table>
 
 </body>
 </html>
