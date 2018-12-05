@@ -32,13 +32,10 @@ public class DAO {
             ps.setString(4, schedule.enddate);
             ps.setString(5, schedule.daystarthour);
             ps.setString(6, schedule.dayendhour);
-//            ps.setDate(3, java.sql.Date.valueOf(schedule.startdate));
-//            ps.setDate(4, java.sql.Date.valueOf(schedule.enddate));
-//            ps.setTime(5, java.sql.Time.valueOf(schedule.daystarthour));
-//            ps.setTime(6, java.sql.Time.valueOf(schedule.dayendhour));
             ps.setString(7, schedule.organizer);
             ps.execute();
             return true;
+            
 
         } catch (Exception e) {
 //        	e.printStackTrace();
@@ -70,7 +67,7 @@ public class DAO {
     
     private TimeSlot generateTimeSlot(ResultSet resultSet) throws Exception {
     	String id = resultSet.getString("id");
-    	String secretcode = resultSet.getString("secretcode");
+    	String secretcode = resultSet.getString("secretcode"); 
     	String startdate = resultSet.getString("startdate");
     	String enddate = resultSet.getString("enddate");
     	String starttime = resultSet.getString("starttime");
