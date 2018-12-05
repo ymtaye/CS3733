@@ -1,17 +1,7 @@
 <html><head><script type="text/javascript">
 var add_url = "";
 
-function processAddResponse(startdate, enddate, daystarthour, dayendhour, organizer, result) {
-  // Can grab any DIV or SPAN HTML element and can then manipulate its
-  // contents dynamically via javascript
-  console.log("result:" + result);
-  var js = JSON.parse(result);
-
-  // Update computation result
-  document.getElementById('message').innerHTML = result;
-}
-
-function handleAddClick(e) {
+function createSchedule(e) {
   var form = document.addForm;
   var startdate = form.startdate.value;
   var enddate = form.enddate.value;
@@ -40,9 +30,8 @@ function handleAddClick(e) {
     console.log(xhr.request);
     if (xhr.readyState == XMLHttpRequest.DONE) {
       console.log ("XHR:" + xhr.responseText);
-      processAddResponse(startdate, enddate, daystarthour, daystarthour, dayendhour, organizer, xhr.responseText);
-    } else {
-      processAddResponse(startdate, enddate, daystarthour, daystarthour, dayendhour, organizer, "N/A");
+      console.log("result:" + result);
+      var js = JSON.parse(result);
     }
   };
 }
@@ -57,7 +46,7 @@ function handleAddClick(e) {
   Start time for each day (HH:MM:SS): <input name="daystarthour" value="" /><br>
   End time for each day (HH:MM:SS): <input name="dayendhour" value="" /><br>
   Your name: <input name="organizer" value="" /><br>
-  <input type="button" value="Submit"  onClick="JavaScript:handleAddClick(this)">
+  <input type="button" value="Submit"  onClick="JavaScript:createSchedule(this)">
 </form>
 
 <h3>Response Text:</h3>
