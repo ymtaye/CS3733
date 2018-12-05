@@ -1,8 +1,6 @@
 <html><head><script type="text/javascript">
 var add_url = "";
 
-<<<<<<< HEAD
-=======
 function showSchedule(startdate, enddate, daystarthour, dayendhour, slotlength){
   document.getElementById("schedule").innerHTML = "";
 
@@ -50,8 +48,6 @@ function showSchedule(startdate, enddate, daystarthour, dayendhour, slotlength){
 
 }
 
-
->>>>>>> 05887eb7f266f37ccc4a3f214865f1ac756c5884
 function createSchedule(e) {
   var form = document.addForm;
   var startdate = form.startdate.value;
@@ -82,15 +78,11 @@ function createSchedule(e) {
     console.log(xhr.request);
     if (xhr.readyState == XMLHttpRequest.DONE) {
       console.log ("XHR:" + xhr.responseText);
-<<<<<<< HEAD
       console.log("result:" + result);
       var js = JSON.parse(result);
-=======
       if(xhr.status == 200){
         showSchedule(startdate, enddate, daystarthour, dayendhour, slotlength);
       }
-      var js = JSON.parse(xhr.responseText);
->>>>>>> 05887eb7f266f37ccc4a3f214865f1ac756c5884
     }
   };
 }
