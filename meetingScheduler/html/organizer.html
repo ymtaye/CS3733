@@ -1,7 +1,7 @@
 <html><head><script type="text/javascript">
 var add_url = "https://1m7vgd21ee.execute-api.us-east-2.amazonaws.com/Alpha/schedule";
 
-function drawSchedule(startdate, enddate, daystarthour, dayendhour, slotlength){
+function showSchedule(startdate, enddate, daystarthour, dayendhour, slotlength){
   document.getElementById("schedule").innerHTML = "";
 
   var table = document.getElementById("schedule");
@@ -48,17 +48,8 @@ function drawSchedule(startdate, enddate, daystarthour, dayendhour, slotlength){
 
 }
 
-function processAddResponse(startdate, enddate, daystarthour, dayendhour, organizer, result) {
-  // Can grab any DIV or SPAN HTML element and can then manipulate its
-  // contents dynamically via javascript
-  //console.log("result:" + result);
-  var js = JSON.parse(result);
 
-  // Update computation result
-  document.getElementById('message').innerHTML = result;
-}
-
-function handleAddClick(e) {
+function createSchedule(e) {
   var form = document.addForm;
   var startdate = form.startdate.value;
   var enddate = form.enddate.value;
@@ -89,11 +80,9 @@ function handleAddClick(e) {
     if (xhr.readyState == XMLHttpRequest.DONE) {
       console.log ("XHR:" + xhr.responseText);
       if(xhr.status == 200){
-        drawSchedule(startdate, enddate, daystarthour, dayendhour, slotlength);
+        showSchedule(startdate, enddate, daystarthour, dayendhour, slotlength);
       }
-      processAddResponse(startdate, enddate, daystarthour, dayendhour, organizer, xhr.responseText);
-    } else {
-      processAddResponse(startdate, enddate, daystarthour, dayendhour, organizer, "N/A");
+      var js = JSON.parse(xhr.responseText);
     }
   };
 }
@@ -109,7 +98,7 @@ function handleAddClick(e) {
   End time for each day (HH:MM:SS): <input name="dayendhour" value="" /><br>
   Meeting Length (minutes): <input name="slotlength" value="" /><br>
   Your name: <input name="organizer" value="" /><br>
-  <input type="button" value="Submit"  onClick="JavaScript:handleAddClick(this)">
+  <input type="button" value="Submit"  onClick="JavaScript:createSchedule(this)">
 </form>
 
 <h3>Response Text:</h3>
