@@ -1,7 +1,7 @@
 <html><head><script type="text/javascript">
 var add_url = "https://1m7vgd21ee.execute-api.us-east-2.amazonaws.com/Alpha/schedule";
 
-function showSchedule(startdate, enddate, daystarthour, dayendhour, slotlength){
+function showScheduleGUI(startdate, enddate, daystarthour, dayendhour, slotlength, js){
   document.getElementById("schedule").innerHTML = "";
 
   var table = document.getElementById("schedule");
@@ -46,11 +46,49 @@ function showSchedule(startdate, enddate, daystarthour, dayendhour, slotlength){
     slot.innerHTML = "<b>" + meetingStartDate.toUTCString().slice(17,25) + " - " + meetingEndDate.toUTCString().slice(17,25) + "</b>";
   }
 
+
+  // insert timslots
+
+
 }
 
+function showSchedule(startdate, enddate, daystarthour, dayendhour, slotlength){
+  var form = document.showForm;
+  var scheduleid = form.scheduleid.value;
+
+  var data = {};
+  data["scheduleid"] = scheduleid;
+
+  var js = JSON.stringify(data);
+  console.log("JS:" + js);
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", show_url, true);
+
+  // send the collected data as JSON
+  xhr.send(js);
+
+  // This will process results and update HTML as appropriate.
+  xhr.onloadend = function () {
+    console.log(xhr);
+    console.log(xhr.request);
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+      console.log ("XHR:" + xhr.responseText);
+      if(xhr.status == 200){
+        var js = JSON.parse(xhr.responseText);
+        console.log(js);
+        showScheduleGUI(startdate, enddate, daystarthour, dayendhour, slotlength, js);
+      }
+    }
+  };
+
+}
+
+function createScheduleID(js){
+  document.getElementById("message").innerHTML = js;
+}
 
 function createSchedule(e) {
-  var form = document.addForm;
+  var form = document.createForm;
   var startdate = form.startdate.value;
   var enddate = form.enddate.value;
   var daystarthour = form.daystarthour.value;
@@ -80,9 +118,9 @@ function createSchedule(e) {
     if (xhr.readyState == XMLHttpRequest.DONE) {
       console.log ("XHR:" + xhr.responseText);
       if(xhr.status == 200){
-        showSchedule(startdate, enddate, daystarthour, dayendhour, slotlength);
+        var js = JSON.parse(xhr.responseText);
+        createScheduleID(js);
       }
-      var js = JSON.parse(xhr.responseText);
     }
   };
 }
@@ -91,7 +129,7 @@ function createSchedule(e) {
 
 <h1>Request to create a calendar </h1>
 
-<form name="addForm" method="post" name="addValues">
+<form name="createForm" method="post" >
   Start date (YYYY-MM-DD): <input name="startdate" value="" /><br>
   End date (YYYY-MM-DD): <input name="enddate" value="" /><br>
   Start time for each day (HH:MM:SS): <input name="daystarthour" value="" /><br>
@@ -101,10 +139,15 @@ function createSchedule(e) {
   <input type="button" value="Submit"  onClick="JavaScript:createSchedule(this)">
 </form>
 
-<h3>Response Text:</h3>
-
 <div id="message">
 </div>
+
+<h1>Request to show the schedule</h1>
+
+<form name="showForm" method="get">
+  Input Schedule ID: <input name="scheduleid" value="" /><br>
+  <input type="button" value="Show"  onClick="JavaScript:showSchedule(this)">
+</form>
 
 <h3>Schedule</h3>
 
