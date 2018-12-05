@@ -1,5 +1,5 @@
 package com.amazonaws.lambda.model;
-
+//testing
 public class TimeSlot {
 	public String startdate;
 	public String enddate;
