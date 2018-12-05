@@ -45,12 +45,8 @@ function showScheduleGUI(startdate, enddate, daystarthour, dayendhour, slotlengt
     //console.log(meetingEndDate.toUTCString());
     slot.innerHTML = "<b>" + meetingStartDate.toUTCString().slice(17,25) + " - " + meetingEndDate.toUTCString().slice(17,25) + "</b>";
   }
-
-
-  // insert timslots
-
-
 }
+
 
 function showSchedule(startdate, enddate, daystarthour, dayendhour, slotlength){
   var form = document.showForm;
