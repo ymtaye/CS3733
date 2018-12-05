@@ -45,6 +45,7 @@ public class CreateScheduleHandler implements RequestStreamHandler {
 
 		Schedule schedule = new Schedule (id ,secretcode, startdate, enddate, daystarthour, dayendhour, organizer);
 		return dao.addSchedule(schedule);
+		
 	}
 	
 	/** Generate random string for organizer's schedule
@@ -62,7 +63,7 @@ public class CreateScheduleHandler implements RequestStreamHandler {
         String saltStr = salt.toString();
         return saltStr;
 
-    }
+    } 
 	
 	@Override
 	public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
@@ -114,11 +115,15 @@ public class CreateScheduleHandler implements RequestStreamHandler {
 			logger.log(req.toString());
 
 			CreateScheduleResponse resp;
-			System.out.print(getSaltString());
-			System.out.print(req.startdate);
+			
+			//System.out.print(getSaltString());
+			//System.out.print(req.startdate);
+		
+			String scheduleid = getSaltString();
+			
 			try {
-				if (createSchedule(getSaltString(), getSaltString(), req.startdate, req.enddate, req.daystarthour, req.dayendhour, req.organizer)) {
-					resp = new CreateScheduleResponse("Successfully made schedule from [" + req.startdate + " to " + req.enddate + "] for organizer:" + req.organizer);
+				if (createSchedule(scheduleid, getSaltString(), req.startdate, req.enddate, req.daystarthour, req.dayendhour, req.organizer)) {
+					resp = new CreateScheduleResponse(scheduleid);
 				} else {
 					resp = new CreateScheduleResponse("Unable to create schedule from [" + req.startdate + " to " + req.enddate + "] for organizer:" + req.organizer, 422);
 				}
