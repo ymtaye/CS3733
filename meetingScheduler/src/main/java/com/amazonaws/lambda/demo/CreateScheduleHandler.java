@@ -9,7 +9,6 @@ import java.io.OutputStreamWriter;
 import java.util.Random;
 import java.util.Scanner;
 
-
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -39,11 +38,11 @@ public class CreateScheduleHandler implements RequestStreamHandler {
 	 * 
 	 * @throws Exception 
 	 */
-	boolean createSchedule(String id, String secretcode, String startdate, String enddate, String daystarthour, String dayendhour, String organizer) throws Exception {
-		if (logger != null) { logger.log("in createConstant"); }
+	boolean createSchedule(String id, String secretcode, String startdate, String enddate, String daystarthour, String dayendhour, String organizer, int meetinglength) throws Exception {
+		if (logger != null) { logger.log("in createSchedule"); }
 		DAO dao = new DAO();
 
-		Schedule schedule = new Schedule (id ,secretcode, startdate, enddate, daystarthour, dayendhour, organizer);
+		Schedule schedule = new Schedule (id, startdate, enddate, daystarthour, dayendhour, organizer, secretcode, meetinglength);
 		return dao.addSchedule(schedule);
 		
 	}
@@ -122,7 +121,7 @@ public class CreateScheduleHandler implements RequestStreamHandler {
 			String scheduleid = getSaltString();
 			
 			try {
-				if (createSchedule(scheduleid, getSaltString(), req.startdate, req.enddate, req.daystarthour, req.dayendhour, req.organizer)) {
+				if (createSchedule(scheduleid, getSaltString(), req.startdate, req.enddate, req.daystarthour, req.dayendhour, req.organizer, req.meetinglength)) {
 					resp = new CreateScheduleResponse(scheduleid);
 				} else {
 					resp = new CreateScheduleResponse("Unable to create schedule from [" + req.startdate + " to " + req.enddate + "] for organizer:" + req.organizer, 422);

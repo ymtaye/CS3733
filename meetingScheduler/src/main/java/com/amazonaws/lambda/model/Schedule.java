@@ -11,8 +11,9 @@ public class Schedule {
 	public String organizer;
 	String secretcode;
 	public ArrayList<TimeSlot> timeslots;
+	public int meetinglength; // minutes
 
-	public Schedule (String id, String startdate, String enddate, String starttime, String endtime, String organizer, String secretcode) {
+	public Schedule (String id, String startdate, String enddate, String starttime, String endtime, String organizer, String secretcode, int meetinglength) {
 		this.secretcode = secretcode;
 		this.startdate = startdate;
 		this.enddate = enddate;
@@ -20,6 +21,7 @@ public class Schedule {
 		this.dayendhour = endtime;
 		this.organizer = organizer;
 		this.id = id;
+		this.meetinglength = meetinglength;
 	}
 
 	public String getsecretcode() {
@@ -28,7 +30,7 @@ public class Schedule {
 	
 	public void initTimeSlots(ArrayList<TimeSlot> timeslots) {
 		for(int i=0;i<timeslots.size();i++) {
-			
+			this.timeslots.add(timeslots.get(i));
 		}
 	}
 	

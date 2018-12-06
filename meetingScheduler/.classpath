@@ -31,5 +31,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="libs/gson-2.6.2.jar"/>
 	<classpathentry kind="lib" path="libs/mysql-connector-java-5.1.6.jar"/>
+	<classpathentry kind="lib" path="/Users/marcreardon/Downloads/java-json.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
