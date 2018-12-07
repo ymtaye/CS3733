@@ -27,7 +27,7 @@ public class DAO {
     public boolean addSchedule(Schedule schedule) throws Exception {
         try {
             PreparedStatement ps = conn.prepareStatement("INSERT INTO Schedules (id, secretcode, startdate, enddate, daystarthour, dayendhour, organizer) values(?,?,?,?,?,?,?);");
-            System.out.println("\n\n\n");
+            
             ps.setString(1, schedule.id);
             ps.setString(2, schedule.getsecretcode());
             ps.setString(3, schedule.startdate);
