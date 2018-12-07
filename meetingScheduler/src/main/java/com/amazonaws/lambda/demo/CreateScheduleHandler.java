@@ -114,7 +114,7 @@ public class CreateScheduleHandler implements RequestStreamHandler {
 			logger.log(req.toString());
 
 			CreateScheduleResponse resp;
-			
+			logger.log("text1");
 			//System.out.print(getSaltString());
 			//System.out.print(req.startdate);
 		
