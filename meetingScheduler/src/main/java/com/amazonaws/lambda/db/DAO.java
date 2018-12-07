@@ -52,18 +52,18 @@ public class DAO {
     		SimpleDateFormat dayofyear = new SimpleDateFormat("yyyy-MM-dd");
             SimpleDateFormat hourofday = new SimpleDateFormat("HH:mm:ss");
             
-            Date startD = (Date) dayofyear.parse(schedule.startdate);
-            Date endD = (Date) dayofyear.parse(schedule.startdate);
+            java.sql.Date startD = (Date) dayofyear.parse(schedule.startdate);
+            java.sql.Date endD = (Date) dayofyear.parse(schedule.startdate);
             
-            Date startT = (Date) hourofday.parse(schedule.daystarthour);
-            Date endT = (Date) hourofday.parse(schedule.dayendhour);
+            java.sql.Date startT = (Date) hourofday.parse(schedule.daystarthour);
+            java.sql.Date endT = (Date) hourofday.parse(schedule.dayendhour);
             
             String dayofmeetingString = "";
             String MstartString = "";
             String MendString = "";
-            Date dayofmeeting = (Date) dayofyear.parse(schedule.startdate);
-            Date MstartTDate;
-            Date MendTDate;
+            java.sql.Date dayofmeeting = (Date) dayofyear.parse(schedule.startdate);
+            java.sql.Date MstartTDate;
+            java.sql.Date MendTDate;
             
             int numdays = (int) ((startD.getTime()-endD.getTime())/(1000*60*60*24));
             int numrows = (int) ((startT.getTime()-endT.getTime())/(schedule.meetinglength*60000));
