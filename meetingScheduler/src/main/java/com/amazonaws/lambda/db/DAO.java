@@ -81,13 +81,15 @@ public class DAO {
             for (int j=0;j<numdays;j++) {
             	// increment dayofmeeting one day ahead
             	days = days + j;
+            	System.out.println("\nv6\n\n");
             	dayofmeeting = new java.util.Date(days);
             	// find a way to get the string
+            	System.out.println("\nv7\n\n");
             	dayofmeetingString = dayofyear.format(dayofmeeting);
-            	System.out.println("\nv6\n\n");
+            	System.out.println("\nv8\n\n");
             	
             	for (int i=0;i<numrows;i++) {
-            		System.out.println("\n7\n\n");
+            		System.out.println("\n9\n\n");
             		// longs for the start and end time
             		MstartT = (dayofmeeting.getTime())+((schedule.meetinglength*60000)*i); // date.getTime()+((slotlength*60000)*i);
             		MendT = (dayofmeeting.getTime())+((schedule.meetinglength*60000)*(i+1));
