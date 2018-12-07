@@ -49,7 +49,8 @@ function showTimeSlotsGUI(timeslots){
       // insert cell
       // increment column counter
       // check if column counter is at 7, then increment rowCounter
-      cell = rows[rowCounter].insertCell();
+      cell = rows[rowCounter].cells[columnCounter];
+      cell.innerHTML = timeslots[i].startime+" "+timeslots[i].secretcode;
       column++;
 
       if(columnCounter == 7){rowCounter++;}
@@ -105,6 +106,9 @@ function showScheduleGUI(startdate, enddate, daystarthour, dayendhour, slotlengt
   for(var i=0;i<Math.abs(numcolumns);i++){
     row = table.insertRow();
     slot = row.insertCell(0);
+    for(var j=0;j<7;j++){
+      row.insertCell();
+    }
 
     var meetingStart = date.getTime()+((slotlength*60000)*i);
     var meetingEnd = date.getTime()+((slotlength*60000)*(i+1));
@@ -174,6 +178,7 @@ function createSchedule(e) {
   data["daystarthour"] = daystarthour;
   data["dayendhour"] = dayendhour;
   data["organizer"] = organizer;
+  data["meetinglength"] = slotlength;
 
   var js = JSON.stringify(data);
   console.log("JS:" + js);
