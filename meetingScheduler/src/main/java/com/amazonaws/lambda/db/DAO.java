@@ -54,13 +54,13 @@ public class DAO {
             SimpleDateFormat hourofday = new SimpleDateFormat("HH:mm:ss");
             System.out.println("2\n");
             
-            java.util.Date startD = (Date) dayofyear.parse(schedule.startdate);
-            java.util.Date endD = (Date) dayofyear.parse(schedule.startdate);
+            java.util.Date startD = (java.util.Date) dayofyear.parse(schedule.startdate);
+            java.util.Date endD = (java.util.Date) dayofyear.parse(schedule.startdate);
             
             System.out.println("3\n");
             
             java.util.Date startT = (Date) hourofday.parse(schedule.daystarthour);
-            java.util.Date endT = (Date) hourofday.parse(schedule.dayendhour);
+            java.util.Date endT = (java.util.Date) hourofday.parse(schedule.dayendhour);
             
             System.out.println("4\n");
             
