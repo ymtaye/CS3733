@@ -52,7 +52,7 @@ public class DAO {
     		
     		SimpleDateFormat dayofyear = new SimpleDateFormat("yyyy-MM-dd");
             SimpleDateFormat hourofday = new SimpleDateFormat("HH:mm:ss");
-            SimpleDateFormat fulltime = new SimpleDateFormat("yyyy-MM-ddTHH:mm:ss");
+            SimpleDateFormat fulltime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             
             java.util.Date startD = (java.util.Date) dayofyear.parse(schedule.startdate);
             java.util.Date endD = (java.util.Date) dayofyear.parse(schedule.enddate);
@@ -60,36 +60,41 @@ public class DAO {
             java.util.Date startT = (java.util.Date) hourofday.parse(schedule.daystarthour);
             java.util.Date endT = (java.util.Date) hourofday.parse(schedule.dayendhour);
             
-            java.util.Date starttimeofdayINIT = (java.util.Date) fulltime.parse(schedule.startdate+"T"+schedule.daystarthour);
+            java.util.Date starttimeofdayINIT = (java.util.Date) fulltime.parse(schedule.startdate+" "+schedule.daystarthour);
             Date starttimeofday = new Date(0);
             starttimeofday.setTime(starttimeofdayINIT.getTime());
             System.out.println("util: "+ starttimeofdayINIT.getTime()+"\n\n");
             System.out.println("sql: "+ starttimeofday.getTime()+"\n\n");
             
-            int numdays = (int) ((startD.getTime()-endD.getTime())/(1000*60*60*24));
+            int numdays = (int) (1+Math.abs((startD.getTime()-endD.getTime())/(1000*60*60*24)));
+        	System.out.println(numdays);
+
             int numrows = (int) ((startT.getTime()-endT.getTime())/(schedule.meetinglength*60000));
             
-            String weekdayString = "";
-            String MstartString = "";
-            String MendString = "";
+            String weekdayString = " ";
+            String MstartString = " ";
+            String MendString = " ";
             
             Date MstartTDate;
             Date MendTDate;
             
             for (int j=0;j<Math.abs(numdays);j++) {
-            	
+            	System.out.println("1\n\n\n\n");
+            	weekdayString = dayofyear.format(starttimeofday);
+            	System.out.println(weekdayString+"\n\n");
             	for (int i=0;i<Math.abs(numrows);i++) {
             		
             		// dates for the start and end time
             		MstartTDate = new Date((starttimeofday.getTime())+((schedule.meetinglength*60000)*i)); // date.getTime()+((slotlength*60000)*i);
             		MendTDate = new Date((starttimeofday.getTime())+((schedule.meetinglength*60000)*(i+1)));
-                  
+            		System.out.println("2\n\n\n\n");
                     // Strings for the start and end time
                     MstartString = hourofday.format(MstartTDate);
                     MendString = hourofday.format(MendTDate);
                     
+                    System.out.println("3\n\n\n\n");
             		PreparedStatement ps = conn.prepareStatement("INSERT INTO TimeSlots (id, secretcode, startdate, enddate, starttime, endtime, participant, scheduleid) values(?,?,?,?,?,?,?,?);");
-                   
+            		System.out.println("4\n\n\n\n");
                     ps.setString(1, getSaltString());
                     ps.setString(2, getSaltString());
                     ps.setString(3, weekdayString);
@@ -102,8 +107,8 @@ public class DAO {
                   
                 }
             	
-            	weekdayString = dayofyear.format(starttimeofday);
-            	System.out.println(weekdayString+"\n\n");
+            ////	weekdayString = dayofyear.format(starttimeofday);
+            //	System.out.println(weekdayString+"\n\n");
             	
             	// increment one day ahead
             	starttimeofday.setTime(starttimeofday.getTime() + (1000*60*60*24));
