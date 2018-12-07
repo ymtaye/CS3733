@@ -49,6 +49,7 @@ public class DAO {
     
     public boolean insertTimeSlots(Schedule schedule) throws Exception {
     	try{
+    		System.out.println("\nbefore\n\n");
     		SimpleDateFormat dayofyear = new SimpleDateFormat("yyyy-MM-dd");
             SimpleDateFormat hourofday = new SimpleDateFormat("HH:mm:ss");
             
