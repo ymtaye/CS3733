@@ -1,19 +1,41 @@
 <html><head><script type="text/javascript">
 var add_url = "https://1m7vgd21ee.execute-api.us-east-2.amazonaws.com/Alpha/schedule";
-var show_url = "https://1m7vgd21ee.execute-api.us-east-2.amazonaws.com/Alpha/schedule";
+
 var ts; // timeslots list
 var startFullDate; // start date of the calendar
 var endFullDate; // end date of the calendar
 var weekStart; // start date for the shown week
 var weekEnd; // end date for the shown week
 
+function showNextWeek(){
+  // check to make sure were not at the end the the schedule
+  // change start week, then call showTimeSlotsGUI()
+  if(endFullDate.getTime() == weekEnd.getTime()){
+    return;
+  }
+
+  weekStart.setDate(weekEnd.getDate());
+
+  showTimeSlotsGUI(ts);
+
+}
+
+function showLastWeek(){
+  // check to make sure were not at the beginning of the the schedule
+  // change start week, then call showTimeSlotsGUI()
+  if(startFullDate.getTime() == weekStart.getTime()){
+    return;
+  }
+
+  weekStart.setDate(weekStart.getDate() - 7);
+
+  showTimeSlotsGUI(ts);
+}
+
 function showTimeSlotsGUI(timeslots){
   var rowCounter = 0;
   var columnCounter = 0;
   var rows = document.getElementById("schedule").rows;
-
-  // weekstart is the start date of the shown week
-  weekStart = new Date(timeslots[0].startdate+"T"+timeslots[0].starttime+"Z");
 
   var cell;
   var slotEndDate;
@@ -23,15 +45,22 @@ function showTimeSlotsGUI(timeslots){
     // and the timeslot start time is less than or equal to the starttime of the start date
     slotEndDate = new Date(timeslots[i].enddate+"T"+timeslots[i].endtime+"Z");
     slotStartDate = new Date(timeslots[i].startdate+"T"+timeslots[i].starttime+"Z");
-    if(Math.abs(slotEndDate.getTime()) >= Math.abs(weekEnd.getTime()) && Math.abs(slotStartDate.getTime()) <= Math.abs(weekStart.getTime())){
+    if(Math.abs(slotStartDate.getTime()) <= Math.abs(weekStart.getTime()) && rowCounter < rows.length-1){
       // insert cell
       // increment column counter
       // check if column counter is at 7, then increment rowCounter
       cell = rows[rowCounter].insertCell();
       column++;
-      if(columnCounter == 7){
-        rowCounter++;
+
+      if(columnCounter == 7){rowCounter++;}
+
+      if (i==timeslots.length-1){
+        weekEnd = new Date(timeslots[i].enddate+"T"+timeslots[i].endtime+"Z");
+        return;
       }
+    } else {
+      weekEnd = new Date(timeslots[i-1].enddate+"T"+timeslots[i-1].endtime+"Z");
+      return;
     }
   }
 
@@ -40,6 +69,8 @@ function showTimeSlotsGUI(timeslots){
 function showScheduleGUI(startdate, enddate, daystarthour, dayendhour, slotlength, timeslots){
   startFullDate = new Date(startdate+"T"+daystarthour+"Z");
   endFullDate = new Date(enddate+"T"+dayendhour+"Z");
+  // weekstart is the start date of the shown week
+  weekStart = new Date(timeslots[0].startdate+"T"+timeslots[0].starttime+"Z");
   ts = timeslots;
   document.getElementById("schedule").innerHTML = "";
 
@@ -84,6 +115,10 @@ function showScheduleGUI(startdate, enddate, daystarthour, dayendhour, slotlengt
     //console.log(meetingEndDate.toUTCString());
     slot.innerHTML = "<b>" + meetingStartDate.toUTCString().slice(17,25) + " - " + meetingEndDate.toUTCString().slice(17,25) + "</b>";
   }
+
+  // add the week buttons
+  var buttons = document.getElementById("changeweek");
+  buttons.innerHTML = "<button onclick='showNextWeek'>Next Week</button> <button onclick='showLastWeek'>Last Week</button>";
 
   showTimeSlotsGUI(timeslots);
 }
@@ -164,32 +199,44 @@ function createSchedule(e) {
 
 </script></head><body>
 
-<h1>Request to create a calendar </h1>
+<div id="message"></div>
 
-<form name="createForm" method="post" >
-  Start date (YYYY-MM-DD): <input name="startdate" value="" /><br>
-  End date (YYYY-MM-DD): <input name="enddate" value="" /><br>
-  Start time for each day (HH:MM:SS): <input name="daystarthour" value="" /><br>
-  End time for each day (HH:MM:SS): <input name="dayendhour" value="" /><br>
-  Meeting Length (minutes): <input name="slotlength" value="" /><br>
-  Your name: <input name="organizer" value="" /><br>
-  <input type="button" value="Submit"  onClick="JavaScript:createSchedule(this)">
-</form>
+<div class="container">
 
-<div id="message">
+  <h1>Request to create a calendar </h1>
+
+  <form name="createForm" method="post" >
+    Start date (YYYY-MM-DD): <input name="startdate" value="" /><br>
+    End date (YYYY-MM-DD): <input name="enddate" value="" /><br>
+    Start time for each day (HH:MM:SS): <input name="daystarthour" value="" /><br>
+    End time for each day (HH:MM:SS): <input name="dayendhour" value="" /><br>
+    Meeting Length (minutes): <input name="slotlength" value="" /><br>
+    Your name: <input name="organizer" value="" /><br>
+    <input type="button" value="Submit"  onClick="JavaScript:createSchedule(this)">
+  </form>
+
 </div>
 
-<h1>Request to show the schedule</h1>
+<div class="container">
 
-<form name="showForm" method="get">
-  Input Schedule ID: <input name="scheduleid" value="" /><br>
-  <input type="button" value="Show"  onClick="JavaScript:showSchedule(this)">
-</form>
+  <h1>Request to show the schedule</h1>
 
-<h3>Schedule</h3>
+  <form name="showForm" method="get">
+    Input Schedule ID: <input name="scheduleid" value="" /><br>
+    <input type="button" value="Show"  onClick="JavaScript:showSchedule(this)">
+  </form>
 
-<table id="schedule" border="black">
-</table>
+</div>
+
+<div class="container">
+
+  <h3>Schedule</h3>
+
+  <table id="schedule" border="black"></table>
+
+  <div id="changeweek"></div>
+
+</div>
 
 </body>
 </html>
