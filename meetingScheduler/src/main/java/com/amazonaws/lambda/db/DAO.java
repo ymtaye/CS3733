@@ -59,7 +59,7 @@ public class DAO {
             
             System.out.println("3\n");
             
-            java.util.Date startT = (Date) hourofday.parse(schedule.daystarthour);
+            java.util.Date startT = (java.util.Date) hourofday.parse(schedule.daystarthour);
             java.util.Date endT = (java.util.Date) hourofday.parse(schedule.dayendhour);
             
             System.out.println("4\n");
@@ -67,7 +67,7 @@ public class DAO {
             String dayofmeetingString = "";
             String MstartString = "";
             String MendString = "";
-            java.util.Date dayofmeeting = (Date) dayofyear.parse(schedule.startdate);
+            java.util.Date dayofmeeting = (java.util.Date) dayofyear.parse(schedule.startdate);
             Date MstartTDate;
             Date MendTDate;
             System.out.println("\nhuh\n\n");
