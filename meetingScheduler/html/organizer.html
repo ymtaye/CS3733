@@ -127,7 +127,6 @@ function showScheduleGUI(startdate, enddate, daystarthour, dayendhour, slotlengt
   showTimeSlotsGUI(timeslots);
 }
 
-
 function showSchedule(startdate, enddate, daystarthour, dayendhour, slotlength){
   var form = document.showForm;
   var scheduleid = form.scheduleid.value;
@@ -190,8 +189,6 @@ function createSchedule(e) {
 
   // This will process results and update HTML as appropriate.
   xhr.onloadend = function () {
-    console.log(xhr);
-    console.log(xhr.request);
     if (xhr.readyState == XMLHttpRequest.DONE) {
       console.log ("XHR:" + xhr.responseText);
       if(xhr.status == 200){
