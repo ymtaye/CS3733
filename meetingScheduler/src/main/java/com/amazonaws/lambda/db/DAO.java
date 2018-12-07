@@ -55,7 +55,7 @@ public class DAO {
             System.out.println("2\n");
             
             java.util.Date startD = (java.util.Date) dayofyear.parse(schedule.startdate);
-            java.util.Date endD = (java.util.Date) dayofyear.parse(schedule.startdate);
+            java.util.Date endD = (java.util.Date) dayofyear.parse(schedule.enddate);
             
             System.out.println("3\n");
             
@@ -76,7 +76,7 @@ public class DAO {
             long days = dayofmeeting.getTime()/(1000*60*60*24);
             long MstartT = dayofmeeting.getTime();
             long MendT = dayofmeeting.getTime();
-            System.out.println("\n5\n\n");
+            System.out.println(numdays);
             
             for (int j=0;j<numdays;j++) {
             	// increment dayofmeeting one day ahead
