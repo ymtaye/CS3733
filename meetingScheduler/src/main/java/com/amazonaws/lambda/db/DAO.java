@@ -76,16 +76,18 @@ public class DAO {
             long days = dayofmeeting.getTime()/(1000*60*60*24);
             long MstartT = dayofmeeting.getTime();
             long MendT = dayofmeeting.getTime();
+            System.out.println("\n5\n\n");
             
             for (int j=0;j<numdays;j++) {
             	// increment dayofmeeting one day ahead
             	days = days + j;
-            	dayofmeeting = new Date(days);
+            	dayofmeeting = new java.util.Date(days);
             	// find a way to get the string
             	dayofmeetingString = dayofyear.format(dayofmeeting);
+            	System.out.println("\nv6\n\n");
             	
             	for (int i=0;i<numrows;i++) {
-            		
+            		System.out.println("\n7\n\n");
             		// longs for the start and end time
             		MstartT = (dayofmeeting.getTime())+((schedule.meetinglength*60000)*i); // date.getTime()+((slotlength*60000)*i);
             		MendT = (dayofmeeting.getTime())+((schedule.meetinglength*60000)*(i+1));
