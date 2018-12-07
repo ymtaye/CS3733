@@ -49,64 +49,51 @@ public class DAO {
     
     public boolean insertTimeSlots(Schedule schedule) throws Exception {
     	try{
-    		System.out.println("sfsdc\n");
+    		
     		SimpleDateFormat dayofyear = new SimpleDateFormat("yyyy-MM-dd");
             SimpleDateFormat hourofday = new SimpleDateFormat("HH:mm:ss");
-            System.out.println("2\n");
+            SimpleDateFormat fulltime = new SimpleDateFormat("yyyy-MM-ddTHH:mm:ss");
             
             java.util.Date startD = (java.util.Date) dayofyear.parse(schedule.startdate);
             java.util.Date endD = (java.util.Date) dayofyear.parse(schedule.enddate);
             
-            System.out.println("3\n");
-            
             java.util.Date startT = (java.util.Date) hourofday.parse(schedule.daystarthour);
             java.util.Date endT = (java.util.Date) hourofday.parse(schedule.dayendhour);
             
-            System.out.println("4\n");
+            java.util.Date starttimeofdayINIT = (java.util.Date) fulltime.parse(schedule.startdate+"T"+schedule.daystarthour);
+            Date starttimeofday = new Date(0);
+            starttimeofday.setTime(starttimeofdayINIT.getTime());
+            System.out.println("util: "+ starttimeofdayINIT.getTime()+"\n\n");
+            System.out.println("sql: "+ starttimeofday.getTime()+"\n\n");
             
-            String dayofmeetingString = "";
-            String MstartString = "";
-            String MendString = "";
-            java.util.Date dayofmeeting = (java.util.Date) dayofyear.parse(schedule.startdate);
-            Date MstartTDate;
-            Date MendTDate;
-            System.out.println("\nhuh\n\n");
             int numdays = (int) ((startD.getTime()-endD.getTime())/(1000*60*60*24));
             int numrows = (int) ((startT.getTime()-endT.getTime())/(schedule.meetinglength*60000));
-            long days = dayofmeeting.getTime()/(1000*60*60*24);
-            long MstartT = dayofmeeting.getTime();
-            long MendT = dayofmeeting.getTime();
-            System.out.println(numdays);
+            
+            String weekdayString = "";
+            String MstartString = "";
+            String MendString = "";
+            
+            Date MstartTDate;
+            Date MendTDate;
             
             for (int j=0;j<Math.abs(numdays);j++) {
-            	// increment dayofmeeting one day ahead
-            	days = days + j;
-            	System.out.println("\nv6\n\n");
-            	dayofmeeting = new java.util.Date(days);
-            	// find a way to get the string
-            	System.out.println("\nv7\n\n");
-            	dayofmeetingString = dayofyear.format(dayofmeeting);
-            	System.out.println("\nv8\n\n");
             	
             	for (int i=0;i<Math.abs(numrows);i++) {
-            		System.out.println("\n9\n\n");
-            		// longs for the start and end time
-            		MstartT = (dayofmeeting.getTime())+((schedule.meetinglength*60000)*i); // date.getTime()+((slotlength*60000)*i);
-            		MendT = (dayofmeeting.getTime())+((schedule.meetinglength*60000)*(i+1));
+            		
             		// dates for the start and end time
-            		MstartTDate = new Date(MstartT);
-                    MendTDate = new Date(MendT);
-                    System.out.println("\nhello\n\n");
+            		MstartTDate = new Date((starttimeofday.getTime())+((schedule.meetinglength*60000)*i)); // date.getTime()+((slotlength*60000)*i);
+            		MendTDate = new Date((starttimeofday.getTime())+((schedule.meetinglength*60000)*(i+1)));
+                  
                     // Strings for the start and end time
                     MstartString = hourofday.format(MstartTDate);
                     MendString = hourofday.format(MendTDate);
                     
             		PreparedStatement ps = conn.prepareStatement("INSERT INTO TimeSlots (id, secretcode, startdate, enddate, starttime, endtime, participant, scheduleid) values(?,?,?,?,?,?,?,?);");
-                    System.out.println("\n\n\n");
+                   
                     ps.setString(1, getSaltString());
                     ps.setString(2, getSaltString());
-                    ps.setString(3, dayofmeetingString);
-                    ps.setString(4, dayofmeetingString);
+                    ps.setString(3, weekdayString);
+                    ps.setString(4, weekdayString);
                     ps.setString(5, MstartString);
                     ps.setString(6, MendString);
                     ps.setString(7, "");
@@ -115,10 +102,16 @@ public class DAO {
                   
                 }
             	
-            	days = days - j;
+            	weekdayString = dayofyear.format(starttimeofday);
+            	System.out.println(weekdayString+"\n\n");
+            	
+            	// increment one day ahead
+            	starttimeofday.setTime(starttimeofday.getTime() + (1000*60*60*24));
+            	
             }
             
             return true;
+            
     	} catch (Exception e) {
     		//e.printStackTrace();
             throw new Exception("Failed to insert schedule: " + e.getMessage());
