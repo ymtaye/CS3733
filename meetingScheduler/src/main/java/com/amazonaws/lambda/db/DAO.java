@@ -88,7 +88,7 @@ public class DAO {
             	dayofmeetingString = dayofyear.format(dayofmeeting);
             	System.out.println("\nv8\n\n");
             	
-            	for (int i=0;i<numrows;i++) {
+            	for (int i=0;i<Math.abs(numrows);i++) {
             		System.out.println("\n9\n\n");
             		// longs for the start and end time
             		MstartT = (dayofmeeting.getTime())+((schedule.meetinglength*60000)*i); // date.getTime()+((slotlength*60000)*i);
