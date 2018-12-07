@@ -64,7 +64,7 @@ public class DAO {
             java.sql.Date dayofmeeting = (Date) dayofyear.parse(schedule.startdate);
             java.sql.Date MstartTDate;
             java.sql.Date MendTDate;
-            
+            System.out.println("\nhuh\n\n");
             int numdays = (int) ((startD.getTime()-endD.getTime())/(1000*60*60*24));
             int numrows = (int) ((startT.getTime()-endT.getTime())/(schedule.meetinglength*60000));
             long days = dayofmeeting.getTime()/(1000*60*60*24);
@@ -86,6 +86,7 @@ public class DAO {
             		// dates for the start and end time
             		MstartTDate = new Date(MstartT);
                     MendTDate = new Date(MendT);
+                    System.out.println("\nhello\n\n");
                     // Strings for the start and end time
                     MstartString = hourofday.format(MstartTDate);
                     MendString = hourofday.format(MendTDate);
