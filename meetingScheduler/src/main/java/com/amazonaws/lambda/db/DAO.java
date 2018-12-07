@@ -78,7 +78,7 @@ public class DAO {
             long MendT = dayofmeeting.getTime();
             System.out.println(numdays);
             
-            for (int j=0;j<numdays;j++) {
+            for (int j=0;j<Math.abs(numdays);j++) {
             	// increment dayofmeeting one day ahead
             	days = days + j;
             	System.out.println("\nv6\n\n");
