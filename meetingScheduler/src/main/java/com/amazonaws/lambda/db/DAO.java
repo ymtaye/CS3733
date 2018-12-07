@@ -53,16 +53,21 @@ public class DAO {
     		SimpleDateFormat dayofyear = new SimpleDateFormat("yyyy-MM-dd");
             SimpleDateFormat hourofday = new SimpleDateFormat("HH:mm:ss");
             System.out.println("2\n");
-            Date startD = (Date) dayofyear.parse(schedule.startdate);
-            Date endD = (Date) dayofyear.parse(schedule.startdate);
+            
+            java.util.Date startD = (Date) dayofyear.parse(schedule.startdate);
+            java.util.Date endD = (Date) dayofyear.parse(schedule.startdate);
+            
             System.out.println("3\n");
-            Date startT = (Date) hourofday.parse(schedule.daystarthour);
-            Date endT = (Date) hourofday.parse(schedule.dayendhour);
+            
+            java.util.Date startT = (Date) hourofday.parse(schedule.daystarthour);
+            java.util.Date endT = (Date) hourofday.parse(schedule.dayendhour);
+            
             System.out.println("4\n");
+            
             String dayofmeetingString = "";
             String MstartString = "";
             String MendString = "";
-            Date dayofmeeting = (Date) dayofyear.parse(schedule.startdate);
+            java.util.Date dayofmeeting = (Date) dayofyear.parse(schedule.startdate);
             Date MstartTDate;
             Date MendTDate;
             System.out.println("\nhuh\n\n");
