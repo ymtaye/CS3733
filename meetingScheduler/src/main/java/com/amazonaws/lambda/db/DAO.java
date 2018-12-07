@@ -49,22 +49,22 @@ public class DAO {
     
     public boolean insertTimeSlots(Schedule schedule) throws Exception {
     	try{
-    		System.out.println("\nbefore\n\n");
+    		
     		SimpleDateFormat dayofyear = new SimpleDateFormat("yyyy-MM-dd");
             SimpleDateFormat hourofday = new SimpleDateFormat("HH:mm:ss");
-            System.out.println("\n2\n\n");
-            java.sql.Date startD = (Date) dayofyear.parse(schedule.startdate);
-            java.sql.Date endD = (Date) dayofyear.parse(schedule.startdate);
-            System.out.println("\n3\n\n");
-            java.sql.Date startT = (Date) hourofday.parse(schedule.daystarthour);
-            java.sql.Date endT = (Date) hourofday.parse(schedule.dayendhour);
+
+            Date startD = (Date) dayofyear.parse(schedule.startdate);
+            Date endD = (Date) dayofyear.parse(schedule.startdate);
+
+            Date startT = (Date) hourofday.parse(schedule.daystarthour);
+            Date endT = (Date) hourofday.parse(schedule.dayendhour);
             
             String dayofmeetingString = "";
             String MstartString = "";
             String MendString = "";
-            java.sql.Date dayofmeeting = (Date) dayofyear.parse(schedule.startdate);
-            java.sql.Date MstartTDate;
-            java.sql.Date MendTDate;
+            Date dayofmeeting = (Date) dayofyear.parse(schedule.startdate);
+            Date MstartTDate;
+            Date MendTDate;
             System.out.println("\nhuh\n\n");
             int numdays = (int) ((startD.getTime()-endD.getTime())/(1000*60*60*24));
             int numrows = (int) ((startT.getTime()-endT.getTime())/(schedule.meetinglength*60000));
