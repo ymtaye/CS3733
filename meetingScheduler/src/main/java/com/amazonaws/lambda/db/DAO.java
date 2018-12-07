@@ -52,10 +52,10 @@ public class DAO {
     		System.out.println("\nbefore\n\n");
     		SimpleDateFormat dayofyear = new SimpleDateFormat("yyyy-MM-dd");
             SimpleDateFormat hourofday = new SimpleDateFormat("HH:mm:ss");
-            
+            System.out.println("\n2\n\n");
             java.sql.Date startD = (Date) dayofyear.parse(schedule.startdate);
             java.sql.Date endD = (Date) dayofyear.parse(schedule.startdate);
-            
+            System.out.println("\n3\n\n");
             java.sql.Date startT = (Date) hourofday.parse(schedule.daystarthour);
             java.sql.Date endT = (Date) hourofday.parse(schedule.dayendhour);
             
