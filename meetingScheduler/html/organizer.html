@@ -1,15 +1,52 @@
 <html><head><script type="text/javascript">
 var add_url = "https://1m7vgd21ee.execute-api.us-east-2.amazonaws.com/Alpha/schedule";
-// hi george
+var show_url = "https://1m7vgd21ee.execute-api.us-east-2.amazonaws.com/Alpha/schedule";
+var ts; // timeslots list
+var startFullDate; // start date of the calendar
+var endFullDate; // end date of the calendar
+var weekStart; // start date for the shown week
+var weekEnd; // end date for the shown week
 
+function showTimeSlotsGUI(timeslots){
+  var rowCounter = 0;
+  var columnCounter = 0;
+  var rows = document.getElementById("schedule").rows;
 
-function showScheduleGUI(startdate, enddate, daystarthour, dayendhour, slotlength, js){
+  // weekstart is the start date of the shown week
+  weekStart = new Date(timeslots[0].startdate+"T"+timeslots[0].starttime+"Z");
+
+  var cell;
+  var slotEndDate;
+  var slotStartDate;
+  for(var i=0; i<timeslots.length;i++){
+    // if the timeslot end time is greater than or equal to the endtime of the end date
+    // and the timeslot start time is less than or equal to the starttime of the start date
+    slotEndDate = new Date(timeslots[i].enddate+"T"+timeslots[i].endtime+"Z");
+    slotStartDate = new Date(timeslots[i].startdate+"T"+timeslots[i].starttime+"Z");
+    if(Math.abs(slotEndDate.getTime()) >= Math.abs(weekEnd.getTime()) && Math.abs(slotStartDate.getTime()) <= Math.abs(weekStart.getTime())){
+      // insert cell
+      // increment column counter
+      // check if column counter is at 7, then increment rowCounter
+      cell = rows[rowCounter].insertCell();
+      column++;
+      if(columnCounter == 7){
+        rowCounter++;
+      }
+    }
+  }
+
+}
+
+function showScheduleGUI(startdate, enddate, daystarthour, dayendhour, slotlength, timeslots){
+  startFullDate = new Date(startdate+"T"+daystarthour+"Z");
+  endFullDate = new Date(enddate+"T"+dayendhour+"Z");
+  ts = timeslots;
   document.getElementById("schedule").innerHTML = "";
 
   var table = document.getElementById("schedule");
   var header = table.createTHead();
   var row = header.insertRow(0);
-  var timeh = row.insertCell(0); 
+  var timeh = row.insertCell(0);
   timeh.innerHTML = "<b>Meeting Times</b>";
   var day;
 
@@ -19,7 +56,7 @@ function showScheduleGUI(startdate, enddate, daystarthour, dayendhour, slotlengt
   //console.log(date2.toUTCString());
   var DOWdate = new Date(startdate+"T"+daystarthour+"Z");
   // Days of the Week at the top of the table
-  for(var i=0;i<8;i++){
+  for(var i=0;i<7;i++){
     day = row.insertCell(i+1);
     DOWdate.setDate(date.getDate()+i);
     var string = DOWdate.toUTCString().slice(0, 12);
@@ -47,6 +84,8 @@ function showScheduleGUI(startdate, enddate, daystarthour, dayendhour, slotlengt
     //console.log(meetingEndDate.toUTCString());
     slot.innerHTML = "<b>" + meetingStartDate.toUTCString().slice(17,25) + " - " + meetingEndDate.toUTCString().slice(17,25) + "</b>";
   }
+
+  showTimeSlotsGUI(timeslots);
 }
 
 
@@ -72,9 +111,9 @@ function showSchedule(startdate, enddate, daystarthour, dayendhour, slotlength){
     if (xhr.readyState == XMLHttpRequest.DONE) {
       console.log ("XHR:" + xhr.responseText);
       if(xhr.status == 200){
-        var js = JSON.parse(xhr.responseText);
-        console.log(js);
-        showScheduleGUI(startdate, enddate, daystarthour, dayendhour, slotlength, js);
+        var timeslots = JSON.parse(xhr.responseText);
+        console.log(timeslots);
+        showScheduleGUI(startdate, enddate, daystarthour, dayendhour, slotlength, timeslots);
       }
     }
   };
