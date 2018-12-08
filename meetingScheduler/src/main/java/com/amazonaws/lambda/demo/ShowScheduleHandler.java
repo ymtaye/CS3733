@@ -64,8 +64,8 @@ public class ShowScheduleHandler implements RequestStreamHandler {
 
 		CreateScheduleResponse response = null;
 		
-		// extract body from incoming HTTP POST request. If any error, then return 422 error
-		String body;
+		// extract queryStringParameters from incoming HTTP POST request. If any error, then return 422 error
+		String queryStringParameters;
 		boolean processed = false;
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(input));
@@ -77,27 +77,27 @@ public class ShowScheduleHandler implements RequestStreamHandler {
 			if (method != null && method.equalsIgnoreCase("OPTIONS")) {
 				logger.log("Options request");
 				response = new CreateScheduleResponse("name", 200);  // OPTIONS needs a 200 response
-		        responseJson.put("body", new Gson().toJson(response));
+		        responseJson.put("queryStringParameters", new Gson().toJson(response));
 		        processed = true;
-		        body = null;
+		        queryStringParameters = null;
 			} else {
-				body = (String)event.get("body");
-				System.out.println(body);
-				logger.log(body);
-				if (body == null) {
-					body = event.toJSONString();  // this is only here to make testing easier
+				queryStringParameters = (String)event.get("queryStringParameters");
+				System.out.println(queryStringParameters);
+				logger.log(queryStringParameters);
+				if (queryStringParameters == null) {
+					queryStringParameters = event.toJSONString();  // this is only here to make testing easier
 				}
 			}
 		} catch (ParseException pe) {
 			logger.log(pe.toString());
 			response = new CreateScheduleResponse("Bad Request:" + pe.getMessage(), 422);  // unable to process input
-	        responseJson.put("body", new Gson().toJson(response));
+	        responseJson.put("queryStringParameters", new Gson().toJson(response));
 	        processed = true;
-	        body = null;
+	        queryStringParameters = null;
 		}
 
 		if (!processed) {
-			ShowScheduleRequest req = new Gson().fromJson(body, ShowScheduleRequest.class);
+			ShowScheduleRequest req = new Gson().fromJson(queryStringParameters, ShowScheduleRequest.class);
 			logger.log(req.toString());
 
 			ShowScheduleResponse resp;
@@ -109,7 +109,7 @@ public class ShowScheduleHandler implements RequestStreamHandler {
 			}
 
 			// compute proper response
-	        responseJson.put("body", new Gson().toJson(resp));  
+	        responseJson.put("queryStringParameters", new Gson().toJson(resp));  
 		}
 		
         logger.log("end result:" + responseJson.toJSONString());
