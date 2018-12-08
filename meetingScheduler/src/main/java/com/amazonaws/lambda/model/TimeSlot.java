@@ -7,6 +7,7 @@ public class TimeSlot {
 	public String endtime;
 	public String participant;
 	public String scheduleid;
+	public boolean open;
 	String secretcode;
 	
 	public TimeSlot (String secretcode, String startdate, String enddate, String starttime, String endtime, String p, String s) {
@@ -17,6 +18,7 @@ public class TimeSlot {
 		this.endtime = endtime;
 		this.participant = p;
 		this.scheduleid = s;
+		this.open = true;
 	}
 
 	
