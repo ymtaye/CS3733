@@ -131,16 +131,17 @@ function showSchedule(startdate, enddate, daystarthour, dayendhour, slotlength){
   var form = document.showForm;
   var scheduleid = form.scheduleid.value;
 
-  var data = {};
-  data["scheduleid"] = scheduleid;
+  //var data = {};
+  //data["scheduleid"] = scheduleid;
 
-  var js = JSON.stringify(data);
-  console.log("JS:" + js);
+  var params = "scheduleid="+scheduleid;
+  //var js = JSON.stringify(data);
+  //console.log("JS:" + js);
   var xhr = new XMLHttpRequest();
-  xhr.open("GET", add_url, true);
+  xhr.open("GET", add_url+"?"+params, true);
 
   // send the collected data as JSON
-  xhr.send(js);
+  xhr.send();
 
   // This will process results and update HTML as appropriate.
   xhr.onloadend = function () {

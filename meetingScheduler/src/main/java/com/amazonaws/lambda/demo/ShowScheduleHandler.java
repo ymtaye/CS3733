@@ -82,6 +82,8 @@ public class ShowScheduleHandler implements RequestStreamHandler {
 		        body = null;
 			} else {
 				body = (String)event.get("body");
+				System.out.println(body);
+				logger.log(body);
 				if (body == null) {
 					body = event.toJSONString();  // this is only here to make testing easier
 				}
