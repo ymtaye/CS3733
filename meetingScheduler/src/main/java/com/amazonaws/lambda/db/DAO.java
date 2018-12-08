@@ -93,7 +93,7 @@ public class DAO {
                     MendString = hourofday.format(MendTDate);
                     
                     System.out.println("3\n\n\n\n");
-            		PreparedStatement ps = conn.prepareStatement("INSERT INTO TimeSlots (id, secretcode, startdate, enddate, starttime, endtime, participant, scheduleid) values(?,?,?,?,?,?,?,?);");
+            		PreparedStatement ps = conn.prepareStatement("INSERT INTO TimeSlots (id, secretcode, startdate, enddate, starttime, endtime, participant, available, scheduleid) values(?,?,?,?,?,?,?,?,?);");
             		System.out.println("4\n\n\n\n");
                     ps.setString(1, getSaltString());
                     ps.setString(2, getSaltString());
@@ -102,15 +102,12 @@ public class DAO {
                     ps.setString(5, MstartString);
                     ps.setString(6, MendString);
                     ps.setString(7, "");
-                    ps.setString(8, schedule.id);
+                    ps.setInt(8, 0);
+                    ps.setString(9, schedule.id);
                     ps.execute();
                   
                 }
             	
-            ////	weekdayString = dayofyear.format(starttimeofday);
-            //	System.out.println(weekdayString+"\n\n");
-            	
-            	// increment one day ahead
             	starttimeofday.setTime(starttimeofday.getTime() + (1000*60*60*24));
             	
             }
@@ -140,7 +137,7 @@ public class DAO {
 
         } catch (Exception e) {
         	e.printStackTrace();
-            throw new Exception("Failed in getting schedule: " + e.getMessage());
+            throw new Exception("Failed in getting timeslots: " + e.getMessage());
         }
     	
     }
@@ -153,8 +150,9 @@ public class DAO {
     	String starttime = resultSet.getString("starttime");
     	String endtime = resultSet.getString("endtime");
     	String participant  = resultSet.getString("participant");
+    	int available = resultSet.getInt("available");
     	String scheduleid = resultSet.getString("scheduleid");
-        return new TimeSlot (secretcode, startdate, enddate, starttime, endtime, participant, scheduleid);
+        return new TimeSlot (secretcode, startdate, enddate, starttime, endtime, participant, scheduleid, available);
     }
     
     String getSaltString() {
@@ -169,7 +167,5 @@ public class DAO {
         return saltStr;
 
     }
-    
-    //test push bullshit - tweed
 
 }
