@@ -168,11 +168,8 @@ public class DAO {
     		ps.setString(2, startdate);
     		ps.setString(3, starttime);
     		ps.setString(4, sID);
-    		ResultSet resultSet = ps.executeQuery();
-    		resultSet.next();
-    		TimeSlot b = generateTimeSlot(resultSet);
-    		resultSet.close();
-    		if(b != null) {
+    		int numRows = ps.executeUpdate();
+    		if(numRows > 0) {
     			r = true;
     		}
     		return r;
