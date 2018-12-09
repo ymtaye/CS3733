@@ -63,11 +63,8 @@ public class DAO {
             java.util.Date starttimeofdayINIT = (java.util.Date) fulltime.parse(schedule.startdate+" "+schedule.daystarthour);
             Date starttimeofday = new Date(0);
             starttimeofday.setTime(starttimeofdayINIT.getTime());
-            System.out.println("util: "+ starttimeofdayINIT.getTime()+"\n\n");
-            System.out.println("sql: "+ starttimeofday.getTime()+"\n\n");
             
             int numdays = (int) (1+Math.abs((startD.getTime()-endD.getTime())/(1000*60*60*24)));
-        	System.out.println(numdays);
 
             int numrows = (int) ((startT.getTime()-endT.getTime())/(schedule.meetinglength*60000));
             
@@ -79,22 +76,17 @@ public class DAO {
             Date MendTDate;
             
             for (int j=0;j<Math.abs(numdays);j++) {
-            	System.out.println("1\n\n\n\n");
             	weekdayString = dayofyear.format(starttimeofday);
-            	System.out.println(weekdayString+"\n\n");
             	for (int i=0;i<Math.abs(numrows);i++) {
             		
             		// dates for the start and end time
             		MstartTDate = new Date((starttimeofday.getTime())+((schedule.meetinglength*60000)*i)); // date.getTime()+((slotlength*60000)*i);
             		MendTDate = new Date((starttimeofday.getTime())+((schedule.meetinglength*60000)*(i+1)));
-            		System.out.println("2\n\n\n\n");
                     // Strings for the start and end time
                     MstartString = hourofday.format(MstartTDate);
                     MendString = hourofday.format(MendTDate);
                     
-                    System.out.println("3\n\n\n\n");
             		PreparedStatement ps = conn.prepareStatement("INSERT INTO TimeSlots (id, secretcode, startdate, enddate, starttime, endtime, participant, available, scheduleid) values(?,?,?,?,?,?,?,?,?);");
-            		System.out.println("4\n\n\n\n");
                     ps.setString(1, getSaltString());
                     ps.setString(2, getSaltString());
                     ps.setString(3, weekdayString);
@@ -123,7 +115,7 @@ public class DAO {
 	public ArrayList<TimeSlot> getTimeSlots(String scheduleid) throws Exception {
     	try {
             ArrayList<TimeSlot> timeslots = new ArrayList<TimeSlot>();
-            PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE scheduleid = ?;");
+            PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE scheduleid = ? ORDER BY startdate, starttime;");
             ps.setString(1,  scheduleid);
             ResultSet resultSet = ps.executeQuery();
             
@@ -166,6 +158,46 @@ public class DAO {
         String saltStr = salt.toString();
         return saltStr;
 
+    }
+    
+    public boolean updateTimeSlot(String starttime, String startdate, String sID, int open) throws Exception{
+    	try {
+    		boolean r = false;
+    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET available = ? WHERE startdate = ? AND starttime = ? and scheduleid = ?;");
+    		ps.setString(1, Integer.toString(open));
+    		ps.setString(2, startdate);
+    		ps.setString(3, starttime);
+    		ps.setString(4, sID);
+    		ResultSet resultSet = ps.executeQuery();
+    		resultSet.next();
+    		TimeSlot b = generateTimeSlot(resultSet);
+    		resultSet.close();
+    		if(b != null) {
+    			r = true;
+    		}
+    		return r;
+    	}
+    	catch(Exception e) {
+    		throw new Exception("Failed in updating time slot: " + e.getMessage());
+    	}    	
+    }
+    
+    public TimeSlot findTimeSlot(String starttime, String startdate, String sID) throws Exception{
+    	try {
+    		PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE startdate = ? AND starttime = ? AND scheduleid = ?;");
+    		ps.setString(1, startdate);
+    		ps.setString(2, starttime);
+    		ps.setString(3, sID);
+    		ResultSet resultSet = ps.executeQuery();
+    		resultSet.next();
+    		TimeSlot b = generateTimeSlot(resultSet);
+    		resultSet.close();
+    		return b;
+    	
+    	}
+    	catch(Exception e) {
+    		throw new Exception("Failed in finding time slot: " + e.getMessage());
+    	}
     }
 
 }
