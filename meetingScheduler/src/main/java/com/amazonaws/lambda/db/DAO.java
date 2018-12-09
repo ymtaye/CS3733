@@ -116,7 +116,7 @@ public class DAO {
             
     	} catch (Exception e) {
     		//e.printStackTrace();
-            throw new Exception("Failed to insert schedule: " + e.getMessage());
+            throw new Exception("Failed to insert timeslots: " + e.getMessage());
     	}
     }
 
