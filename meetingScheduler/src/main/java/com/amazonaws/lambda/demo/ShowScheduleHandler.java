@@ -109,7 +109,7 @@ public class ShowScheduleHandler implements RequestStreamHandler {
 			}
 
 			// compute proper response
-	        responseJson.put("queryStringParameters", new Gson().toJson(resp));  
+	        responseJson.put("body", new Gson().toJson(resp));  
 		}
 		
         logger.log("end result:" + responseJson.toJSONString());
