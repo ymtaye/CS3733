@@ -223,20 +223,23 @@ public class DAO {
     public boolean createMeeting(TimeSlot meeting) throws Exception{
     	try {
     		boolean r = false;
-    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ? WHERE startdate = ? AND starttime = ? and scheduleid = ?;");
+    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ?, available = ?, secretcode = ? WHERE startdate = ? AND starttime = ? AND scheduleid = ?;");
     		ps.setString(1, meeting.participant);
-    		ps.setString(2, meeting.startdate);
-    		ps.setString(3, meeting.starttime);
-    		ps.setString(4, meeting.scheduleid);
-    		ResultSet resultSet = ps.executeQuery();
-    		resultSet.next();
-    		TimeSlot b = generateTimeSlot(resultSet);
-    		resultSet.close();
-    		if(b != null) {
-    			r = true;
+    		ps.setInt(2, meeting.available);
+    		ps.setString(3, meeting.getSecretcode());
+    		ps.setString(4, meeting.startdate);
+    		ps.setString(5, meeting.starttime);
+    		ps.setString(6, meeting.scheduleid);
+    		int result = ps.executeUpdate();
+    		System.out.println(result);
+    		
+    		if(result == 0) {
+    			return false;
+    		} else {
+    			return true;
     		}
-    		return r;
     	}
+    		
     	catch(Exception e) {
     		throw new Exception("Failed in updating participant: " + e.getMessage());
     	}    	

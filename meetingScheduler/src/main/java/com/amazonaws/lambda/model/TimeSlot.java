@@ -21,6 +21,10 @@ public class TimeSlot {
 		this.available = available;
 	}
 	
+	public String getSecretcode() {
+		return this.secretcode;
+	}
+	
 	public boolean isAvailable () {
 		if(this.available == 0) {
 			return true;

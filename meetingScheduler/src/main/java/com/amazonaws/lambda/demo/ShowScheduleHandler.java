@@ -97,6 +97,7 @@ public class ShowScheduleHandler implements RequestStreamHandler {
 		}
 
 		if (!processed) {
+			
 			ShowScheduleRequest req = new Gson().fromJson(queryStringParameters, ShowScheduleRequest.class);
 			logger.log(req.toString());
 
