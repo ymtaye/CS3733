@@ -37,10 +37,10 @@ public class DeleteMeetingHandler implements RequestStreamHandler{
 	 * 
 	 * @throws Exception 
 	 */
-	boolean deleteMeeting(String sID, String secretcode) throws Exception {
+	boolean deleteMeeting(String sID, String secretcode, String starttime, String startdate) throws Exception {
 		if (logger != null) { logger.log("in deleteMeeting"); }
 		DAO dao = new DAO();
-		return dao.deleteMeeting(sID, secretcode);
+		return dao.deleteMeeting(sID, secretcode, starttime, startdate);
 	}
 	
 	@Override
@@ -95,7 +95,7 @@ public class DeleteMeetingHandler implements RequestStreamHandler{
 			DeleteMeetingResponse resp;
 			logger.log("text1");
 			try {
-				if (deleteMeeting(req.scheduleid, req.secretcode)) {
+				if (deleteMeeting(req.scheduleid, req.secretcode, req.starttime, req.startdate)) {
 					resp = new DeleteMeetingResponse("Confirmed");
 				} else {
 					resp = new DeleteMeetingResponse("Unable to cancel meeting for  [" + req.scheduleid + "with" + req.secretcode + "]", 422);
