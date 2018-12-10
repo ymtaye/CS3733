@@ -187,7 +187,7 @@ public class DAO {
     	try {
     		boolean r = false;
     		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET available = ? WHERE startdate = ? AND starttime = ? and scheduleid = ?;");
-    		ps.setString(1, Integer.toString(open));
+    		ps.setInt(1, open);
     		ps.setString(2, startdate);
     		ps.setString(3, starttime);
     		ps.setString(4, sID);

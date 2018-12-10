@@ -1,5 +1,7 @@
 <html><head><script type="text/javascript">
 var add_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/schedule";
+var close_time_slot = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/close-time-slot";
+var open_time_slot = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/open-time-slot";
 
 var ts; // timeslots list
 var startFullDate; // start date of the calendar
@@ -51,7 +53,11 @@ function showTimeSlotsGUI(timeslots){
       // increment column counter
       // check if column counter is at 7, then increment rowCounter
       cell = rows[rowCounter].cells[columnCounter];
-      cell.innerHTML = '<button id="' + timeslots.list[i].secretcode + '" onclick="closeTimeSlot(this)" value="Close"></button>';
+      if(timeslots.list[i].available == 1){
+        cell.innerHTML = '<button id="' + timeslots.list[i].secretcode + '" onclick="openTimeSlot(this)" value="Unavailable" style="background-color:#B22222">Unavailable</button>';
+      } else {
+        cell.innerHTML = '<button id="' + timeslots.list[i].secretcode + '" onclick="closeTimeSlot(this)" value="Open" style="background-color:#20B2AA">Open</button>';
+      }
 
       if(rowCounter == rows.length-1){
         columnCounter++;
@@ -208,12 +214,12 @@ function showScheduleGUI(timeslots){
 
 function showSchedule(){
   var form = document.showForm;
-  var scheduleid = form.scheduleid.value;
+  var secretcode = form.secretcode.value;
 
   //var data = {};
   //data["scheduleid"] = scheduleid;
 
-  var params = "scheduleid="+scheduleid;
+  var params = "secretcode="+secretcode;
   //var js = JSON.stringify(data);
   //console.log("JS:" + js);
   var xhr = new XMLHttpRequest();
@@ -238,8 +244,8 @@ function showSchedule(){
 
 }
 
-function createScheduleID(js){
-  document.getElementById("message").innerHTML = "secret code: "+ js.response;
+function createScheduleSC(js){
+  document.getElementById("message").innerHTML = "Secret Code for you: "+ js.secretcode + "\nID for Participant: " + js.scheduleid;
 }
 
 function createSchedule(e) {
@@ -273,7 +279,7 @@ function createSchedule(e) {
       console.log ("XHR:" + xhr.responseText);
       if(xhr.status == 200){
         var js = JSON.parse(xhr.responseText);
-        createScheduleID(js);
+        createScheduleSC(js);
       }
     }
   };
@@ -288,7 +294,7 @@ function openTimeSlot(e){
   // search for a timeslot with a matching secretcode
   for(var i=0; i<ts.list.length; i++){
     if(e.id == ts.list[i].secretcode){
-      sID = ts.list[i].secretcode;
+      sID = ts.list[i].scheduleid;
     	starttime = ts.list[i].starttime;
     	startdate = ts.list[i].startdate;
     	close = 0;
@@ -297,23 +303,19 @@ function openTimeSlot(e){
 
   var data = {};
   data["sID"] = sID;
-  data["starttime"] = starttime;
   data["startdate"] = startdate;
+  data["starttime"] = starttime;
   data["close"] = close;
 
-  //openTimeSlotRequest(data);
+  openTimeSlotRequest(e, data);
 
-  document.getElementById(e.id).onclick = function () {
-    closeTimeSlot(this);
-  }
-  document.getElementById(e.id).value = "Close";
 }
 
-function openTimeSlotRequest(data){
+function openTimeSlotRequest(e, data){
   var js = JSON.stringify(data);
   console.log("JS:" + js);
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", time_slot, true);
+  xhr.open("POST", open_time_slot, true);
 
   // send the collected data as JSON
   xhr.send(js);
@@ -327,7 +329,9 @@ function openTimeSlotRequest(data){
         document.getElementById(e.id).onclick = function () {
     	    closeTimeSlot(this);
         }
-        document.getElementById(e.id).value = "Close";
+        document.getElementById(e.id).value = "Open";
+        document.getElementById(e.id).innerHTML = "Open";
+        document.getElementById(e.id).style.background = "#20B2AA";
       }
     }
   };
@@ -342,7 +346,7 @@ function closeTimeSlot(e){
   // search for a timeslot with a matching secretcode
   for(var i=0; i<ts.list.length; i++){
     if(e.id == ts.list[i].secretcode){
-      sID = ts.list[i].secretcode;
+      sID = ts.list[i].scheduleid;
     	starttime = ts.list[i].starttime;
     	startdate = ts.list[i].startdate;
     	close = 1;
@@ -351,22 +355,18 @@ function closeTimeSlot(e){
 
   var data = {};
   data["sID"] = sID;
-  data["starttime"] = starttime;
   data["startdate"] = startdate;
+  data["starttime"] = starttime;
   data["close"] = close;
 
-  //closeTimeSlotRequest(data);
-  document.getElementById(e.id).onclick = function () {
-    openTimeSlot(this);
-  }
-  document.getElementById(e.id).value = "Open";
+  closeTimeSlotRequest(e, data);
 }
 
-function closeTimeSlotRequest(data){
+function closeTimeSlotRequest(e, data){
   var js = JSON.stringify(data);
   console.log("JS:" + js);
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", time_slot, true);
+  xhr.open("POST", close_time_slot, true);
 
   // send the collected data as JSON
   xhr.send(js);
@@ -380,7 +380,9 @@ function closeTimeSlotRequest(data){
         document.getElementById(e.id).onclick = function () {
     	    openTimeSlot(this);
         }
-        document.getElementById(e.id).value = "Open";
+        document.getElementById(e.id).value = "Unavailable";
+        document.getElementById(e.id).innerHTML = "Unavailable";
+        document.getElementById(e.id).style.background = "#B22222";
       }
     }
   };
@@ -411,7 +413,7 @@ function closeTimeSlotRequest(data){
   <h1>Request to show the schedule</h1>
 
   <form name="showForm" method="get">
-    Input Schedule ID: <input name="scheduleid" value="" /><br>
+    Input Schedule Secret Code: <input name="secretcode" value="" /><br>
     <input type="button" value="Show"  onClick="JavaScript:showSchedule()">
   </form>
 
