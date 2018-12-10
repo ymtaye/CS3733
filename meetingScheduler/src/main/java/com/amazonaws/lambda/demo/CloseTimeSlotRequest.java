@@ -12,10 +12,7 @@ public class CloseTimeSlotRequest {
 		this.startdate = startdate;
 		this.close = 1;
 	}
-	
 	public String toString() {
 		return "Fetch(" + sID + "," + starttime + "," + startdate + "," + Integer.toString(close) + ")";
 	}
-
-
 }
