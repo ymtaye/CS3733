@@ -55,7 +55,7 @@ function showTimeSlotsGUI(timeslots){
       // check if column counter is at 7, then increment rowCounter
       cell = rows[rowCounter].cells[columnCounter];
       if(timeslots.list[i].available == 1){
-        cell.innerHTML = '<p id="'+ timeslots.list[i].id + '">' + timeslots.list[i].participant + '</p><br><button id="' + timeslots.list[i].secretcode + '" onclick="cancelMeeting(this)" value="Unavailable" style="background-color:#B22222">Unavailable</button>';
+        cell.innerHTML = '<p id="'+ timeslots.list[i].id + '">' + timeslots.list[i].participant + '</p><button id="' + timeslots.list[i].secretcode + '" onclick="cancelMeeting(this)" value="Unavailable" style="background-color:#B22222">Unavailable</button>';
       } else {
         cell.innerHTML = '<p id="'+ timeslots.list[i].id + '"></p><button id="' + timeslots.list[i].secretcode + '" onclick="createMeeting(this)" value="Open" style="background-color:#20B2AA">Open</button>';
       }
@@ -244,6 +244,22 @@ function showSchedule(){
 
 }
 
+function fillParticipantInCell(participant, startdate, starttime, secretcode){
+  for(var i=0; i<ts.list.length;i++){
+    if(ts.list[i].starttime == starttime && ts.list[i].startdate == startdate){
+      ts.list[i].secretcode = secretcode;
+      ts.list[i].participant = participant;
+      document.getElementById(ts.list[i].id).innerHTML = participant;
+      console.log(ts.list[i].id);
+      console.log("ts starttime:" + ts.list[i].starttime);
+      console.log("cell starttime:" + starttime);
+      console.log("ts starttime:" + ts.list[i].startdate);
+      console.log("cell starttime:" + startdate);
+
+    }
+  }
+}
+
 function createMeeting(e){
   var form = document.showForm;
   var scheduleID = form.scheduleid.value;
@@ -285,9 +301,6 @@ function createMeeting(e){
 
 }
 
-// this has to search ts by date/time to change the secretcode after creating meeting
-// get the p tag with id of the previously found timeslot
-// change its message to participant
 function createMeetingRequest(e, data){
   var js = JSON.stringify(data);
   console.log("JS:" + js);
@@ -312,8 +325,10 @@ function createMeetingRequest(e, data){
         document.getElementById(e.id).value = "Unavailable";
         document.getElementById(e.id).innerHTML = "Unavailable";
         document.getElementById(e.id).style.background = "#B22222";
-        //document.getElementById(response.response).innerHTML = data.participant;
         document.getElementById("message").innerHTML = "Your meeting code: " + response.response;
+        fillParticipantInCell(data.participant, data.startdate, data.starttime, response.response);
+        //console.log(data.starttime);
+        //console.log(data.startdate);
       }
     }
   };
