@@ -249,13 +249,6 @@ public class DAO {
     	try {
     		String sc = getSaltString();
     		boolean r = false;
-<<<<<<< HEAD
-    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ? AND availability = ? WHERE secretcode = ? AND scheduleid = ?");
-    		ps.setString(1, " ");
-    		ps.setInt(2, 0);
-    		ps.setString(3, secretcode);
-    		ps.setString(4, sID);
-=======
     		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET secretcode = ?, participant = ?, available = ? WHERE secretcode = ? AND starttime = ? AND startdate = ? AND NOT participant = ? AND available = ? AND scheduleid = ?");
     		ps.setString(1,  sc);
     		ps.setString(2, "");
@@ -266,7 +259,6 @@ public class DAO {
     		ps.setString(7, "");
     		ps.setInt(8, 1);
     		ps.setString(9, sID);
->>>>>>> branch 'master' of https://github.com/marcuscop/Tarazed.git
     		int numRows = ps.executeUpdate();
     		if(numRows > 0) {
     			r = true;
