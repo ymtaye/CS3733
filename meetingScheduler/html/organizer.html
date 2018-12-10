@@ -221,7 +221,7 @@ function showSchedule(){
 
   var params = "secretcode="+secretcode;
   //var js = JSON.stringify(data);
-  //console.log("JS:" + js);
+  console.log("request: " + params);
   var xhr = new XMLHttpRequest();
   xhr.open("GET", add_url+"?"+params, true);
 
