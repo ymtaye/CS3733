@@ -223,7 +223,7 @@ public class DAO {
     public boolean createMeeting(TimeSlot meeting) throws Exception{
     	try {
     		boolean r = false;
-    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ?, available = ?, secretcode = ? WHERE startdate = ? AND starttime = ? and scheduleid = ?;");
+    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ?, available = ?, secretcode = ? WHERE startdate = ? AND starttime = ? AND scheduleid = ?;");
     		ps.setString(1, meeting.participant);
     		ps.setInt(2, meeting.available);
     		ps.setString(3, meeting.getSecretcode());
