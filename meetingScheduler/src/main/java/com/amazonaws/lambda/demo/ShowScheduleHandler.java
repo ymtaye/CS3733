@@ -46,7 +46,7 @@ public class ShowScheduleHandler implements RequestStreamHandler {
 		if (logger != null) { logger.log("in getTimeSlots"); }
 		DAO dao = new DAO();
 
-		return dao.getTimeSlots(secretcode);
+		return dao.getTimeSlotsForOrg(secretcode);
 	}
 	
 	@Override
