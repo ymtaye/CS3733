@@ -133,6 +133,29 @@ public class DAO {
         }
     	
     }
+	
+	// Get timeslot for Organizer to access timeslot with secretcode
+	public ArrayList<TimeSlot> getTimeSlotsForOrg(String secretcode) throws Exception {
+    	try {
+            ArrayList<TimeSlot> timeslots = new ArrayList<TimeSlot>();
+            PreparedStatement ps = conn.prepareStatement("SELECT TimeSlots.id, TimeSlots.secretcode, TimeSlots.startDate, TimeSlots.enddate, TimeSlots.starttime, TimeSlots.endtime, TimeSlots.participant, TimeSlots.available, TimeSlots.scheduleid FROM TimeSlots JOIN Schedule ON TimeSlots.scheduleid = schedule.scheduleid  WHERE schedule.secretcode = ? ORDER BY TimeSlots.startdate, TimeSlots.starttime;");
+            ps.setString(1,  secretcode);
+            ResultSet resultSet = ps.executeQuery();
+            
+            while (resultSet.next()) {
+                timeslots.add(generateTimeSlot(resultSet));
+            }
+            resultSet.close();
+            ps.close();
+            
+            return timeslots;
+
+        } catch (Exception e) {
+        	e.printStackTrace();
+            throw new Exception("Failed in getting timeslots: " + e.getMessage());
+        }
+    	
+    }
     
     private TimeSlot generateTimeSlot(ResultSet resultSet) throws Exception {
     	String id = resultSet.getString("id");
@@ -195,6 +218,28 @@ public class DAO {
     	catch(Exception e) {
     		throw new Exception("Failed in finding time slot: " + e.getMessage());
     	}
+    }
+    
+    public boolean createMeeting(TimeSlot meeting) throws Exception{
+    	try {
+    		boolean r = false;
+    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ? WHERE startdate = ? AND starttime = ? and scheduleid = ?;");
+    		ps.setString(1, meeting.participant);
+    		ps.setString(2, meeting.startdate);
+    		ps.setString(3, meeting.starttime);
+    		ps.setString(4, meeting.scheduleid);
+    		ResultSet resultSet = ps.executeQuery();
+    		resultSet.next();
+    		TimeSlot b = generateTimeSlot(resultSet);
+    		resultSet.close();
+    		if(b != null) {
+    			r = true;
+    		}
+    		return r;
+    	}
+    	catch(Exception e) {
+    		throw new Exception("Failed in updating participant: " + e.getMessage());
+    	}    	
     }
 
 }

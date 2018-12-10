@@ -7,43 +7,32 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Random;
-import java.util.Scanner;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.amazonaws.SdkClientException;
+import com.amazonaws.lambda.db.DAO;
+import com.amazonaws.lambda.model.Schedule;
+import com.amazonaws.lambda.model.TimeSlot;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.amazonaws.services.lambda.runtime.events.S3Event;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-
 import com.google.gson.Gson;
 
-import com.amazonaws.lambda.db.*;
-import com.amazonaws.lambda.model.*;
-
-public class CreateScheduleHandler implements RequestStreamHandler {
-
+public class CreateMeetingHandler implements RequestStreamHandler{
 	public LambdaLogger logger = null;
 
 	/** Load from RDS, if it exists
 	 * 
 	 * @throws Exception 
 	 */
-	boolean createSchedule(String id, String secretcode, String startdate, String enddate, String daystarthour, String dayendhour, String organizer, int meetinglength) throws Exception {
-		if (logger != null) { logger.log("in createSchedule"); }
+	boolean createMeeting(String startdate, String enddate, String starttime, String endtime, String participant, String scheduleid, int available, String secretcode) throws Exception {
+		if (logger != null) { logger.log("in createMeeting"); }
 		DAO dao = new DAO();
 
-		Schedule schedule = new Schedule (id, startdate, enddate, daystarthour, dayendhour, organizer, secretcode, meetinglength);
-		return dao.addSchedule(schedule);
+		TimeSlot meeting = new TimeSlot (secretcode, startdate, enddate, starttime, endtime, participant, scheduleid, available);
+		return dao.createMeeting(meeting);
 		
 	}
 	
@@ -67,7 +56,7 @@ public class CreateScheduleHandler implements RequestStreamHandler {
 	@Override
 	public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
 		logger = context.getLogger();
-		logger.log("Loading Java Lambda handler to create constant");
+		logger.log("Loading Java Lambda handler to create meeting");
 
 		JSONObject headerJson = new JSONObject();
 		headerJson.put("Content-Type",  "application/json");  // not sure if needed anymore?
@@ -77,7 +66,7 @@ public class CreateScheduleHandler implements RequestStreamHandler {
 		JSONObject responseJson = new JSONObject();
 		responseJson.put("headers", headerJson);
 
-		CreateScheduleResponse response = null;
+		CreateMeetingResponse response = null;
 		
 		// extract body from incoming HTTP POST request. If any error, then return 422 error
 		String body;
@@ -91,7 +80,7 @@ public class CreateScheduleHandler implements RequestStreamHandler {
 			String method = (String) event.get("httpMethod");
 			if (method != null && method.equalsIgnoreCase("OPTIONS")) {
 				logger.log("Options request");
-				response = new CreateScheduleResponse("name", 200);  // OPTIONS needs a 200 response
+				response = new CreateMeetingResponse("name", 200);  // OPTIONS needs a 200 response
 		        responseJson.put("body", new Gson().toJson(response));
 		        processed = true;
 		        body = null;
@@ -103,32 +92,31 @@ public class CreateScheduleHandler implements RequestStreamHandler {
 			}
 		} catch (ParseException pe) {
 			logger.log(pe.toString());
-			response = new CreateScheduleResponse("Bad Request:" + pe.getMessage(), 422);  // unable to process input
+			response = new CreateMeetingResponse("Bad Request:" + pe.getMessage(), 422);  // unable to process input
 	        responseJson.put("body", new Gson().toJson(response));
 	        processed = true;
 	        body = null;
 		}
 
 		if (!processed) {
-			CreateScheduleRequest req = new Gson().fromJson(body, CreateScheduleRequest.class);
+			CreateMeetingRequest req = new Gson().fromJson(body, CreateMeetingRequest.class);
 			logger.log(req.toString());
 
-			CreateScheduleResponse resp;
-			logger.log("text1");
-			//System.out.print(getSaltString());
-			//System.out.print(req.startdate);
+			CreateMeetingResponse resp;
+//			logger.log("\n got here\n");
 		
-			String scheduleid = getSaltString();
-			String secretcode = getSaltString();
-			
+			String meetingSC = getSaltString();
+
 			try {
-				if (createSchedule(scheduleid, secretcode, req.startdate, req.enddate, req.daystarthour, req.dayendhour, req.organizer, req.meetinglength)) {
-					resp = new CreateScheduleResponse(scheduleid, secretcode);
+				if (createMeeting(req.startdate, req.enddate, req.starttime, req.endtime, req.participant, req.scheduleID, 1, getSaltString())) {
+//					logger.log("\n got here\n");
+					resp = new CreateMeetingResponse(meetingSC, 200);
 				} else {
-					resp = new CreateScheduleResponse("Unable to create schedule from [" + req.startdate + " to " + req.enddate + "] for organizer:" + req.organizer, 422);
+					resp = new CreateMeetingResponse("Unable to create meeting from [" + req.startdate + " to " + req.enddate + "] for participant:" + req.participant, 422);
 				}
 			} catch (Exception e) {
-				resp = new CreateScheduleResponse("Unable to create schedule for organizer: [" + req.organizer + "] (" + e.getMessage() + ")", 403);
+//				logger.log("\n got here\n");
+				resp = new CreateMeetingResponse("Unable to create schedule for participant: [" + req.participant + "] (" + e.getMessage() + ")", 403);
 			}
 
 			// compute proper response
