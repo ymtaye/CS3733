@@ -27,7 +27,7 @@ public class CreateMeetingHandler implements RequestStreamHandler{
 	 * 
 	 * @throws Exception 
 	 */
-	boolean createMeeting(String startdate, String enddate, String starttime, String endtime, String participant, String scheduleid, int available, String secretcode) throws Exception {
+	boolean createMeeting ( String startdate, String enddate, String starttime, String endtime, String participant, String scheduleid, int available, String secretcode) throws Exception {
 		if (logger != null) { logger.log("in createMeeting"); }
 		DAO dao = new DAO();
 
@@ -107,6 +107,7 @@ public class CreateMeetingHandler implements RequestStreamHandler{
 //			logger.log("\n got here\n");
 		
 			String meetingSC = getSaltString();
+			//String ID = getSaltString();
 
 			try {
 				if (createMeeting(req.startdate, req.enddate, req.starttime, req.endtime, req.participant, req.scheduleID, 1, meetingSC)) {

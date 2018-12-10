@@ -1,6 +1,7 @@
 package com.amazonaws.lambda.model;
 
 public class TimeSlot {
+	public String id;
 	public String startdate;
 	public String enddate;
 	public String starttime;
@@ -10,7 +11,19 @@ public class TimeSlot {
 	public int available;
 	String secretcode;
 	
-	public TimeSlot (String secretcode, String startdate, String enddate, String starttime, String endtime, String p, String s, int available) {
+	public TimeSlot (String id, String secretcode, String startdate, String enddate, String starttime, String endtime, String p, String s, int available) {
+		this.id=id;
+		this.secretcode = secretcode;
+		this.startdate = startdate;
+		this.enddate = enddate;
+		this.starttime = starttime;
+		this.endtime = endtime;
+		this.participant = p;
+		this.scheduleid = s;
+		this.available = available;
+	}
+	public TimeSlot ( String secretcode, String startdate, String enddate, String starttime, String endtime, String p, String s, int available) {
+
 		this.secretcode = secretcode;
 		this.startdate = startdate;
 		this.enddate = enddate;

@@ -167,7 +167,7 @@ public class DAO {
     	String participant  = resultSet.getString("participant");
     	int available = resultSet.getInt("available");
     	String scheduleid = resultSet.getString("scheduleid");
-        return new TimeSlot (secretcode, startdate, enddate, starttime, endtime, participant, scheduleid, available);
+        return new TimeSlot (id, secretcode, startdate, enddate, starttime, endtime, participant, scheduleid, available);
     }
     
     String getSaltString() {
@@ -247,7 +247,7 @@ public class DAO {
     	try {
     		boolean r = false;
     		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ? AND availability = ? WHERE secretcode = ? AND scheduleid = ?");
-    		ps.setString(1, "");
+    		ps.setString(1, " ");
     		ps.setInt(2, 0);
     		ps.setString(3, secretcode);
     		ps.setString(4, sID);
