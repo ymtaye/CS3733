@@ -33,7 +33,7 @@ import com.google.gson.Gson;
 import com.amazonaws.lambda.db.*;
 import com.amazonaws.lambda.model.*;
 
-public class ParticipantShowScheduleHandler {// implements RequestStreamHandler {
+public class ParticipantShowScheduleHandler  implements RequestStreamHandler {
 	
 	public LambdaLogger logger = null;
 
@@ -46,9 +46,9 @@ public class ParticipantShowScheduleHandler {// implements RequestStreamHandler 
 		DAO dao = new DAO();
 
 		return dao.getTimeSlots(scheduleid);}
-}
 
-/*	public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
+    @Override
+	public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
 		logger = context.getLogger();
 		logger.log("Loading Java Lambda handler to create constant");
 
@@ -60,10 +60,10 @@ public class ParticipantShowScheduleHandler {// implements RequestStreamHandler 
 		JSONObject responseJson = new JSONObject();
 		responseJson.put("headers", headerJson);
 
-		ParticipantShowScheduleResponse response = null;
+		CreateScheduleResponse response = null;
 		
-// extract queryStringParameters from incoming HTTP POST request. If any error, then return 422 error
-/*	String queryStringParameters;
+  //  extract queryStringParameters from incoming HTTP POST request. If any error,  then return 422 error;
+	String queryStringParameters;
 	boolean processed = false;
 	try {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
@@ -75,7 +75,7 @@ public class ParticipantShowScheduleHandler {// implements RequestStreamHandler 
 		if (method != null && method.equalsIgnoreCase("OPTIONS")) {
 			logger.log("Options request");
 		//	List<TimeSlot>  TimeSlotsRequested = new 
-		//	response = new ParticipantShowScheduleResponse("name", 200);  // OPTIONS needs a 200 response
+		    response = new CreateScheduleResponse("name", 200);  // OPTIONS needs a 200 response
 	        responseJson.put("queryStringParameters", new Gson().toJson(response));
 	        processed = true;
 	        queryStringParameters = null;
@@ -86,7 +86,37 @@ public class ParticipantShowScheduleHandler {// implements RequestStreamHandler 
 			if (queryStringParameters == null) {
 				queryStringParameters = event.toJSONString();  // this is only here to make testing easier
 			}
-		}}}
-		*/
+		} 
+		} catch (ParseException pe) {
+			logger.log(pe.toString());
+			response = new CreateScheduleResponse("Bad Request:" + pe.getMessage(), 422);  // unable to process input
+	        responseJson.put("queryStringParameters", new Gson().toJson(response));
+	        processed = true;
+	        queryStringParameters = null;
+		}if (!processed) {
+			ParticipantShowScheduleRequest req = new Gson().fromJson(queryStringParameters, ParticipantShowScheduleRequest.class);
+			logger.log(req.toString());
+
+			ParticipantShowScheduleResponse resp;
+			try {
+				List<TimeSlot> list = getTimeSlots(req.scheduleid);
+				resp = new ParticipantShowScheduleResponse(list, 200);
+			} catch (Exception e) {
+				resp = new ParticipantShowScheduleResponse(403);
+			}
+
+			// compute proper response
+	        responseJson.put("body", new Gson().toJson(resp));  
+		}
+		 logger.log("end result:" + responseJson.toJSONString());
+	        logger.log(responseJson.toJSONString());
+	        OutputStreamWriter writer = new OutputStreamWriter(output, "UTF-8");
+	        writer.write(responseJson.toJSONString());  
+	        writer.close();
+		}
+	}
+
+
+		
 		
 	
