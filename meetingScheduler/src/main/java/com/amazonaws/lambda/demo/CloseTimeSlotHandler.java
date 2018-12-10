@@ -97,7 +97,7 @@ public class CloseTimeSlotHandler implements RequestStreamHandler{
 		
 			
 			try {
-				if (closeTimeSlot(req.startdate, req.starttime, req.sID)) {
+				if (closeTimeSlot(req.starttime, req.startdate, req.sID)) {
 					resp = new CloseTimeSlotResponse("Confirmed");
 				} else {
 					resp = new CloseTimeSlotResponse("Unable to update time slot on  [" + req.startdate + " at " + req.starttime + "]", 422);

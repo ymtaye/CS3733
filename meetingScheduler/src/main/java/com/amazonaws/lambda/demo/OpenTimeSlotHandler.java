@@ -94,10 +94,8 @@ public class OpenTimeSlotHandler implements RequestStreamHandler{
 
 			OpenTimeSlotResponse resp;
 			logger.log("text1");
-		
-			
 			try {
-				if (openTimeSlot(req.startdate, req.starttime, req.sID)) {
+				if (openTimeSlot(req.starttime, req.startdate, req.sID)) {
 					resp = new OpenTimeSlotResponse("Confirmed");
 				} else {
 					resp = new OpenTimeSlotResponse("Unable to update time slot on  [" + req.startdate + " at " + req.starttime + "]", 422);
@@ -105,11 +103,9 @@ public class OpenTimeSlotHandler implements RequestStreamHandler{
 			} catch (Exception e) {
 				resp = new OpenTimeSlotResponse("Unable to update time slot (" + e.getMessage() + ")", 403);
 			}
-
 			// compute proper response
 	        responseJson.put("body", new Gson().toJson(resp));  
 		}
-		
         logger.log("end result:" + responseJson.toJSONString());
         logger.log(responseJson.toJSONString());
         OutputStreamWriter writer = new OutputStreamWriter(output, "UTF-8");
