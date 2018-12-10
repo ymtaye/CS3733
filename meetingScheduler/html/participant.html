@@ -55,9 +55,9 @@ function showTimeSlotsGUI(timeslots){
       // check if column counter is at 7, then increment rowCounter
       cell = rows[rowCounter].cells[columnCounter];
       if(timeslots.list[i].available == 1){
-        cell.innerHTML = '<button id="' + timeslots.list[i].secretcode + '" onclick="cancelMeeting(this)" value="Unavailable" style="background-color:#B22222">Unavailable</button>';
+        cell.innerHTML = '<p id="'+ timeslots.list[i].id + '">' + timeslots.list[i].participant + '</p><br><button id="' + timeslots.list[i].secretcode + '" onclick="cancelMeeting(this)" value="Unavailable" style="background-color:#B22222">Unavailable</button>';
       } else {
-        cell.innerHTML = '<button id="' + timeslots.list[i].secretcode + '" onclick="createMeeting(this)" value="Open" style="background-color:#20B2AA">Open</button>';
+        cell.innerHTML = '<p id="'+ timeslots.list[i].id + '"></p><button id="' + timeslots.list[i].secretcode + '" onclick="createMeeting(this)" value="Open" style="background-color:#20B2AA">Open</button>';
       }
 
       if(rowCounter == rows.length-1){
@@ -246,7 +246,7 @@ function showSchedule(){
 
 function createMeeting(e){
   var form = document.showForm;
-  var scheduleid = form.scheduleid.value;
+  var scheduleID = form.scheduleid.value;
   var form2 = document.nameForm;
   var participant = form2.participant.value;
 
@@ -263,7 +263,7 @@ function createMeeting(e){
   // search for a timeslot with a matching secretcode
   for(var i=0; i<ts.list.length; i++){
     if(e.id == ts.list[i].secretcode){
-      scheduleid = ts.list[i].scheduleid;
+      scheduleID = ts.list[i].scheduleid;
     	starttime = ts.list[i].starttime;
     	startdate = ts.list[i].startdate;
       endtime = ts.list[i].endtime;
@@ -277,12 +277,17 @@ function createMeeting(e){
   data["starttime"] = starttime;
   data["endtime"] = endtime;
   data["participant"] = participant;
-  data["scheduleid"] = scheduleid;
+  data["scheduleID"] = scheduleID;
+
+  console.log(data);
 
   createMeetingRequest(e, data);
 
 }
 
+// this has to search ts by date/time to change the secretcode after creating meeting
+// get the p tag with id of the previously found timeslot
+// change its message to participant
 function createMeetingRequest(e, data){
   var js = JSON.stringify(data);
   console.log("JS:" + js);
@@ -290,7 +295,7 @@ function createMeetingRequest(e, data){
   xhr.open("POST", create_url, true);
 
   // send the collected data as JSON
-  xhr.send();
+  xhr.send(js);
 
   // This will process results and update HTML as appropriate.
   xhr.onloadend = function () {
@@ -307,8 +312,8 @@ function createMeetingRequest(e, data){
         document.getElementById(e.id).value = "Unavailable";
         document.getElementById(e.id).innerHTML = "Unavailable";
         document.getElementById(e.id).style.background = "#B22222";
-
-        document.getElementById("message").innerHTML = response;
+        //document.getElementById(response.response).innerHTML = data.participant;
+        document.getElementById("message").innerHTML = "Your meeting code: " + response.response;
       }
     }
   };
