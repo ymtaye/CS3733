@@ -1,5 +1,6 @@
 <html><head><script type="text/javascript">
 var add_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/schedule";
+var time_slot = "";
 
 var ts; // timeslots list
 var startFullDate; // start date of the calendar
@@ -51,7 +52,7 @@ function showTimeSlotsGUI(timeslots){
       // increment column counter
       // check if column counter is at 7, then increment rowCounter
       cell = rows[rowCounter].cells[columnCounter];
-      cell.innerHTML = '<button id="' + timeslots.list[i].secretcode + '" onclick="closeTimeSlot(this)" value="Close"></button>';
+      cell.innerHTML = '<button id="' + timeslots.list[i].secretcode + '" onclick="closeTimeSlot(this)" value="Open" style="background-color:#20B2AA">Open</button>';
 
       if(rowCounter == rows.length-1){
         columnCounter++;
@@ -301,12 +302,8 @@ function openTimeSlot(e){
   data["startdate"] = startdate;
   data["close"] = close;
 
-  //openTimeSlotRequest(data);
+  openTimeSlotRequest(data);
 
-  document.getElementById(e.id).onclick = function () {
-    closeTimeSlot(this);
-  }
-  document.getElementById(e.id).value = "Close";
 }
 
 function openTimeSlotRequest(data){
@@ -327,7 +324,9 @@ function openTimeSlotRequest(data){
         document.getElementById(e.id).onclick = function () {
     	    closeTimeSlot(this);
         }
-        document.getElementById(e.id).value = "Close";
+        document.getElementById(e.id).value = "Open";
+        document.getElementById(e.id).innerHTML = "Open";
+        document.getElementById(e.id).style.background = "#20B2AA";
       }
     }
   };
@@ -355,11 +354,7 @@ function closeTimeSlot(e){
   data["startdate"] = startdate;
   data["close"] = close;
 
-  //closeTimeSlotRequest(data);
-  document.getElementById(e.id).onclick = function () {
-    openTimeSlot(this);
-  }
-  document.getElementById(e.id).value = "Open";
+  closeTimeSlotRequest(data);
 }
 
 function closeTimeSlotRequest(data){
@@ -380,7 +375,9 @@ function closeTimeSlotRequest(data){
         document.getElementById(e.id).onclick = function () {
     	    openTimeSlot(this);
         }
-        document.getElementById(e.id).value = "Open";
+        document.getElementById(e.id).value = "Unavailable";
+        document.getElementById(e.id).innerHTML = "Unavailable";
+        document.getElementById(e.id).style.background = "#B22222";
       }
     }
   };
