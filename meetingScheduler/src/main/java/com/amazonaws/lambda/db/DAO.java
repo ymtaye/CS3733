@@ -186,7 +186,7 @@ public class DAO {
     public boolean updateTimeSlot(String starttime, String startdate, String sID, int open) throws Exception{
     	try {
     		boolean r = false;
-    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET available = ? and participant = ? WHERE startdate = ? AND starttime = ? and scheduleid = ?;");
+    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ?, available = ? WHERE startdate = ? AND starttime = ? and scheduleid = ?;");
     		ps.setInt(1, open);
     		ps.setString(2, "");
     		ps.setString(3, startdate);
@@ -247,7 +247,7 @@ public class DAO {
     public boolean deleteMeeting(String sID, String secretcode) throws Exception{
     	try {
     		boolean r = false;
-    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ? AND available = ? WHERE secretcode = ? AND scheduleid = ?");
+    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ?, available = ? WHERE secretcode = ? AND scheduleid = ?");
     		ps.setString(1, "");
     		ps.setInt(2, 0);
     		ps.setString(3, secretcode);
