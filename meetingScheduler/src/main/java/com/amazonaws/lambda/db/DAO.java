@@ -241,5 +241,24 @@ public class DAO {
     		throw new Exception("Failed in updating participant: " + e.getMessage());
     	}    	
     }
+    public boolean deleteMeeting(String sID, String secretcode) throws Exception{
+    	try {
+    		boolean r = false;
+    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ? AND availability = ? WHERE secretcode = ? AND scheduleid = ?");
+    		ps.setString(1, "");
+    		ps.setInt(2, 0);
+    		ps.setString(3, secretcode);
+    		ps.setString(4, sID);
+    		int numRows = ps.executeUpdate();
+    		if(numRows > 0) {
+    			r = true;
+    		}
+    		return r;
+    	}
+    	catch(Exception e) {
+    		throw new Exception("Failed in deleting time slot: " + e.getMessage());
+
+    	}
+    }
 
 }

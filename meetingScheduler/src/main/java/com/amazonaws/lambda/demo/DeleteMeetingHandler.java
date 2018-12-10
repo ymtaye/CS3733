@@ -30,23 +30,22 @@ import com.google.gson.Gson;
 import com.amazonaws.lambda.db.*;
 import com.amazonaws.lambda.model.*;
 
-public class OpenTimeSlotHandler implements RequestStreamHandler{
+public class DeleteMeetingHandler implements RequestStreamHandler{
 	public LambdaLogger logger = null;
-
 	/** Load from RDS, if it exists
 	 * 
 	 * @throws Exception 
 	 */
-	boolean openTimeSlot(String starttime, String startdate, String sID) throws Exception {
-		if (logger != null) { logger.log("in openTimeSlot"); }
+	boolean deleteMeeting(String sID, String secretcode) throws Exception {
+		if (logger != null) { logger.log("in deleteMeeting"); }
 		DAO dao = new DAO();
-		return dao.updateTimeSlot(starttime, startdate, sID, 0);
+		return dao.deleteMeeting(sID, secretcode);
 	}
 	
 	@Override
 	public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
 		logger = context.getLogger();
-		logger.log("Loading Java Lambda handler to open Time Slot");
+		logger.log("Loading Java Lambda handler to cancel meeting");
 
 		JSONObject headerJson = new JSONObject();
 		headerJson.put("Content-Type",  "application/json");  // not sure if needed anymore?
@@ -56,7 +55,7 @@ public class OpenTimeSlotHandler implements RequestStreamHandler{
 		JSONObject responseJson = new JSONObject();
 		responseJson.put("headers", headerJson);
 
-		OpenTimeSlotResponse response = null;
+		DeleteMeetingResponse response = null;
 		
 		// extract body from incoming HTTP POST request. If any error, then return 422 error
 		String body;
@@ -70,7 +69,7 @@ public class OpenTimeSlotHandler implements RequestStreamHandler{
 			String method = (String) event.get("httpMethod");
 			if (method != null && method.equalsIgnoreCase("OPTIONS")) {
 				logger.log("Options request");
-				response = new OpenTimeSlotResponse("name", 200);  // OPTIONS needs a 200 response
+				response = new DeleteMeetingResponse("name", 200);  // OPTIONS needs a 200 response
 		        responseJson.put("body", new Gson().toJson(response));
 		        processed = true;
 		        body = null;
@@ -82,26 +81,26 @@ public class OpenTimeSlotHandler implements RequestStreamHandler{
 			}
 		} catch (ParseException pe) {
 			logger.log(pe.toString());
-			response = new OpenTimeSlotResponse("Bad Request:" + pe.getMessage(), 422);  // unable to process input
+			response = new DeleteMeetingResponse("Bad Request:" + pe.getMessage(), 422);  // unable to process input
 	        responseJson.put("body", new Gson().toJson(response));
 	        processed = true;
 	        body = null;
 		}
 
 		if (!processed) {
-			OpenTimeSlotRequest req = new Gson().fromJson(body, OpenTimeSlotRequest.class);
+			DeleteMeetingRequest req = new Gson().fromJson(body, DeleteMeetingRequest.class);
 			logger.log(req.toString());
 
-			OpenTimeSlotResponse resp;
+			DeleteMeetingResponse resp;
 			logger.log("text1");
 			try {
-				if (openTimeSlot(req.starttime, req.startdate, req.sID)) {
-					resp = new OpenTimeSlotResponse("Confirmed");
+				if (deleteMeeting(req.scheduleid, req.secretcode)) {
+					resp = new DeleteMeetingResponse("Confirmed");
 				} else {
-					resp = new OpenTimeSlotResponse("Unable to update time slot on  [" + req.startdate + " at " + req.starttime + "]", 422);
+					resp = new DeleteMeetingResponse("Unable to cancel meeting for  [" + req.scheduleid + "with" + req.secretcode + "]", 422);
 				}
 			} catch (Exception e) {
-				resp = new OpenTimeSlotResponse("Unable to update time slot (" + e.getMessage() + ")", 403);
+				resp = new DeleteMeetingResponse("Unable to update time slot (" + e.getMessage() + ")", 403);
 			}
 			// compute proper response
 	        responseJson.put("body", new Gson().toJson(resp));  
@@ -112,4 +111,6 @@ public class OpenTimeSlotHandler implements RequestStreamHandler{
         writer.write(responseJson.toJSONString());  
         writer.close();
 	}
+	
+	
 }
