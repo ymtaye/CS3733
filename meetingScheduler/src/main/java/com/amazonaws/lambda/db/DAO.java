@@ -186,11 +186,12 @@ public class DAO {
     public boolean updateTimeSlot(String starttime, String startdate, String sID, int open) throws Exception{
     	try {
     		boolean r = false;
-    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET available = ? WHERE startdate = ? AND starttime = ? and scheduleid = ?;");
+    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET available = ? and participant = ? WHERE startdate = ? AND starttime = ? and scheduleid = ?;");
     		ps.setInt(1, open);
-    		ps.setString(2, startdate);
-    		ps.setString(3, starttime);
-    		ps.setString(4, sID);
+    		ps.setString(2, "");
+    		ps.setString(3, startdate);
+    		ps.setString(4, starttime);
+    		ps.setString(5, sID);
     		int numRows = ps.executeUpdate();
     		if(numRows > 0) {
     			r = true;
