@@ -231,6 +231,7 @@ public class DAO {
     		ps.setString(5, meeting.starttime);
     		ps.setString(6, meeting.scheduleid);
     		int result = ps.executeUpdate();
+    		System.out.println(result);
     		
     		if(result == 0) {
     			return false;
