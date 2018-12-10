@@ -43,10 +43,10 @@ public class ShowScheduleHandler implements RequestStreamHandler {
 	 * @throws Exception 
 	 */
 	ArrayList<TimeSlot> getTimeSlotsForOrg(String secretcode) throws Exception {
-		if (logger != null) { logger.log("in getTimeSlots"); }
+		if (logger != null) { logger.log("in getTimeSlotsForOrg"); }
 		DAO dao = new DAO();
 
-		return dao.getTimeSlots(secretcode);
+		return dao.getTimeSlotsForOrg(secretcode);
 	}
 	
 	@Override
