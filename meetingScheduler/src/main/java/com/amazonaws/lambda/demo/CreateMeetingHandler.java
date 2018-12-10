@@ -108,7 +108,7 @@ public class CreateMeetingHandler implements RequestStreamHandler{
 			String meetingSC = getSaltString();
 
 			try {
-				if (createMeeting(req.startdate, req.enddate, req.starttime, req.endtime, req.participant, req.scheduleID, 1, getSaltString())) {
+				if (createMeeting(req.startdate, req.enddate, req.starttime, req.endtime, req.participant, req.scheduleID, 1, meetingSC)) {
 //					logger.log("\n got here\n");
 					resp = new CreateMeetingResponse(meetingSC, 200);
 				} else {
