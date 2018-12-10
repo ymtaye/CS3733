@@ -86,6 +86,7 @@ public class CreateMeetingHandler implements RequestStreamHandler{
 		        body = null;
 			} else {
 				body = (String)event.get("body");
+				logger.log(body);
 				if (body == null) {
 					body = event.toJSONString();  // this is only here to make testing easier
 				}
@@ -108,7 +109,7 @@ public class CreateMeetingHandler implements RequestStreamHandler{
 			String meetingSC = getSaltString();
 
 			try {
-				if (createMeeting(req.startdate, req.enddate, req.starttime, req.endtime, req.participant, req.scheduleID, 1, getSaltString())) {
+				if (createMeeting(req.startdate, req.enddate, req.starttime, req.endtime, req.participant, req.scheduleID, 1, meetingSC)) {
 //					logger.log("\n got here\n");
 					resp = new CreateMeetingResponse(meetingSC, 200);
 				} else {
@@ -116,7 +117,7 @@ public class CreateMeetingHandler implements RequestStreamHandler{
 				}
 			} catch (Exception e) {
 //				logger.log("\n got here\n");
-				resp = new CreateMeetingResponse("Unable to create schedule for participant: [" + req.participant + "] (" + e.getMessage() + ")", 403);
+				resp = new CreateMeetingResponse("Unable to create meeting for participant: [" + req.participant + "] (" + e.getMessage() + ")", 403);
 			}
 
 			// compute proper response

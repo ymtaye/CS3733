@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head><script type="text/javascript">
-var add_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/schedule";
-var close_time_slot = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/close-time-slot";
-var open_time_slot = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/open-time-slot";
+var show_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/participantschedule";
+var create_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/register";
 
 var ts; // timeslots list
 var startFullDate; // start date of the calendar
@@ -13,101 +12,100 @@ var weekEnd; // end date for the shown week
 var columnmax; // the difference in days between start day and end day, in days
 
 function showNextWeek(){
-// check to make sure were not at the end the the schedule
-// change start week, then call showTimeSlotsGUI()
-if(endFullDate.getTime() == weekEnd.getTime()){
-  return;
-}
+  // check to make sure were not at the end the the schedule
+  // change start week, then call showTimeSlotsGUI()
+  if(endFullDate.getTime() == weekEnd.getTime()){
+    return;
+  }
 
-weekStart.setDate(weekEnd.getDate());
+  weekStart.setDate(weekEnd.getDate());
 
-showTimeSlotsGUI(ts);
+  showTimeSlotsGUI(ts);
 
 }
 
 function showLastWeek(){
-// check to make sure were not at the beginning of the the schedule
-// change start week, then call showTimeSlotsGUI()
-if(startFullDate.getTime() == weekStart.getTime()){
-  return;
-}
+  // check to make sure were not at the beginning of the the schedule
+  // change start week, then call showTimeSlotsGUI()
+  if(startFullDate.getTime() == weekStart.getTime()){
+    return;
+  }
 
-weekStart.setDate(weekStart.getDate() - 7);
+  weekStart.setDate(weekStart.getDate() - 7);
 
-showTimeSlotsGUI(ts);
+  showTimeSlotsGUI(ts);
 }
 
 function showTimeSlotsGUI(timeslots){
-var rowCounter = 1;
-var columnCounter = 1;
-var cell;
-var slotEndDate;
-var slotStartDate;
-if(columnmax>7){columnmax=7}
+  var rowCounter = 1;
+  var columnCounter = 1;
+  var cell;
+  var slotEndDate;
+  var slotStartDate;
+  if(columnmax>7){columnmax=7}
 
-var rows = document.getElementById("schedule").rows;
+  var rows = document.getElementById("schedule").rows;
 
-for(var i=0; i<timeslots.list.length;i++){
-  slotEndDate = new Date(timeslots.list[i].enddate+"T"+timeslots.list[i].endtime+"Z");
-  slotStartDate = new Date(timeslots.list[i].startdate+"T"+timeslots.list[i].starttime+"Z");
-  if(Math.abs(slotStartDate.getTime()) >= Math.abs(weekStart.getTime()) && columnCounter <= columnmax){
-    // insert cell
-    // increment column counter
-    // check if column counter is at 7, then increment rowCounter
-    cell = rows[rowCounter].cells[columnCounter];
-    if(timeslots.list[i].available == 1){
-      cell.innerHTML = '<button id="' + timeslots.list[i].secretcode + '" onclick="openTimeSlot(this)" value="Unavailable" style="background-color:#B22222">Unavailable</button>';
+  for(var i=0; i<timeslots.list.length;i++){
+    slotEndDate = new Date(timeslots.list[i].enddate+"T"+timeslots.list[i].endtime+"Z");
+    slotStartDate = new Date(timeslots.list[i].startdate+"T"+timeslots.list[i].starttime+"Z");
+    if(Math.abs(slotStartDate.getTime()) >= Math.abs(weekStart.getTime()) && columnCounter <= columnmax){
+      // insert cell
+      // increment column counter
+      // check if column counter is at 7, then increment rowCounter
+      cell = rows[rowCounter].cells[columnCounter];
+      if(timeslots.list[i].available == 1){
+        cell.innerHTML = '<p id="'+ timeslots.list[i].id + '">' + timeslots.list[i].participant + '</p><br><button id="' + timeslots.list[i].secretcode + '" onclick="cancelMeeting(this)" value="Unavailable" style="background-color:#B22222">Unavailable</button>';
+      } else {
+        cell.innerHTML = '<p id="'+ timeslots.list[i].id + '"></p><button id="' + timeslots.list[i].secretcode + '" onclick="createMeeting(this)" value="Open" style="background-color:#20B2AA">Open</button>';
+      }
+
+      if(rowCounter == rows.length-1){
+        columnCounter++;
+        rowCounter = 1;
+      } else {
+        rowCounter++;
+      }
     } else {
-      cell.innerHTML = '<button id="' + timeslots.list[i].secretcode + '" onclick="closeTimeSlot(this)" value="Open" style="background-color:#20B2AA">Open</button>';
+      weekStart = new Date(slotStartDate.getTime());
+      weekEnd = new Date(slotEndDate.getTime());
+      console.log(weekStart.toUTCString());
+      console.log(weekEnd.toUTCString());
     }
-
-    if(rowCounter == rows.length-1){
-      columnCounter++;
-      rowCounter = 1;
-    } else {
-      rowCounter++;
-    }
-  } else {
-    weekStart = new Date(slotStartDate.getTime());
-    weekEnd = new Date(slotEndDate.getTime());
-    console.log(weekStart.toUTCString());
-    console.log(weekEnd.toUTCString());
   }
-}
-
 }
 
 function getSlotLength(timeslots){
-var date1 = new Date(timeslots.list[0].startdate+"T"+timeslots.list[0].starttime+"Z");
-var date2 = new Date(timeslots.list[0].startdate+"T"+timeslots.list[0].endtime+"Z");
-var slotlength = (Math.abs(date1.getTime() - date2.getTime()))/60000;
-return slotlength;
-}
-
-function getEarliestDate(timeslots){
-var tempDate;
-var earliestDate = new Date(timeslots.list[0].startdate+"T"+timeslots.list[0].starttime+"Z");
-// find the startdate
-for(var i=0; i<timeslots.list.length; i++){
-  tempDate = new Date(timeslots.list[i].startdate+"T"+timeslots.list[i].starttime+"Z");
-  if(tempDate.getTime() < earliestDate.getTime()){
-    earliestDate = new Date(tempDate.getTime());
+  var date1 = new Date(timeslots.list[0].startdate+"T"+timeslots.list[0].starttime+"Z");
+  var date2 = new Date(timeslots.list[0].startdate+"T"+timeslots.list[0].endtime+"Z");
+  var slotlength = (Math.abs(date1.getTime() - date2.getTime()))/60000;
+  return slotlength;
   }
-}
-return earliestDate;
+
+  function getEarliestDate(timeslots){
+  var tempDate;
+  var earliestDate = new Date(timeslots.list[0].startdate+"T"+timeslots.list[0].starttime+"Z");
+  // find the startdate
+  for(var i=0; i<timeslots.list.length; i++){
+    tempDate = new Date(timeslots.list[i].startdate+"T"+timeslots.list[i].starttime+"Z");
+    if(tempDate.getTime() < earliestDate.getTime()){
+      earliestDate = new Date(tempDate.getTime());
+    }
+  }
+  return earliestDate;
 }
 
 function getLatestDate(timeslots){
-var tempDate;
-var latestDate = new Date(timeslots.list[0].startdate+"T"+timeslots.list[0].starttime+"Z");
-// find the enddate
-for(var i=0; i<timeslots.list.length; i++){
-  tempDate = new Date(timeslots.list[i].enddate+"T"+timeslots.list[i].endtime+"Z");
-  if(tempDate.getTime() > latestDate.getTime()){
-    latestDate = new Date(tempDate.getTime());
+  var tempDate;
+  var latestDate = new Date(timeslots.list[0].startdate+"T"+timeslots.list[0].starttime+"Z");
+  // find the enddate
+  for(var i=0; i<timeslots.list.length; i++){
+    tempDate = new Date(timeslots.list[i].enddate+"T"+timeslots.list[i].endtime+"Z");
+    if(tempDate.getTime() > latestDate.getTime()){
+      latestDate = new Date(tempDate.getTime());
+    }
   }
-}
-return latestDate;
+  return latestDate;
 }
 
 function getStartDOYString(timeslots){
@@ -115,280 +113,220 @@ function getStartDOYString(timeslots){
 }
 
 function getEndTString(timeslots){
-var tempDate;
-var endTime;
-var latestDate = new Date(timeslots.list[0].startdate+"T"+timeslots.list[0].starttime+"Z");
-// find the startdate
-for(var i=0; i<timeslots.list.length; i++){
-  tempDate = new Date(timeslots.list[i].enddate+"T"+timeslots.list[i].endtime+"Z");
-  if(tempDate.getTime() > latestDate.getTime()){
-    endTime = timeslots.list[i].endtime;
-    latestDate = new Date(tempDate.getTime());
+  var tempDate;
+  var endTime;
+  var latestDate = new Date(timeslots.list[0].startdate+"T"+timeslots.list[0].starttime+"Z");
+  // find the startdate
+  for(var i=0; i<timeslots.list.length; i++){
+    tempDate = new Date(timeslots.list[i].enddate+"T"+timeslots.list[i].endtime+"Z");
+    if(tempDate.getTime() > latestDate.getTime()){
+      endTime = timeslots.list[i].endtime;
+      latestDate = new Date(tempDate.getTime());
+    }
   }
-}
-return endTime;
+  return endTime;
 }
 
 function drawScheduleSkeleton(earliestDate, slotlength, startDate, endTime){
-// Insert rows for every schedule
-var slot;
-var row;
-var table = document.getElementById("schedule");
-var date = new Date(earliestDate.getTime());
-console.log("earliest: " + date.toUTCString());
-var date2 = new Date(startDate+"T"+endTime+"Z");
-console.log(startDate);
-console.log(endTime);
-console.log("end time on same day: " + date2.toUTCString());
-console.log("slotlength: " + slotlength);
-var meetingStartDate = new Date(earliestDate.getTime());
-var meetingEndDate = new Date(earliestDate.getTime());
-var numcolumns = parseInt((date.getTime()-date2.getTime())/(slotlength*60000));
-for(var i=0;i<Math.abs(numcolumns);i++){
-  row = table.insertRow();
-  slot = row.insertCell(0);
-  for(var j=0;j<7;j++){
-    row.insertCell();
+  // Insert rows for every schedule
+  var slot;
+  var row;
+  var table = document.getElementById("schedule");
+  var date = new Date(earliestDate.getTime());
+  console.log("earliest: " + date.toUTCString());
+  var date2 = new Date(startDate+"T"+endTime+"Z");
+  console.log(startDate);
+  console.log(endTime);
+  console.log("end time on same day: " + date2.toUTCString());
+  console.log("slotlength: " + slotlength);
+  var meetingStartDate = new Date(earliestDate.getTime());
+  var meetingEndDate = new Date(earliestDate.getTime());
+  var numcolumns = parseInt((date.getTime()-date2.getTime())/(slotlength*60000));
+  for(var i=0;i<Math.abs(numcolumns);i++){
+    row = table.insertRow();
+    slot = row.insertCell(0);
+    for(var j=0;j<7;j++){
+      row.insertCell();
+    }
+
+    var meetingStart = date.getTime()+((slotlength*60000)*i);
+    var meetingEnd = date.getTime()+((slotlength*60000)*(i+1));
+
+    meetingStartDate.setTime(meetingStart);
+    console.log(meetingStartDate.toUTCString());
+    meetingEndDate.setTime(meetingEnd);
+    console.log(meetingEndDate.toUTCString());
+    slot.innerHTML = "<b>" + meetingStartDate.toUTCString().slice(17,25) + " - " + meetingEndDate.toUTCString().slice(17,25) + "</b>";
   }
-
-  var meetingStart = date.getTime()+((slotlength*60000)*i);
-  var meetingEnd = date.getTime()+((slotlength*60000)*(i+1));
-
-  meetingStartDate.setTime(meetingStart);
-  console.log(meetingStartDate.toUTCString());
-  meetingEndDate.setTime(meetingEnd);
-  console.log(meetingEndDate.toUTCString());
-  slot.innerHTML = "<b>" + meetingStartDate.toUTCString().slice(17,25) + " - " + meetingEndDate.toUTCString().slice(17,25) + "</b>";
-}
 }
 
 function drawScheduleHeader(earliestDate, latestDate){
-var table = document.getElementById("schedule");
-var header = table.createTHead();
-var row = header.insertRow(0);
-var timeh = row.insertCell(0);
-timeh.innerHTML = "<b>Meeting Times</b>";
-var day;
+  var table = document.getElementById("schedule");
+  var header = table.createTHead();
+  var row = header.insertRow(0);
+  var timeh = row.insertCell(0);
+  timeh.innerHTML = "<b>Meeting Times</b>";
+  var day;
 
-var date = new Date(earliestDate.getTime());
-console.log(date.toUTCString());
-var date2 = new Date(latestDate.getTime());
-console.log(date2.toUTCString());
-var DOWdate = new Date(earliestDate.getTime());
-// Days of the Week at the top of the table
-for(var i=0;i<7;i++){
-  day = row.insertCell(i+1);
-  DOWdate.setDate(date.getDate()+i);
-  var string = DOWdate.toUTCString().slice(0, 12);
-  console.log(string);
-  day.innerHTML = "<b>" + string + "</b>";
-}
+  var date = new Date(earliestDate.getTime());
+  console.log(date.toUTCString());
+  var date2 = new Date(latestDate.getTime());
+  console.log(date2.toUTCString());
+  var DOWdate = new Date(earliestDate.getTime());
+  // Days of the Week at the top of the table
+  for(var i=0;i<7;i++){
+    day = row.insertCell(i+1);
+    DOWdate.setDate(date.getDate()+i);
+    var string = DOWdate.toUTCString().slice(0, 12);
+    console.log(string);
+    day.innerHTML = "<b>" + string + "</b>";
+  }
 }
 
 function showScheduleGUI(timeslots){
-ts = timeslots;
+  ts = timeslots;
 
-var slotlength = getSlotLength(timeslots);
-var startDate = getStartDOYString(timeslots);
-var endTime = getEndTString(timeslots);
-var latestDate = getLatestDate(timeslots);
-var earliestDate = getEarliestDate(timeslots);
+  var slotlength = getSlotLength(timeslots);
+  var startDate = getStartDOYString(timeslots);
+  var endTime = getEndTString(timeslots);
+  var latestDate = getLatestDate(timeslots);
+  var earliestDate = getEarliestDate(timeslots);
 
-columnmax = Math.abs(getLatestDate(timeslots).getDate() - getEarliestDate(timeslots).getDate())+1;
-startFullDate = new Date(earliestDate.getTime());
-endFullDate = new Date(latestDate.getTime());
-weekStart = new Date(earliestDate.getTime());
-console.log("\n\n\n\n\nEarliest Time: "+endFullDate.getTime());
+  columnmax = Math.abs(getLatestDate(timeslots).getDate() - getEarliestDate(timeslots).getDate())+1;
+  startFullDate = new Date(earliestDate.getTime());
+  endFullDate = new Date(latestDate.getTime());
+  weekStart = new Date(earliestDate.getTime());
+  console.log("\n\n\n\n\nEarliest Time: "+endFullDate.getTime());
 
-document.getElementById("schedule").innerHTML = "";
+  document.getElementById("schedule").innerHTML = "";
 
-drawScheduleHeader(earliestDate, latestDate);
+  drawScheduleHeader(earliestDate, latestDate);
 
-drawScheduleSkeleton(earliestDate, slotlength, startDate, endTime);
+  drawScheduleSkeleton(earliestDate, slotlength, startDate, endTime);
 
-// add the week buttons
-/*var buttons = document.getElementById("changeweek");
-buttons.innerHTML = "<button onclick='showNextWeek()'>Next Week</button> <button onclick='showLastWeek()'>Last Week</button>";
-*/
+  // add the week buttons
+  /*var buttons = document.getElementById("changeweek");
+  buttons.innerHTML = "<button onclick='showNextWeek()'>Next Week</button> <button onclick='showLastWeek()'>Last Week</button>";
+  */
 
-showTimeSlotsGUI(timeslots);
+  showTimeSlotsGUI(timeslots);
 }
 
 function showSchedule(){
-var form = document.showForm;
-var scheduleid = form.scheduleid.value;
+  var form = document.showForm;
+  var scheduleid = form.scheduleid.value;
 
-//var data = {};
-//data["scheduleid"] = scheduleid;
+  //var data = {};
+  //data["scheduleid"] = scheduleid;
 
-var params = "scheduleid="+scheduleid;
-//var js = JSON.stringify(data);
-//console.log("JS:" + js);
-var xhr = new XMLHttpRequest();
-xhr.open("GET", add_url+"?"+params, true);
+  var params = "scheduleid="+scheduleid;
+  //var js = JSON.stringify(data);
+  //console.log("JS:" + js);
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", show_url+"?"+params, true);
 
-// send the collected data as JSON
-xhr.send();
+  // send the collected data as JSON
+  xhr.send();
 
-// This will process results and update HTML as appropriate.
-xhr.onloadend = function () {
-  console.log(xhr);
-  console.log(xhr.request);
-  if (xhr.readyState == XMLHttpRequest.DONE) {
-    console.log ("XHR:" + xhr.responseText);
-    if(xhr.status == 200){
-      var timeslots = JSON.parse(xhr.responseText);
-      console.log(timeslots);
-      showScheduleGUI(timeslots);
-    }
-  }
-};
-
-}
-
-function createScheduleID(js){
-document.getElementById("message").innerHTML = "secret code: "+ js.response;
-}
-
-function createSchedule(e) {
-var form = document.createForm;
-var startdate = form.startdate.value;
-var enddate = form.enddate.value;
-var daystarthour = form.daystarthour.value;
-var dayendhour = form.dayendhour.value;
-var organizer = form.organizer.value;
-var slotlength = form.slotlength.value;
-
-var data = {};
-data["startdate"] = startdate;
-data["enddate"] = enddate;
-data["daystarthour"] = daystarthour;
-data["dayendhour"] = dayendhour;
-data["organizer"] = organizer;
-data["meetinglength"] = slotlength;
-
-var js = JSON.stringify(data);
-console.log("JS:" + js);
-var xhr = new XMLHttpRequest();
-xhr.open("POST", add_url, true);
-
-// send the collected data as JSON
-xhr.send(js);
-
-// This will process results and update HTML as appropriate.
-xhr.onloadend = function () {
-  if (xhr.readyState == XMLHttpRequest.DONE) {
-    console.log ("XHR:" + xhr.responseText);
-    if(xhr.status == 200){
-      var js = JSON.parse(xhr.responseText);
-      createScheduleID(js);
-    }
-  }
-};
-}
-
-function openTimeSlot(e){
-var sID;  // string
-var starttime; // string
-var startdate; // string
-var close; // int
-
-// search for a timeslot with a matching secretcode
-for(var i=0; i<ts.list.length; i++){
-  if(e.id == ts.list[i].secretcode){
-    sID = ts.list[i].scheduleid;
-  	starttime = ts.list[i].starttime;
-  	startdate = ts.list[i].startdate;
-  	close = 0;
-  }
-}
-
-var data = {};
-data["sID"] = sID;
-data["startdate"] = startdate;
-data["starttime"] = starttime;
-data["close"] = close;
-
-openTimeSlotRequest(e, data);
-
-}
-
-function openTimeSlotRequest(e, data){
-var js = JSON.stringify(data);
-console.log("JS:" + js);
-var xhr = new XMLHttpRequest();
-xhr.open("POST", open_time_slot, true);
-
-// send the collected data as JSON
-xhr.send(js);
-
-// This will process results and update HTML as appropriate.
-xhr.onloadend = function () {
-  if (xhr.readyState == XMLHttpRequest.DONE) {
-    console.log ("XHR:" + xhr.responseText);
-    if(xhr.status == 200){
-      var js = JSON.parse(xhr.responseText);
-      document.getElementById(e.id).onclick = function () {
-  	    closeTimeSlot(this);
+  // This will process results and update HTML as appropriate.
+  xhr.onloadend = function () {
+    console.log(xhr);
+    console.log(xhr.request);
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+      console.log ("XHR:" + xhr.responseText);
+      if(xhr.status == 200){
+        var timeslots = JSON.parse(xhr.responseText);
+        console.log(timeslots);
+        showScheduleGUI(timeslots);
       }
-      document.getElementById(e.id).value = "Open";
-      document.getElementById(e.id).innerHTML = "Open";
-      document.getElementById(e.id).style.background = "#20B2AA";
+    }
+  };
+
+}
+
+function createMeeting(e){
+  var form = document.showForm;
+  var scheduleID = form.scheduleid.value;
+  var form2 = document.nameForm;
+  var participant = form2.participant.value;
+
+  if(participant == ""){
+    return;
+  }
+
+  // find the timeslot that corresponds to the button and generate an input over it
+  var startdate;  // string
+  var enddate;
+	var starttime; // string
+	var enddate; // string
+
+  // search for a timeslot with a matching secretcode
+  for(var i=0; i<ts.list.length; i++){
+    if(e.id == ts.list[i].secretcode){
+      scheduleID = ts.list[i].scheduleid;
+    	starttime = ts.list[i].starttime;
+    	startdate = ts.list[i].startdate;
+      endtime = ts.list[i].endtime;
+      enddate = ts.list[i].enddate;
     }
   }
-};
+
+  var data = {};
+  data["startdate"] = startdate;
+  data["enddate"] = enddate;
+  data["starttime"] = starttime;
+  data["endtime"] = endtime;
+  data["participant"] = participant;
+  data["scheduleID"] = scheduleID;
+
+  console.log(data);
+
+  createMeetingRequest(e, data);
+
 }
 
-function closeTimeSlot(e){
-var sID;  // string
-var starttime; // string
-var startdate; // string
-var close; // int
+// this has to search ts by date/time to change the secretcode after creating meeting
+// get the p tag with id of the previously found timeslot
+// change its message to participant
+function createMeetingRequest(e, data){
+  var js = JSON.stringify(data);
+  console.log("JS:" + js);
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", create_url, true);
 
-// search for a timeslot with a matching secretcode
-for(var i=0; i<ts.list.length; i++){
-  if(e.id == ts.list[i].secretcode){
-    sID = ts.list[i].scheduleid;
-  	starttime = ts.list[i].starttime;
-  	startdate = ts.list[i].startdate;
-  	close = 1;
-  }
-}
+  // send the collected data as JSON
+  xhr.send(js);
 
-var data = {};
-data["sID"] = sID;
-data["startdate"] = startdate;
-data["starttime"] = starttime;
-data["close"] = close;
-
-closeTimeSlotRequest(e, data);
-}
-
-function closeTimeSlotRequest(e, data){
-var js = JSON.stringify(data);
-console.log("JS:" + js);
-var xhr = new XMLHttpRequest();
-xhr.open("POST", close_time_slot, true);
-
-// send the collected data as JSON
-xhr.send(js);
-
-// This will process results and update HTML as appropriate.
-xhr.onloadend = function () {
-  if (xhr.readyState == XMLHttpRequest.DONE) {
-    console.log ("XHR:" + xhr.responseText);
-    if(xhr.status == 200){
-      var js = JSON.parse(xhr.responseText);
-      document.getElementById(e.id).onclick = function () {
-  	    openTimeSlot(this);
+  // This will process results and update HTML as appropriate.
+  xhr.onloadend = function () {
+    console.log(xhr);
+    console.log(xhr.request);
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+      console.log ("XHR:" + xhr.responseText);
+      if(xhr.status == 200){
+        var response = JSON.parse(xhr.responseText);
+        console.log(response);
+        document.getElementById(e.id).onclick = function () {
+    	    cancelMeeting(this);
+        }
+        document.getElementById(e.id).value = "Unavailable";
+        document.getElementById(e.id).innerHTML = "Unavailable";
+        document.getElementById(e.id).style.background = "#B22222";
+        //document.getElementById(response.response).innerHTML = data.participant;
+        document.getElementById("message").innerHTML = "Your meeting code: " + response.response;
       }
-      document.getElementById(e.id).value = "Unavailable";
-      document.getElementById(e.id).innerHTML = "Unavailable";
-      document.getElementById(e.id).style.background = "#B22222";
     }
-  }
-};
+  };
 }
+
+function cancelMeeting(e){
+  return;
+}
+
+function cancelMeetingRequest(e, data){
+ return;
+}
+
 
 </script></head><body>
   <div id="message"></div>
@@ -400,6 +338,16 @@ xhr.onloadend = function () {
     <form name="showForm" method="get">
       Input Schedule ID: <input name="scheduleid" value="" /><br>
       <input type="button" value="Show"  onClick="JavaScript:showSchedule()">
+    </form>
+
+  </div>
+
+  <div class="container">
+
+    <h1>Type Your Name</h1>
+
+    <form name="nameForm" method="get">
+      Name: <input name="participant" value="" /><br>
     </form>
 
   </div>
