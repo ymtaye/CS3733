@@ -115,7 +115,7 @@ public class DAO {
 	public ArrayList<TimeSlot> getTimeSlots(String scheduleid) throws Exception {
     	try {
             ArrayList<TimeSlot> timeslots = new ArrayList<TimeSlot>();
-            PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE scheduleid = ?;");
+            PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE scheduleid = ? ORDER BY startdate, starttime;");
             ps.setString(1,  scheduleid);
             ResultSet resultSet = ps.executeQuery();
             
