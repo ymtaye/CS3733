@@ -247,7 +247,7 @@ public class DAO {
     public boolean deleteMeeting(String sID, String secretcode) throws Exception{
     	try {
     		boolean r = false;
-    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ? AND availability = ? WHERE secretcode = ? AND scheduleid = ?");
+    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ? AND available = ? WHERE secretcode = ? AND scheduleid = ?");
     		ps.setString(1, "");
     		ps.setInt(2, 0);
     		ps.setString(3, secretcode);
