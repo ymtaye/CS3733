@@ -119,10 +119,11 @@ public class CreateScheduleHandler implements RequestStreamHandler {
 			//System.out.print(req.startdate);
 		
 			String scheduleid = getSaltString();
+			String secretcode = getSaltString();
 			
 			try {
-				if (createSchedule(scheduleid, getSaltString(), req.startdate, req.enddate, req.daystarthour, req.dayendhour, req.organizer, req.meetinglength)) {
-					resp = new CreateScheduleResponse(scheduleid);
+				if (createSchedule(scheduleid, secretcode, req.startdate, req.enddate, req.daystarthour, req.dayendhour, req.organizer, req.meetinglength)) {
+					resp = new CreateScheduleResponse(scheduleid, secretcode);
 				} else {
 					resp = new CreateScheduleResponse("Unable to create schedule from [" + req.startdate + " to " + req.enddate + "] for organizer:" + req.organizer, 422);
 				}

@@ -115,8 +115,31 @@ public class DAO {
 	public ArrayList<TimeSlot> getTimeSlots(String scheduleid) throws Exception {
     	try {
             ArrayList<TimeSlot> timeslots = new ArrayList<TimeSlot>();
-            PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE scheduleid = ?;");
+            PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE scheduleid = ? ORDER BY startdate, starttime;");
             ps.setString(1,  scheduleid);
+            ResultSet resultSet = ps.executeQuery();
+            
+            while (resultSet.next()) {
+                timeslots.add(generateTimeSlot(resultSet));
+            }
+            resultSet.close();
+            ps.close();
+            
+            return timeslots;
+
+        } catch (Exception e) {
+        	e.printStackTrace();
+            throw new Exception("Failed in getting timeslots: " + e.getMessage());
+        }
+    	
+    }
+	
+	// Get timeslot for Organizer to access timeslot with secretcode
+	public ArrayList<TimeSlot> getTimeSlotsForOrg(String secretcode) throws Exception {
+    	try {
+            ArrayList<TimeSlot> timeslots = new ArrayList<TimeSlot>();
+            PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE secretcode = ? ORDER BY startdate, starttime;");
+            ps.setString(1,  secretcode);
             ResultSet resultSet = ps.executeQuery();
             
             while (resultSet.next()) {
@@ -164,15 +187,12 @@ public class DAO {
     	try {
     		boolean r = false;
     		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET available = ? WHERE startdate = ? AND starttime = ? and scheduleid = ?;");
-    		ps.setString(1, Integer.toString(open));
+    		ps.setInt(1, open);
     		ps.setString(2, startdate);
     		ps.setString(3, starttime);
     		ps.setString(4, sID);
-    		ResultSet resultSet = ps.executeQuery();
-    		resultSet.next();
-    		TimeSlot b = generateTimeSlot(resultSet);
-    		resultSet.close();
-    		if(b != null) {
+    		int numRows = ps.executeUpdate();
+    		if(numRows > 0) {
     			r = true;
     		}
     		return r;
