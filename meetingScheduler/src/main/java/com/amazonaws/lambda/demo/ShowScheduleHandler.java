@@ -42,11 +42,11 @@ public class ShowScheduleHandler implements RequestStreamHandler {
 	 * 
 	 * @throws Exception 
 	 */
-	ArrayList<TimeSlot> getTimeSlots(String scheduleid) throws Exception {
+	ArrayList<TimeSlot> getTimeSlotsForOrg(String secretcode) throws Exception {
 		if (logger != null) { logger.log("in getTimeSlots"); }
 		DAO dao = new DAO();
 
-		return dao.getTimeSlots(scheduleid);
+		return dao.getTimeSlots(secretcode);
 	}
 	
 	@Override
@@ -102,7 +102,7 @@ public class ShowScheduleHandler implements RequestStreamHandler {
 
 			ShowScheduleResponse resp;
 			try {
-				List<TimeSlot> list = getTimeSlots(req.scheduleid);
+				List<TimeSlot> list = getTimeSlotsForOrg(req.secretcode);
 				resp = new ShowScheduleResponse(list, 200);
 			} catch (Exception e) {
 				resp = new ShowScheduleResponse(403);

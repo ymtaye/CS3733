@@ -1,13 +1,14 @@
 package com.amazonaws.lambda.demo;
 
 public class ShowScheduleRequest {
-	String scheduleid;
 	
-	public ShowScheduleRequest (String scheduleid) {
-		this.scheduleid = scheduleid;
+	String secretcode;
+	
+	public ShowScheduleRequest (String secretcode) {
+		this.secretcode = secretcode;
 	}
 	
 	public String toString() {
-		return "Add(" + scheduleid + ")";
+		return "Add(" + secretcode + ")";
 	}
 }

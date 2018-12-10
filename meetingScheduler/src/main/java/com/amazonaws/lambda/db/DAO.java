@@ -133,6 +133,29 @@ public class DAO {
         }
     	
     }
+	
+	// Get timeslot for Organizer to access timeslot with secretcode
+	public ArrayList<TimeSlot> getTimeSlotsForOrg(String secretcode) throws Exception {
+    	try {
+            ArrayList<TimeSlot> timeslots = new ArrayList<TimeSlot>();
+            PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE secretcode = ? ORDER BY startdate, starttime;");
+            ps.setString(1,  secretcode);
+            ResultSet resultSet = ps.executeQuery();
+            
+            while (resultSet.next()) {
+                timeslots.add(generateTimeSlot(resultSet));
+            }
+            resultSet.close();
+            ps.close();
+            
+            return timeslots;
+
+        } catch (Exception e) {
+        	e.printStackTrace();
+            throw new Exception("Failed in getting timeslots: " + e.getMessage());
+        }
+    	
+    }
     
     private TimeSlot generateTimeSlot(ResultSet resultSet) throws Exception {
     	String id = resultSet.getString("id");
