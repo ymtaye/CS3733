@@ -230,15 +230,15 @@ public class DAO {
     		ps.setString(4, meeting.startdate);
     		ps.setString(5, meeting.starttime);
     		ps.setString(6, meeting.scheduleid);
-    		ResultSet resultSet = ps.executeQuery();
-    		resultSet.next();
-    		TimeSlot b = generateTimeSlot(resultSet);
-    		resultSet.close();
-    		if(b != null) {
-    			r = true;
+    		int result = ps.executeUpdate();
+    		
+    		if(result == 0) {
+    			return false;
+    		} else {
+    			return true;
     		}
-    		return r;
     	}
+    		
     	catch(Exception e) {
     		throw new Exception("Failed in updating participant: " + e.getMessage());
     	}    	
