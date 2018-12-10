@@ -199,5 +199,27 @@ public class DAO {
     		throw new Exception("Failed in finding time slot: " + e.getMessage());
     	}
     }
+    
+    public boolean createMeeting(TimeSlot meeting) throws Exception{
+    	try {
+    		boolean r = false;
+    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ? WHERE startdate = ? AND starttime = ? and scheduleid = ?;");
+    		ps.setString(1, meeting.participant);
+    		ps.setString(2, meeting.startdate);
+    		ps.setString(3, meeting.starttime);
+    		ps.setString(4, meeting.scheduleid);
+    		ResultSet resultSet = ps.executeQuery();
+    		resultSet.next();
+    		TimeSlot b = generateTimeSlot(resultSet);
+    		resultSet.close();
+    		if(b != null) {
+    			r = true;
+    		}
+    		return r;
+    	}
+    	catch(Exception e) {
+    		throw new Exception("Failed in updating participant: " + e.getMessage());
+    	}    	
+    }
 
 }
