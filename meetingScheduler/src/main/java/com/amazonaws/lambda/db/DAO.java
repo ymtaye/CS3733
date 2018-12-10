@@ -223,13 +223,14 @@ public class DAO {
     
     public boolean createMeeting(TimeSlot meeting) throws Exception{
     	try {
-    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ?, available = ?, secretcode = ? WHERE startdate = ? AND starttime = ? AND scheduleid = ?;");
+    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ?, available = ?, secretcode = ? WHERE startdate = ? AND starttime = ? AND available = ? AND scheduleid = ?;");
     		ps.setString(1, meeting.participant);
     		ps.setInt(2, meeting.available);
     		ps.setString(3, meeting.getSecretcode());
     		ps.setString(4, meeting.startdate);
     		ps.setString(5, meeting.starttime);
-    		ps.setString(6, meeting.scheduleid);
+    		ps.setInt(6, 0);
+    		ps.setString(7, meeting.scheduleid);
     		int result = ps.executeUpdate();
     		System.out.println(result);
     		
@@ -244,14 +245,20 @@ public class DAO {
     		throw new Exception("Failed in updating participant: " + e.getMessage());
     	}    	
     }
-    public boolean deleteMeeting(String sID, String secretcode) throws Exception{
+    public boolean deleteMeeting(String sID, String secretcode, String starttime, String startdate) throws Exception{
     	try {
+    		String sc = getSaltString();
     		boolean r = false;
-    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET participant = ?, available = ? WHERE secretcode = ? AND scheduleid = ?");
-    		ps.setString(1, "");
-    		ps.setInt(2, 0);
-    		ps.setString(3, secretcode);
-    		ps.setString(4, sID);
+    		PreparedStatement ps = conn.prepareStatement("UPDATE TimeSlots SET secretcode = ?, participant = ?, available = ? WHERE secretcode = ? AND starttime = ? AND startdate = ? AND NOT participant = ? AND available = ? AND scheduleid = ?");
+    		ps.setString(1,  sc);
+    		ps.setString(2, "");
+    		ps.setInt(3, 0);
+    		ps.setString(4, secretcode);
+    		ps.setString(5, starttime);
+    		ps.setString(6, startdate);
+    		ps.setString(7, "");
+    		ps.setInt(8, 1);
+    		ps.setString(9, sID);
     		int numRows = ps.executeUpdate();
     		if(numRows > 0) {
     			r = true;
