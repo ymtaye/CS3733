@@ -51,7 +51,7 @@ function showTimeSlotsGUI(timeslots){
       // increment column counter
       // check if column counter is at 7, then increment rowCounter
       cell = rows[rowCounter].cells[columnCounter];
-      cell.innerHTML = "<button onclick='closeTimeSlot()'>Close</button>";
+      cell.innerHTML = '<button id="' + timeslots.list[i].secretcode + '" onclick="closeTimeSlot(this)" value="Close"></button>';
 
       if(rowCounter == rows.length-1){
         columnCounter++;
@@ -279,27 +279,41 @@ function createSchedule(e) {
   };
 }
 
-function createMeeting(){
-  var form = document.createForm;
-  var startdate = form.startdate.value;
-  var enddate = form.enddate.value;
-  var daystarthour = form.daystarthour.value;
-  var dayendhour = form.dayendhour.value;
-  var organizer = form.organizer.value;
-  var slotlength = form.slotlength.value;
+function openTimeSlot(e){
+  var sID;  // string
+	var starttime; // string
+	var startdate; // string
+	var close; // int
+
+  // search for a timeslot with a matching secretcode
+  for(var i=0; i<ts.list.length; i++){
+    if(e.id == ts.list[i].secretcode){
+      sID = ts.list[i].secretcode;
+    	starttime = ts.list[i].starttime;
+    	startdate = ts.list[i].startdate;
+    	close = 0;
+    }
+  }
 
   var data = {};
+  data["sID"] = sID;
+  data["starttime"] = starttime;
   data["startdate"] = startdate;
-  data["enddate"] = enddate;
-  data["daystarthour"] = daystarthour;
-  data["dayendhour"] = dayendhour;
-  data["organizer"] = organizer;
-  data["meetinglength"] = slotlength;
+  data["close"] = close;
 
+  //openTimeSlotRequest(data);
+
+  document.getElementById(e.id).onclick = function () {
+    closeTimeSlot(this);
+  }
+  document.getElementById(e.id).value = "Close";
+}
+
+function openTimeSlotRequest(data){
   var js = JSON.stringify(data);
   console.log("JS:" + js);
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", add_url, true);
+  xhr.open("POST", time_slot, true);
 
   // send the collected data as JSON
   xhr.send(js);
@@ -310,7 +324,63 @@ function createMeeting(){
       console.log ("XHR:" + xhr.responseText);
       if(xhr.status == 200){
         var js = JSON.parse(xhr.responseText);
-        createScheduleID(js);
+        document.getElementById(e.id).onclick = function () {
+    	    closeTimeSlot(this);
+        }
+        document.getElementById(e.id).value = "Close";
+      }
+    }
+  };
+}
+
+function closeTimeSlot(e){
+  var sID;  // string
+	var starttime; // string
+	var startdate; // string
+	var close; // int
+
+  // search for a timeslot with a matching secretcode
+  for(var i=0; i<ts.list.length; i++){
+    if(e.id == ts.list[i].secretcode){
+      sID = ts.list[i].secretcode;
+    	starttime = ts.list[i].starttime;
+    	startdate = ts.list[i].startdate;
+    	close = 1;
+    }
+  }
+
+  var data = {};
+  data["sID"] = sID;
+  data["starttime"] = starttime;
+  data["startdate"] = startdate;
+  data["close"] = close;
+
+  //closeTimeSlotRequest(data);
+  document.getElementById(e.id).onclick = function () {
+    openTimeSlot(this);
+  }
+  document.getElementById(e.id).value = "Open";
+}
+
+function closeTimeSlotRequest(data){
+  var js = JSON.stringify(data);
+  console.log("JS:" + js);
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", time_slot, true);
+
+  // send the collected data as JSON
+  xhr.send(js);
+
+  // This will process results and update HTML as appropriate.
+  xhr.onloadend = function () {
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+      console.log ("XHR:" + xhr.responseText);
+      if(xhr.status == 200){
+        var js = JSON.parse(xhr.responseText);
+        document.getElementById(e.id).onclick = function () {
+    	    openTimeSlot(this);
+        }
+        document.getElementById(e.id).value = "Open";
       }
     }
   };
