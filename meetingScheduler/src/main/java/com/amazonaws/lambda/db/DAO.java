@@ -138,7 +138,7 @@ public class DAO {
 	public ArrayList<TimeSlot> getTimeSlotsForOrg(String secretcode) throws Exception {
     	try {
             ArrayList<TimeSlot> timeslots = new ArrayList<TimeSlot>();
-            PreparedStatement ps = conn.prepareStatement("SELECT TimeSlots.id, TimeSlots.secretcode, TimeSlots.startDate, TimeSlots.enddate, TimeSlots.starttime, TimeSlots.endtime, TimeSlots.participant, TimeSlots.available, TimeSlots.scheduleid FROM TimeSlots JOIN Schedule ON TimeSlots.scheduleid = schedule.scheduleid  WHERE schedule.secretcode = ? ORDER BY TimeSlots.startdate, TimeSlots.starttime;");
+            PreparedStatement ps = conn.prepareStatement("SELECT TimeSlots.id, TimeSlots.secretcode, TimeSlots.startDate, TimeSlots.enddate, TimeSlots.starttime, TimeSlots.endtime, TimeSlots.participant, TimeSlots.available, TimeSlots.scheduleid FROM TimeSlots JOIN Schedules ON TimeSlots.scheduleid = Schedules.id  WHERE Schedules.secretcode = ? ORDER BY TimeSlots.startdate, TimeSlots.starttime;");
             ps.setString(1,  secretcode);
             ResultSet resultSet = ps.executeQuery();
             
