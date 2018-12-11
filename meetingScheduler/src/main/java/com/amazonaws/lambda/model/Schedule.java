@@ -12,6 +12,8 @@ public class Schedule {
 	String secretcode;
 	public ArrayList<TimeSlot> timeslots;
 	public int meetinglength; // minutes
+	public String creationTime;
+	public String creationDate;
 
 	public Schedule (String id, String startdate, String enddate, String starttime, String endtime, String organizer, String secretcode, int meetinglength) {
 		this.secretcode = secretcode;
