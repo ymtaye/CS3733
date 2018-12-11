@@ -3,6 +3,7 @@
 <head><script type="text/javascript">
 var show_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/participantschedule";
 var create_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/register";
+var cancel_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/deletemeeting";
 
 var ts; // timeslots list
 var startFullDate; // start date of the calendar
@@ -49,7 +50,7 @@ function showTimeSlotsGUI(timeslots){
   for(var i=0; i<timeslots.list.length;i++){
     slotEndDate = new Date(timeslots.list[i].enddate+"T"+timeslots.list[i].endtime+"Z");
     slotStartDate = new Date(timeslots.list[i].startdate+"T"+timeslots.list[i].starttime+"Z");
-    if(Math.abs(slotStartDate.getTime()) >= Math.abs(weekStart.getTime()) && columnCounter <= columnmax){
+    if(slotStartDate.getTime() >= weekStart.getTime() && columnCounter <= columnmax){
       // insert cell
       // increment column counter
       // check if column counter is at 7, then increment rowCounter
@@ -57,7 +58,7 @@ function showTimeSlotsGUI(timeslots){
       if(timeslots.list[i].available == 1){
         cell.innerHTML = '<p id="'+ timeslots.list[i].id + '">' + timeslots.list[i].participant + '</p><button id="' + timeslots.list[i].secretcode + '" onclick="cancelMeeting(this)" value="Unavailable" style="background-color:#B22222">Unavailable</button>';
       } else {
-        cell.innerHTML = '<p id="'+ timeslots.list[i].id + '"></p><button id="' + timeslots.list[i].secretcode + '" onclick="createMeeting(this)" value="Open" style="background-color:#20B2AA">Open</button>';
+        cell.innerHTML = '<p id="'+ timeslots.list[i].id + '"></p><button id="' + timeslots.list[i].secretcode + '" onclick="createMeeting(this)" value="Join" style="background-color:#20B2AA">Join</button>';
       }
 
       if(rowCounter == rows.length-1){
@@ -245,17 +246,25 @@ function showSchedule(){
 }
 
 function fillParticipantInCell(participant, startdate, starttime, secretcode){
+  console.log(secretcode);
   for(var i=0; i<ts.list.length;i++){
     if(ts.list[i].starttime == starttime && ts.list[i].startdate == startdate){
       ts.list[i].secretcode = secretcode;
       ts.list[i].participant = participant;
       document.getElementById(ts.list[i].id).innerHTML = participant;
-      console.log(ts.list[i].id);
-      console.log("ts starttime:" + ts.list[i].starttime);
-      console.log("cell starttime:" + starttime);
-      console.log("ts starttime:" + ts.list[i].startdate);
-      console.log("cell starttime:" + startdate);
+      document.getElementById("message").innerHTML = "Your meeting code: " + secretcode;
+      document.getElementById("meetingcode").value = secretcode;
+      return;
+    }
+  }
+}
 
+function removeParticipantInCell(secretcode){
+  for(var i=0; i<ts.list.length;i++){
+    if(ts.list[i].secretcode == secretcode){
+      ts.list[i].participant = "";
+      document.getElementById(ts.list[i].id).innerHTML = "";
+      document.getElementById("meetingcode").value = "";
     }
   }
 }
@@ -318,28 +327,83 @@ function createMeetingRequest(e, data){
       console.log ("XHR:" + xhr.responseText);
       if(xhr.status == 200){
         var response = JSON.parse(xhr.responseText);
-        console.log(response);
-        document.getElementById(e.id).onclick = function () {
-    	    cancelMeeting(this);
+        if(response.httpCode == 200){
+          console.log(response);
+          document.getElementById(e.id).onclick = function () {
+      	    cancelMeeting(this);
+          }
+          document.getElementById(e.id).value = "Cancel";
+          document.getElementById(e.id).innerHTML = "Cancel";
+          document.getElementById(e.id).style.background = "#B22222";
+          document.getElementById(e.id).id = response.response;
+          fillParticipantInCell(data.participant, data.startdate, data.starttime, response.response);
+          //console.log(data.starttime);
+          //console.log(data.startdate);
         }
-        document.getElementById(e.id).value = "Unavailable";
-        document.getElementById(e.id).innerHTML = "Unavailable";
-        document.getElementById(e.id).style.background = "#B22222";
-        document.getElementById("message").innerHTML = "Your meeting code: " + response.response;
-        fillParticipantInCell(data.participant, data.startdate, data.starttime, response.response);
-        //console.log(data.starttime);
-        //console.log(data.startdate);
       }
     }
   };
 }
 
 function cancelMeeting(e){
-  return;
+  var form3 = document.cancelForm;
+  var meetingcode = form3.meetingcode.value;
+
+  // find the timeslot that corresponds to the button and generate an input over it
+  // search for a timeslot with a matching secretcode
+  for(var i=0; i<ts.list.length; i++){
+    if(e.id == ts.list[i].secretcode){
+      var scheduleid = ts.list[i].scheduleid;
+    	var starttime = ts.list[i].starttime;
+    	var startdate = ts.list[i].startdate;
+    }
+  }
+  console.log(e.id);
+
+  var data = {};
+  data["scheduleid"] = scheduleid;
+  data["secretcode"] = meetingcode;
+  data["starttime"] = starttime;
+  data["startdate"] = startdate;
+
+  console.log(data);
+
+  cancelMeetingRequest(e, data);
 }
 
 function cancelMeetingRequest(e, data){
- return;
+  var js = JSON.stringify(data);
+  console.log("JS:" + js);
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", cancel_url, true);
+
+  // send the collected data as JSON
+  xhr.send(js);
+
+  // This will process results and update HTML as appropriate.
+  xhr.onloadend = function () {
+    console.log(xhr);
+    console.log(xhr.request);
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+      console.log ("XHR:" + xhr.responseText);
+      if(xhr.status == 200){
+        var response = JSON.parse(xhr.responseText);
+        if(response.httpCode == 200){
+          console.log(response);
+          document.getElementById(e.id).onclick = function () {
+            createMeeting(this);
+          }
+          document.getElementById(e.id).value = "Join";
+          document.getElementById(e.id).innerHTML = "Join";
+          document.getElementById(e.id).style.background = "#20B2AA";
+          document.getElementById("message").innerHTML = "";
+          removeParticipantInCell(data.secretcode);
+          //console.log(data.starttime);
+          //console.log(data.startdate);
+        }
+      }
+    }
+  };
 }
 
 
@@ -353,6 +417,16 @@ function cancelMeetingRequest(e, data){
     <form name="showForm" method="get">
       Input Schedule ID: <input name="scheduleid" value="" /><br>
       <input type="button" value="Show"  onClick="JavaScript:showSchedule()">
+    </form>
+
+  </div>
+
+  <div class="container">
+
+    <h1>Type meeting code to enable delete:</h1>
+
+    <form name="cancelForm" method="post">
+      Meeting Code: <input id="meetingcode" name="meetingcode" value="" /><br>
     </form>
 
   </div>

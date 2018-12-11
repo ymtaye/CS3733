@@ -48,7 +48,7 @@ function showTimeSlotsGUI(timeslots){
   for(var i=0; i<timeslots.list.length;i++){
     slotEndDate = new Date(timeslots.list[i].enddate+"T"+timeslots.list[i].endtime+"Z");
     slotStartDate = new Date(timeslots.list[i].startdate+"T"+timeslots.list[i].starttime+"Z");
-    if(Math.abs(slotStartDate.getTime()) >= Math.abs(weekStart.getTime()) && columnCounter <= columnmax){
+    if(slotStartDate.getTime() >= weekStart.getTime() && columnCounter <= columnmax){
       // insert cell
       // increment column counter
       // check if column counter is at 7, then increment rowCounter
@@ -245,7 +245,8 @@ function showSchedule(){
 }
 
 function createScheduleSC(js){
-  document.getElementById("message").innerHTML = "Secret Code for you: "+ js.secretcode + "\nID for Participant: " + js.scheduleid;
+  document.getElementById("message").innerHTML = "<p>Secret Code for you: "+ js.secretcode + "</p><p>ID for Participant: " + js.scheduleid + "</p>";
+  //document.getElementById("secretcode").value = js.secretcode;
 }
 
 function createSchedule(e) {
@@ -430,7 +431,7 @@ function closeTimeSlotRequest(e, data){
   <h1>Request to show the schedule</h1>
 
   <form name="showForm" method="get">
-    Input Schedule Secret Code: <input name="secretcode" value="" /><br>
+    Input Schedule Secret Code: <input id="secretcode" name="secretcode" value="" /><br>
     <input type="button" value="Show"  onClick="JavaScript:showSchedule()">
   </form>
 
