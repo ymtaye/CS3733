@@ -25,6 +25,17 @@ public class Schedule {
 		this.id = id;
 		this.meetinglength = meetinglength;
 	}
+	public Schedule (String id, String startdate, String enddate, String starttime, String endtime, String organizer, String secretcode, Date date, Time time) {
+		this.secretcode = secretcode;
+		this.startdate = startdate;
+		this.enddate = enddate;
+		this.daystarthour = starttime;
+		this.dayendhour = endtime;
+		this.organizer = organizer;
+		this.id = id;
+		this.creationDate = date;
+		this.creationTime = time;
+	}
 
 	public String getsecretcode() {
 		return this.secretcode;

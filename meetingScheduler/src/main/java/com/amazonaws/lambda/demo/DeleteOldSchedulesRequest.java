@@ -7,6 +7,6 @@ public class DeleteOldSchedulesRequest {
 		this.days = days;
 	}
 	public String toString() {
-		return "Delete(" + days + ")";
+		return "Fetch(" + Integer.toString(days) + ")";
 	}
 }

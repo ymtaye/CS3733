@@ -5,6 +5,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import com.amazonaws.lambda.model.Schedule;
 import com.amazonaws.lambda.model.TimeSlot;
@@ -172,6 +176,22 @@ public class DAO {
         return new TimeSlot (id, secretcode, startdate, enddate, starttime, endtime, participant, scheduleid, available);
     }
     
+    private Schedule generateSchedule(ResultSet resultSet) throws Exception {
+    	String id = resultSet.getString("id");
+    	String secretcode = resultSet.getString("secretcode"); 
+    	String startdate = resultSet.getString("startdate");
+    	String enddate = resultSet.getString("enddate");
+    	String daystarthour = resultSet.getString("daystarthour");
+    	String dayendhour = resultSet.getString("dayendhour");
+    	String organizer  = resultSet.getString("organizer");
+    	Date creationDate = resultSet.getDate("creationdate");
+    	Time creationTime = resultSet.getTime("creationtime");
+
+    	return new Schedule (id, secretcode, startdate, enddate, daystarthour, dayendhour, organizer, creationdate, creationtime );
+    }
+    
+    
+    
     String getSaltString() {
         String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         StringBuilder salt = new StringBuilder();
@@ -290,12 +310,19 @@ public class DAO {
     	}
     }
     
-    public boolean deleteOldSchedules(String creatingDate) throws Exception{
+    public boolean deleteOldSchedules(int days) throws Exception{
     	try {
     		boolean r = false;
-    		PreparedStatement ps = conn.prepareStatement("DELETE FROM Schedules WHERE creationdate <= ? AND creationtime <= NOW()");
-    		ps.setString(1, creatingDate);
+    		LocalDate date =  LocalDate.now();
+    		date = date.minusDays(days);
+    		java.sql.Date formattedDateTime = java.sql.Date.valueOf( date ); 
     		
+    		System.out.println("Entering DAO");
+    		System.out.println(date);
+    		System.out.println(formattedDateTime);
+    		
+    		PreparedStatement ps = conn.prepareStatement("DELETE FROM Schedules WHERE creationdate <= ?;");
+    		ps.setDate(1, formattedDateTime);    		
     		int numRows = ps.executeUpdate();
     		if(numRows > 0) {
     			r = true;
@@ -305,4 +332,33 @@ public class DAO {
     		throw new Exception("Failed in deleting old schedules:" + e.getMessage());
     	}
     }
+     public ArrayList<Schedule> getSchedules(int hours) throws Exception{
+    	try {
+    		boolean r = false;
+    		ArrayList<Schedule> ScheduleSYS;
+    		LocalTime time =  LocalTime.now();
+    		time = time.minusHours(hours);
+    		java.sql.Time formattedTime = java.sql.Time.valueOf( time ); 
+    		
+    		System.out.println("Entering DAO");
+    		System.out.println(hours);
+    		System.out.println(formattedTime);
+    		
+    		PreparedStatement ps = conn.prepareStatement("SELECT * FROM Schedules WHERE creationtime <= ?;");
+    		ps.setTime(1, formattedTime);    		
+    		ResultSet resultSet = ps.executeQuery();
+    		 while (resultSet.next()) {
+                 ScheduleSYS.add(generateTimeSlot(resultSet));
+             }
+             resultSet.close();
+             ps.close();
+             
+             return timeslots;
+
+         } catch (Exception e) {
+         	e.printStackTrace();
+             throw new Exception("Failed in getting timeslots: " + e.getMessage());
+         }
+    }
+}
 }

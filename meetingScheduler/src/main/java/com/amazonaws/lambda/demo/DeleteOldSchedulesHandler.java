@@ -1,6 +1,7 @@
 package com.amazonaws.lambda.demo;
 
 import java.io.BufferedReader;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,6 +13,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import com.amazonaws.lambda.db.DAO;
@@ -27,16 +29,17 @@ public class DeleteOldSchedulesHandler implements RequestStreamHandler {
 	 * @throws Exception 
 	 */
 	boolean deleteOldSchedules(int days) throws Exception {
-		if (logger != null) { logger.log("in deleteMeeting"); }
+		if (logger != null) { logger.log("in deleteOldSchedules"); }		
+				
 		DAO dao = new DAO();
-		String date = LocalDate.now().minusDays(days).format(DateTimeFormatter.ofPattern("yyyy-mm-dd"));
-		return dao.deleteOldSchedules(date);
+	
+		return dao.deleteOldSchedules(days);
 	}
 	
 	@Override
 	public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
 		logger = context.getLogger();
-		logger.log("Loading Java Lambda handler to cancel meeting");
+		logger.log("Loading Java Lambda handler to delete Schedule");
 
 		JSONObject headerJson = new JSONObject();
 		headerJson.put("Content-Type",  "application/json");  // not sure if needed anymore?
