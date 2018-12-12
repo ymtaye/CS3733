@@ -26,7 +26,7 @@ public class DAO {
     
     public boolean addSchedule(Schedule schedule) throws Exception {
         try {
-            PreparedStatement ps = conn.prepareStatement("INSERT INTO Schedules (id, secretcode, startdate, enddate, daystarthour, dayendhour, organizer) values(?,?,?,?,?,?,?);");
+            PreparedStatement ps = conn.prepareStatement("INSERT INTO Schedules (id, secretcode, startdate, enddate, daystarthour, dayendhour, organizer, creationdate, creationtime) values(?,?,?,?,?,?,?,NOW(),NOW());");
             
             ps.setString(1, schedule.id);
             ps.setString(2, schedule.getsecretcode());
@@ -35,6 +35,8 @@ public class DAO {
             ps.setString(5, schedule.daystarthour);
             ps.setString(6, schedule.dayendhour);
             ps.setString(7, schedule.organizer);
+//            ps.setString(8, "CURDATE()");
+//            ps.setString(9, "CURTIME()");
             ps.execute();
 
             insertTimeSlots(schedule);
