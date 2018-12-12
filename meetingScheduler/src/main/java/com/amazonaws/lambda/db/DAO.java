@@ -274,10 +274,28 @@ public class DAO {
     
     public boolean deleteOldSchedules(String creationDate) throws Exception{
     	try {
-    		String sc = getSaltString();
     		boolean r = false;
     		PreparedStatement ps = conn.prepareStatement("DELETE * FROM Schedule WHERE creationdate <= ? AND creationtime <= NOW()");
     		ps.setString(1,  creationDate);
+    		
+    		int numRows = ps.executeUpdate();
+    		if(numRows > 0) {
+    			r = true;
+    		}
+    		return r;
+    	}
+    	catch(Exception e){
+    		throw new Exception("Failed in deleting schedule: " + e.getMessage());
+    	}
+    }
+    
+    public boolean deleteSchedule(String sID) throws Exception{
+    	try {
+    		
+    		boolean r = false;
+    		PreparedStatement ps = conn.prepareStatement("DELETE FROM Schedules Where id = ?;");
+    		ps.setString(1,  sID);
+    		
     		int numRows = ps.executeUpdate();
     		if(numRows > 0) {
     			r = true;
@@ -286,8 +304,6 @@ public class DAO {
     	}
     	catch(Exception e) {
     		throw new Exception("Failed in deleting time slot: " + e.getMessage());
-
     	}
     }
-
 }
