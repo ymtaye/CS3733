@@ -31,6 +31,7 @@
 var add_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/schedule";
 var close_time_slot = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/close-time-slot";
 var open_time_slot = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/open-time-slot";
+var delete_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/deleteschedule";
 
 var ts; // timeslots list
 var startFullDate; // start date of the calendar
@@ -83,7 +84,7 @@ function showTimeSlotsGUI(timeslots){
       // check if column counter is at 7, then increment rowCounter
       cell = rows[rowCounter].cells[columnCounter];
       if(timeslots.list[i].available == 1){
-        cell.innerHTML = '<p id="'+ timeslots.list[i].id + '">' + timeslots.list[i].participant + '</p><button class="btn-xs" id="' + timeslots.list[i].secretcode + '" onclick="openTimeSlot(this)" value="UNAVAILABLE" style="color:#FFA07A">UNAVAILABLE</button>';
+        cell.innerHTML = '<p id="'+ timeslots.list[i].id + '">' + timeslots.list[i].participant + '</p><button class="btn-xs" id="' + timeslots.list[i].secretcode + '" onclick="openTimeSlot(this)" value="CLOSED" style="color:#FFA07A">CLOSED</button>';
       } else {
         cell.innerHTML = '<p id="'+ timeslots.list[i].id + '"></p><button class="btn-xs" id="' + timeslots.list[i].secretcode + '" onclick="closeTimeSlot(this)" value="OPEN" style="color:#99FF99">OPEN</button>';
       }
@@ -429,9 +430,35 @@ function closeTimeSlotRequest(e, data){
         document.getElementById(e.id).onclick = function () {
     	    openTimeSlot(this);
         }
-        document.getElementById(e.id).value = "UNAVAILABLE";
-        document.getElementById(e.id).innerHTML = "UNAVAILABLE";
+        document.getElementById(e.id).value = "CLOSED";
+        document.getElementById(e.id).innerHTML = "CLOSED";
         document.getElementById(e.id).style.color = "#FFA07A";
+      }
+    }
+  };
+}
+
+function deleteSchedule(e){
+  var form = document.deleteForm;
+  var secretcode = form.deletesecretcode.value;
+
+  var data = {};
+  data["secretcode"] = secretcode;
+
+  var js = JSON.stringify(data);
+  console.log("JS:" + js);
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", delete_url, true);
+
+  // send the collected data as JSON
+  xhr.send(js);
+
+  // This will process results and update HTML as appropriate.
+  xhr.onloadend = function () {
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+      console.log ("XHR:" + xhr.responseText);
+      if(xhr.status == 200){
+        var js = JSON.parse(xhr.responseText);
       }
     }
   };
@@ -461,9 +488,20 @@ function closeTimeSlotRequest(e, data){
 
   <div id="gtco-intro">
 
+      <div class="page-header">
+        <div class="container">
+        </div>
+      </div>
+
       <div class="row">
 
-        <div class="col-md-4">
+        <div class="col-md-1">
+          <div class="container">
+
+          </div>
+        </div>
+
+        <div class="col-md-3">
             <div class="dtc animate-box">
               <form name="createForm" method="post" >
                 <div class="list-group">
@@ -514,7 +552,7 @@ function closeTimeSlotRequest(e, data){
                           </div>
                           <div class="list-group-2-item">
                             <input type="search" id="message" value="" disabled/>
-                            <input type="search" id="secretcode" name="secretcode" value="" />
+                            <input type="search" id="secretcode" name="secretcode" value="AAAAAAAAAAAAAAA" />
                           </div>
                         </div>
                       </div>
@@ -525,14 +563,66 @@ function closeTimeSlotRequest(e, data){
                   </div>
               </form>
 
-            <div class="calendar">
-              <table class="table" id="schedule"></table>
-              <div id="changeweek"></div>
-            </div>
+              <form name="deleteForm" method="post">
+                <div class="list-group-2">
+                  <fieldset>
+                    <div class="list-group-2-item">
+                      <div class="dl-horizontal">
+                        <legend>Delete Schedule</legend>
+                        <div class="list-group-2-item">
+                          <input type="search" id="deletesecretcode" name="deletesecretcode" value="AAAAAAAAAAAAAAA" />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="list-group-2-item">
+                      <input class="btn" type="button" value="Delete"  onClick="JavaScript:deleteSchedule()">
+                    </div>
+                  </fieldset>
+                </div>
+              </form>
 
           </div>
         </div>
 
+      </div>
+
+      <div class="row">
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-10">
+          <div class="dtc animate-box">
+            <div class="calendar">
+              <table class="table" id="schedule"></table>
+              <div id="changeweek"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-1">
+        </div>
+      </div>
+
+      <div class="panel-footer">
+        <div class="row">
+          <div class="col-sm-1">
+              <h4>Authors</h4>
+              <ul>
+                <li>Marc Reardon</li>
+                <li>Christian Tweed</li>
+                <li>Thar Min Htet</li>
+                <li>Yared Taye</li>
+              </ul>
+          </div>
+          <div class="col-sm-4">
+            <h4>Contact Us</h4>
+            <p>mdreardon@wpi.edu or mdreardon@gmail.com</p>
+            <p>603-370-3966</p>
+            <p></p>
+          </div>
+          <div class="col-sm-5">
+            <b>Description</b>
+            <p>This project was a final submission for Software Engineering CS3733 at WPI.  Organizers can create a schedule from here, and give out the secret code to participants.  Participants can join a schedule by visiting the participant page. If you want to edit the schedule at any time, visit this page.</p>
+          </div>
+        </div>
       </div>
 
   </div>
