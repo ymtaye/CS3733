@@ -27,7 +27,8 @@ public class DAO {
     public boolean addSchedule(Schedule schedule) throws Exception {
         try {
             PreparedStatement ps = conn.prepareStatement("INSERT INTO Schedules (id, secretcode, startdate, enddate, daystarthour, dayendhour, organizer, creationdate, creationtime) values(?,?,?,?,?,?,?,NOW(),NOW());");
-            
+//            PreparedStatement ps = conn.prepareStatement("INSERT INTO Schedules (id, secretcode, startdate, enddate, daystarthour, dayendhour, organizer, creationdate, creationtime) values(?,?,?,?,?,?,?,'2018-12-05',NOW());");
+
             ps.setString(1, schedule.id);
             ps.setString(2, schedule.getsecretcode());
             ps.setString(3, schedule.startdate);
@@ -35,8 +36,6 @@ public class DAO {
             ps.setString(5, schedule.daystarthour);
             ps.setString(6, schedule.dayendhour);
             ps.setString(7, schedule.organizer);
-//            ps.setString(8, "CURDATE()");
-//            ps.setString(9, "CURTIME()");
             ps.execute();
 
             insertTimeSlots(schedule);
@@ -261,6 +260,24 @@ public class DAO {
     		ps.setString(7, "");
     		ps.setInt(8, 1);
     		ps.setString(9, sID);
+    		int numRows = ps.executeUpdate();
+    		if(numRows > 0) {
+    			r = true;
+    		}
+    		return r;
+    	}
+    	catch(Exception e) {
+    		throw new Exception("Failed in deleting time slot: " + e.getMessage());
+
+    	}
+    }
+    
+    public boolean deleteOldSchedules(String creationDate) throws Exception{
+    	try {
+    		String sc = getSaltString();
+    		boolean r = false;
+    		PreparedStatement ps = conn.prepareStatement("DELETE * FROM Schedule WHERE creationdate <= ? AND creationtime <= NOW()");
+    		ps.setString(1,  creationDate);
     		int numRows = ps.executeUpdate();
     		if(numRows > 0) {
     			r = true;
