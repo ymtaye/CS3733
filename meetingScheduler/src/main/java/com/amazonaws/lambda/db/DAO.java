@@ -184,10 +184,10 @@ public class DAO {
     	String daystarthour = resultSet.getString("daystarthour");
     	String dayendhour = resultSet.getString("dayendhour");
     	String organizer  = resultSet.getString("organizer");
-    	Date creationDate = resultSet.getDate("creationdate");
-    	Time creationTime = resultSet.getTime("creationtime");
+    	java.sql.Date creationDate = resultSet.getDate("creationdate");
+    	java.sql.Time creationTime = resultSet.getTime("creationtime");
 
-    	return new Schedule (id, secretcode, startdate, enddate, daystarthour, dayendhour, organizer, creationdate, creationtime );
+    	return new Schedule (id, secretcode, startdate, enddate, daystarthour, dayendhour, organizer, creationDate, creationTime );
     }
     
     
@@ -332,10 +332,9 @@ public class DAO {
     		throw new Exception("Failed in deleting old schedules:" + e.getMessage());
     	}
     }
-     public ArrayList<Schedule> getSchedules(int hours) throws Exception{
+     public ArrayList<TimeSlot> getSchedules(int hours) throws Exception{
     	try {
-    		boolean r = false;
-    		ArrayList<Schedule> ScheduleSYS;
+    		ArrayList<TimeSlot> ScheduleSYS = new ArrayList<TimeSlot>();;
     		LocalTime time =  LocalTime.now();
     		time = time.minusHours(hours);
     		java.sql.Time formattedTime = java.sql.Time.valueOf( time ); 
@@ -344,7 +343,7 @@ public class DAO {
     		System.out.println(hours);
     		System.out.println(formattedTime);
     		
-    		PreparedStatement ps = conn.prepareStatement("SELECT * FROM Schedules WHERE creationtime <= ?;");
+            PreparedStatement ps = conn.prepareStatement("SELECT TimeSlots.id, TimeSlots.secretcode, TimeSlots.startDate, TimeSlots.enddate, TimeSlots.starttime, TimeSlots.endtime, TimeSlots.participant, TimeSlots.available, TimeSlots.scheduleid FROM TimeSlots JOIN Schedules ON TimeSlots.scheduleid = Schedules.id  WHERE Schedules.creationtime >= ? ORDER BY TimeSlots.startdate, TimeSlots.starttime;");
     		ps.setTime(1, formattedTime);    		
     		ResultSet resultSet = ps.executeQuery();
     		 while (resultSet.next()) {
@@ -353,12 +352,11 @@ public class DAO {
              resultSet.close();
              ps.close();
              
-             return timeslots;
+             return ScheduleSYS;
 
          } catch (Exception e) {
          	e.printStackTrace();
              throw new Exception("Failed in getting timeslots: " + e.getMessage());
          }
     }
-}
 }

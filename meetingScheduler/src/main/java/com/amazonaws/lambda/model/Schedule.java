@@ -1,5 +1,7 @@
 package com.amazonaws.lambda.model;
 
+import java.sql.Date;
+import java.sql.Time;
 import java.util.ArrayList;
 
 public class Schedule {
@@ -12,8 +14,8 @@ public class Schedule {
 	String secretcode;
 	public ArrayList<TimeSlot> timeslots;
 	public int meetinglength; // minutes
-	public String creationTime;
-	public String creationDate;
+	public java.sql.Date creationDate;
+	public java.sql.Time creationTime;
 
 	public Schedule (String id, String startdate, String enddate, String starttime, String endtime, String organizer, String secretcode, int meetinglength) {
 		this.secretcode = secretcode;
@@ -25,12 +27,12 @@ public class Schedule {
 		this.id = id;
 		this.meetinglength = meetinglength;
 	}
-	public Schedule (String id, String startdate, String enddate, String starttime, String endtime, String organizer, String secretcode, Date date, Time time) {
+	public Schedule (String id, String secretcode, String startdate, String enddate, String daystarthour, String dayendhour, String organizer,  Date date, Time time) {
 		this.secretcode = secretcode;
 		this.startdate = startdate;
 		this.enddate = enddate;
-		this.daystarthour = starttime;
-		this.dayendhour = endtime;
+		this.daystarthour = daystarthour;
+		this.dayendhour = dayendhour;
 		this.organizer = organizer;
 		this.id = id;
 		this.creationDate = date;
