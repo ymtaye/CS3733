@@ -271,12 +271,12 @@ public class DAO {
     		throw new Exception("Failed in deleting time slot: " + e.getMessage());
 
     	}
-    }public boolean deleteSchedule(String sID) throws Exception{
+    }public boolean deleteSchedule(String secretCode) throws Exception{
     	try {
     		
     		boolean r = false;
-    		PreparedStatement ps = conn.prepareStatement("DELETE FROM Schedules Where id = ?;");
-    		ps.setString(1,  sID);
+    		PreparedStatement ps = conn.prepareStatement("DELETE FROM Schedules Where secretcode = ?;");
+    		ps.setString(1,  secretCode);
     		
     		int numRows = ps.executeUpdate();
     		if(numRows > 0) {

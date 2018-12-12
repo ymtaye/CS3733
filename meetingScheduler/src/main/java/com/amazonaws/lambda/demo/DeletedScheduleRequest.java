@@ -1,13 +1,13 @@
 package com.amazonaws.lambda.demo;
 
 public class DeletedScheduleRequest {
-	String sID;
+	String secretCode;
 	
-	public  DeletedScheduleRequest (String sID) {
-		this.sID=sID;
+	public  DeletedScheduleRequest (String secretCode) {
+		this.secretCode=secretCode;
 	}
 	public String toString() {
-		return "Fetch(" + sID + ")";
+		return "Fetch(" + secretCode + ")";
 }
 
 	

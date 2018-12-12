@@ -23,10 +23,10 @@ public class DeletedScheduleHandler implements RequestStreamHandler{
 	 * 
 	 * @throws Exception 
 	 */
-	boolean deleteSchedule(String sID) throws Exception {
+	boolean deleteSchedule(String secretCode) throws Exception {
 		if (logger != null) { logger.log("in deleteSchedule"); }
 		DAO dao = new DAO();
-		return dao.deleteSchedule(sID);
+		return dao.deleteSchedule(secretCode);
 	}
 	
 	
@@ -82,10 +82,10 @@ public class DeletedScheduleHandler implements RequestStreamHandler{
 					DeletedScheduleResponse resp;
 					logger.log("text1");
 					try {
-						if (deleteSchedule(req.sID)) {
+						if (deleteSchedule(req.secretCode)) {
 							resp = new DeletedScheduleResponse("Confirmed");
 						} else {
-							resp = new DeletedScheduleResponse("Unable to delete schedule for  [" + req.sID + "]", 422);
+							resp = new DeletedScheduleResponse("Unable to delete schedule for  [" + req.secretCode + "]", 422);
 						}
 					} catch (Exception e) {
 						resp = new DeletedScheduleResponse("Unable to delete schedule (" + e.getMessage() + ")", 403);
