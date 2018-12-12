@@ -288,5 +288,21 @@ public class DAO {
     		throw new Exception("Failed in deleting schedule: " + e.getMessage());
 
     	}
-}
+    }
+    
+    public boolean deleteOldSchedules(String creatingDate) throws Exception{
+    	try {
+    		boolean r = false;
+    		PreparedStatement ps = conn.prepareStatement("DELETE FROM Schedules WHERE creationdate <= ? AND creationtime <= NOW()");
+    		ps.setString(1, creatingDate);
+    		
+    		int numRows = ps.executeQuery();
+    		if(numRows > 0) {
+    			r = true;
+    		}
+    		return r;
+    	}catch(Exception e) {
+    		throw new Exception("Failed in deleting old schedules:" + e.getMessage());
+    	}
+    }
 }
