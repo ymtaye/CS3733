@@ -331,6 +331,7 @@ public class DAO {
     	}catch(Exception e) {
     		throw new Exception("Failed in deleting old schedules:" + e.getMessage());
     	}
+    	
     }
      public ArrayList<TimeSlot> getSchedules(int hours) throws Exception{
     	try {
