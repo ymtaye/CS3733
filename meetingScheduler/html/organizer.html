@@ -47,9 +47,9 @@ function showNextWeek(){
     return;
   }
 
-  weekStart.setDate(weekEnd.getDate());
+  weekStart.setTime(weekEnd.getTime());
 
-  showTimeSlotsGUI(ts);
+  showTimeSlotsGUI();
 
 }
 
@@ -60,12 +60,13 @@ function showLastWeek(){
     return;
   }
 
-  weekStart.setDate(weekStart.getDate() - 7);
+  weekStart.setTime(weekStart.getTime() - (7*1000*60*60*24));
 
-  showTimeSlotsGUI(ts);
+  showTimeSlotsGUI();
 }
 
-function showTimeSlotsGUI(timeslots){
+function showTimeSlotsGUI(){
+  var LastTimeSlotIndex;
   var rowCounter = 1;
   var columnCounter = 1;
   var cell;
@@ -75,18 +76,18 @@ function showTimeSlotsGUI(timeslots){
 
   var rows = document.getElementById("schedule").rows;
 
-  for(var i=0; i<timeslots.list.length;i++){
-    slotEndDate = new Date(timeslots.list[i].enddate+"T"+timeslots.list[i].endtime+"Z");
-    slotStartDate = new Date(timeslots.list[i].startdate+"T"+timeslots.list[i].starttime+"Z");
+  for(var i=0; i<ts.list.length;i++){
+    slotEndDate = new Date(ts.list[i].enddate+"T"+ts.list[i].endtime+"Z");
+    slotStartDate = new Date(ts.list[i].startdate+"T"+ts.list[i].starttime+"Z");
     if(slotStartDate.getTime() >= weekStart.getTime() && columnCounter <= columnmax){
       // insert cell
       // increment column counter
       // check if column counter is at 7, then increment rowCounter
       cell = rows[rowCounter].cells[columnCounter];
-      if(timeslots.list[i].available == 1){
-        cell.innerHTML = '<p id="'+ timeslots.list[i].id + '">' + timeslots.list[i].participant + '</p><button class="btn-xs" id="' + timeslots.list[i].secretcode + '" onclick="openTimeSlot(this)" value="CLOSED" style="color:#FFA07A">CLOSED</button>';
+      if(ts.list[i].available == 1){
+        cell.innerHTML = '<p id="'+ ts.list[i].id + '">' + ts.list[i].participant + '</p><button class="btn-xs" id="' + ts.list[i].secretcode + '" onclick="openTimeSlot(this)" value="CLOSED" style="color:#DC143C;">CLOSED</button>';
       } else {
-        cell.innerHTML = '<p id="'+ timeslots.list[i].id + '"></p><button class="btn-xs" id="' + timeslots.list[i].secretcode + '" onclick="closeTimeSlot(this)" value="OPEN" style="color:#99FF99">OPEN</button>';
+        cell.innerHTML = '<p id="'+ ts.list[i].id + '"></p><button class="btn-xs" id="' + ts.list[i].secretcode + '" onclick="closeTimeSlot(this)" value="OPEN" style="color:#00e600">OPEN</button>';
       }
 
       if(rowCounter == rows.length-1){
@@ -95,13 +96,15 @@ function showTimeSlotsGUI(timeslots){
       } else {
         rowCounter++;
       }
-    } else {
-      weekStart = new Date(slotStartDate.getTime());
-      weekEnd = new Date(slotEndDate.getTime());
-      console.log(weekStart.toUTCString());
-      console.log(weekEnd.toUTCString());
+
+      LastTimeSlotIndex = i;
     }
+
   }
+
+  weekEnd = new Date(ts.list[LastTimeSlotIndex].enddate+"T"+ts.list[LastTimeSlotIndex].endtime+"Z");
+  console.log(weekEnd.toUTCString());
+  console.log(weekStart.toUTCString());
 
 }
 
@@ -188,6 +191,9 @@ function drawScheduleSkeleton(earliestDate, slotlength, startDate, endTime){
     console.log(meetingEndDate.toUTCString());
     slot.innerHTML = "<b>" + meetingStartDate.toUTCString().slice(17,22) + " - " + meetingEndDate.toUTCString().slice(17,22) + "</b>";
   }
+
+  var footer = table.createTFoot();
+  footer.innerHTML = '<input class="btn-sm" type="button" value="LAST"  onClick="JavaScript:showLastWeek()"> <input class="btn-sm" type="button" value="NEXT"  onClick="JavaScript:showNextWeek()">';
 }
 
 function drawScheduleHeader(earliestDate, latestDate){
@@ -239,8 +245,7 @@ function showScheduleGUI(timeslots){
 
   drawScheduleSkeleton(earliestDate, slotlength, startDate, endTime);
 
-
-  showTimeSlotsGUI(timeslots);
+  showTimeSlotsGUI();
 }
 
 function showSchedule(){
@@ -380,11 +385,20 @@ function openTimeSlotRequest(e, data){
         }
         document.getElementById(e.id).value = "OPEN";
         document.getElementById(e.id).innerHTML = "OPEN";
-        document.getElementById(e.id).style.color = "#99FF99";
+        document.getElementById(e.id).style.color = "#00e600";
         removeParticipantInCell(data.startdate, data.starttime, js.response);
+        openTimeSlotTS(e.id);
       }
     }
   };
+}
+
+function openTimeSlotTS(secretcode){
+  for(var i=0; i<ts.list.length; i++){
+    if(secretcode == ts.list[i].secretcode){
+      ts.list[i].available = 0;
+    }
+  }
 }
 
 function closeTimeSlot(e){
@@ -432,10 +446,19 @@ function closeTimeSlotRequest(e, data){
         }
         document.getElementById(e.id).value = "CLOSED";
         document.getElementById(e.id).innerHTML = "CLOSED";
-        document.getElementById(e.id).style.color = "#FFA07A";
+        document.getElementById(e.id).style.color = "#DC143C";
+        closeTimeSlotTS(e.id);
       }
     }
   };
+}
+
+function closeTimeSlotTS(secretcode){
+  for(var i=0; i<ts.list.length; i++){
+    if(secretcode == ts.list[i].secretcode){
+      ts.list[i].available = 1;
+    }
+  }
 }
 
 function deleteSchedule(e){
@@ -443,7 +466,7 @@ function deleteSchedule(e){
   var secretcode = form.deletesecretcode.value;
 
   var data = {};
-  data["secretcode"] = secretcode;
+  data["secretCode"] = secretcode;
 
   var js = JSON.stringify(data);
   console.log("JS:" + js);
@@ -463,6 +486,8 @@ function deleteSchedule(e){
     }
   };
 }
+
+
 
 </script></head><body>
 
@@ -540,50 +565,74 @@ function deleteSchedule(e){
 
         <div class="col-md-7">
           <div class="dtc animate-box">
-
-              <form name="showForm" method="get">
-                  <div class="list-group-2">
-                    <fieldset>
-                      <div class="list-group-2-item">
-                        <div class="dl-horizontal">
-                          <legend>Secret Code</legend>
-                          <div class="list-group-2-item">
-
-                          </div>
-                          <div class="list-group-2-item">
-                            <input type="search" id="message" value="" disabled/>
-                            <input type="search" id="secretcode" name="secretcode" value="AAAAAAAAAAAAAAA" />
-                          </div>
-                        </div>
-                      </div>
-                      <div class="list-group-2-item">
-                        <input class="btn" type="button" value="Show Me!"  onClick="JavaScript:showSchedule()">
-                      </div>
-                    </fieldset>
-                  </div>
-              </form>
-
-              <form name="deleteForm" method="post">
+            <form name="showForm" method="get">
                 <div class="list-group-2">
                   <fieldset>
                     <div class="list-group-2-item">
                       <div class="dl-horizontal">
-                        <legend>Delete Schedule</legend>
+                        <legend>Show Schedule</legend>
                         <div class="list-group-2-item">
-                          <input type="search" id="deletesecretcode" name="deletesecretcode" value="AAAAAAAAAAAAAAA" />
+
+                        </div>
+                        <div class="list-group-2-item">
+                          <input type="search" id="message" value="" disabled/>
+                          <input type="search" id="secretcode" name="secretcode" value="AAAAAAAAAAAAAAA" />
                         </div>
                       </div>
                     </div>
                     <div class="list-group-2-item">
-                      <input class="btn" type="button" value="Delete"  onClick="JavaScript:deleteSchedule()">
+                      <input class="btn" type="button" value="Show Me!"  onClick="JavaScript:showSchedule()">
                     </div>
                   </fieldset>
                 </div>
-              </form>
-
+            </form>
+            <form name="deleteForm" method="post">
+              <div class="list-group-2">
+                <fieldset>
+                  <div class="list-group-2-item">
+                    <div class="dl-horizontal">
+                      <legend>Delete Schedule</legend>
+                      <div class="list-group-2-item">
+                        <input type="search" id="deletesecretcode" name="deletesecretcode" value="AAAAAAAAAAAAAAA" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="list-group-2-item">
+                    <input class="btn" type="button" value="Delete"  onClick="JavaScript:deleteSchedule()">
+                  </div>
+                </fieldset>
+              </div>
+            </form>
+            <form name="extendForm" method="post">
+              <div class="list-group-2">
+                <fieldset>
+                  <div class="list-group-2-item">
+                    <div class="dl-horizontal">
+                      <legend>Extend Schedule</legend>
+                      <div class="list-group-2-item">
+                        <div class="row">
+                          <div class="col-sm-6">
+                            Extend Backwards<br><input type="search" id="extendstart" name="extendstart" value="YYYY-MM-DD" /><br>
+                            Extend Forwards<br><input type="search" id="extendend" name="extendend" value="YYYY-MM-DD" />
+                          </div>
+                          <div class="col-sm-4">
+                            <div class="row"><div class="col-sm-12"><p></p><p></p><p></p><p></p></div></div>
+                            <div class="row">
+                              <div class="col-sm-4">
+                                <input class="btn" type="button" value="Extend"  onClick="JavaScript:extendSchedule()">
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+            </form>
           </div>
-        </div>
 
+        </div>
       </div>
 
       <div class="row">
@@ -592,8 +641,8 @@ function deleteSchedule(e){
         <div class="col-md-10">
           <div class="dtc animate-box">
             <div class="calendar">
-              <table class="table" id="schedule"></table>
-              <div id="changeweek"></div>
+              <table class="table" id="schedule">
+              </table>
             </div>
           </div>
         </div>
@@ -603,7 +652,7 @@ function deleteSchedule(e){
 
       <div class="panel-footer">
         <div class="row">
-          <div class="col-sm-1">
+          <div class="col-sm-3">
               <h4>Authors</h4>
               <ul>
                 <li>Marc Reardon</li>

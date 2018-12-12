@@ -15,7 +15,7 @@ var columnmax; // the difference in days between start day and end day, in days
 function showNextWeek(){
   // check to make sure were not at the end the the schedule
   // change start week, then call showTimeSlotsGUI()
-  if(endFullDate.getTime() == weekEnd.getTime()){
+  if(endFullDate.getTime() <= weekEnd.getTime()){
     return;
   }
 
@@ -38,6 +38,7 @@ function showLastWeek(){
 }
 
 function showTimeSlotsGUI(timeslots){
+  var LastTimeSlotIndex;
   var rowCounter = 1;
   var columnCounter = 1;
   var cell;
@@ -56,7 +57,7 @@ function showTimeSlotsGUI(timeslots){
       // check if column counter is at 7, then increment rowCounter
       cell = rows[rowCounter].cells[columnCounter];
       if(timeslots.list[i].available == 1){
-        cell.innerHTML = '<p id="'+ timeslots.list[i].id + '">' + timeslots.list[i].participant + '</p><button id="' + timeslots.list[i].secretcode + '" onclick="cancelMeeting(this)" value="Unavailable" style="background-color:#B22222">Unavailable</button>';
+        cell.innerHTML = '<p id="'+ timeslots.list[i].id + '">' + timeslots.list[i].participant + '</p><button id="' + timeslots.list[i].secretcode + '" onclick="cancelMeeting(this)" value="Unavailable" style="background-color:#DC143C; font-weight: 400;">Unavailable</button>';
       } else {
         cell.innerHTML = '<p id="'+ timeslots.list[i].id + '"></p><button id="' + timeslots.list[i].secretcode + '" onclick="createMeeting(this)" value="Join" style="background-color:#20B2AA">Join</button>';
       }
@@ -67,13 +68,15 @@ function showTimeSlotsGUI(timeslots){
       } else {
         rowCounter++;
       }
-    } else {
-      weekStart = new Date(slotStartDate.getTime());
-      weekEnd = new Date(slotEndDate.getTime());
-      console.log(weekStart.toUTCString());
-      console.log(weekEnd.toUTCString());
+
+      LastTimeSlotIndex = i;
     }
+
   }
+
+  weekEnd = new Date(timeslots.list[LastTimeSlotIndex].enddate+"T"+timeslots.list[LastTimeSlotIndex].endtime+"Z");
+  console.log(weekEnd.toUTCString());
+  console.log(weekStart.toUTCString());
 }
 
 function getSlotLength(timeslots){
@@ -334,7 +337,7 @@ function createMeetingRequest(e, data){
           }
           document.getElementById(e.id).value = "Cancel";
           document.getElementById(e.id).innerHTML = "Cancel";
-          document.getElementById(e.id).style.background = "#B22222";
+          document.getElementById(e.id).style.background = "#DC143C";
           document.getElementById(e.id).id = response.response;
           fillParticipantInCell(data.participant, data.startdate, data.starttime, response.response);
           //console.log(data.starttime);

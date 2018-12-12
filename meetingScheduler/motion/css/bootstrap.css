@@ -2744,9 +2744,10 @@ a.btn.disabled, fieldset[disabled] a.btn {
 }
 
 .btn-info {
-  color: #fff;
-  background-color: #5bc0de;
-  border-color: #46b8da;
+  color: #ddd;
+  background-color: #fff;
+  border-color: #ddd;
+  border-radius: 6px;
 }
 .btn-info:focus, .btn-info.focus {
   color: #fff;
@@ -2886,19 +2887,23 @@ a.btn.disabled, fieldset[disabled] a.btn {
 
 .btn-sm, .btn-group-sm > .btn {
   padding: 5px 20px;
+  border: 1px solid #212f3d;
+  background-color: #fff;
+  color: #212f3d;
   font-size: 12px;
   line-height: 1.5;
-  border-radius: 3px;
+  border-radius: 6px;
+  margin: 2px;
 }
 
 .btn-xs, .btn-group-xs > .btn {
   font-size: 8px;
-  border: 1px solid #fff;
+  border: 1px solid #212f3d;
   width: 50px;
   height: 100%;
   font-family: "Work", sans-serif;
-  font-weight: 20;
-  background-color: #212f3d;
+  font-weight: bold;
+  background-color: #fff;
   border-radius: 5px;
 }
 
