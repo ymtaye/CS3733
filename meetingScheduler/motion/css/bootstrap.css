@@ -186,6 +186,11 @@ input[type="number"]::-webkit-outer-spin-button {
 input[type="search"] {
   -webkit-appearance: textfield;
   box-sizing: content-box;
+  border-radius: 16px;
+  border: 1px solid #fff;
+  background-color: #212f3d;
+  color: #52D681;
+  text-align: center;
 }
 
 input[type="search"]::-webkit-search-cancel-button,
@@ -669,7 +674,7 @@ a.bg-danger:focus {
 
 .page-header {
   padding-bottom: 9px;
-  margin: 40px 0 20px;
+  margin: 40px 0px 30px;
   border-bottom: 1px solid #eeeeee;
 }
 
@@ -2008,7 +2013,7 @@ legend {
   display: block;
   width: 100%;
   padding: 0;
-  margin-bottom: 20px;
+  margin-bottom: 7px;
   font-size: 21px;
   line-height: inherit;
   color: #333333;
@@ -2888,10 +2893,18 @@ a.btn.disabled, fieldset[disabled] a.btn {
 }
 
 .btn-xs, .btn-group-xs > .btn {
-  padding: 1px 5px;
-  font-size: 12px;
-  line-height: 1.5;
-  border-radius: 3px;
+  font-size: 8px;
+  border: 1px solid #fff;
+  width: 66px;
+  height: 100%;
+  font-family: "Work", sans-serif;
+  font-weight: 20;
+  background-color: #212f3d;
+  border-radius: 5px;
+}
+
+.btn-xs:hover, .btn-xs:focus, .btn-xs.focus {
+  text-decoration: none;
 }
 
 .btn-block {
@@ -4681,27 +4694,61 @@ a.thumbnail.active {
   list-style: none;
 }
 
+.calendar {
+  margin-top: 10px;
+  padding-left: 0;
+  background: #FFF;
+  position: relative;
+  font-weight: 20;
+  border-radius: 7px;
+}
+
+.list-group-2 {
+  margin-bottom: 0px;
+  margin-top: 100px;
+  padding-left: 0;
+  background: #FFF;
+  position: relative;
+  font-weight: 400;
+  border-radius: 7px;
+}
+
+.list-group-2-item {
+  text-align: center;
+  position: relative;
+  display: block;
+  padding: 5px 0px;
+  margin-bottom: -1px;
+}
+
 .list-group {
   margin-bottom: 20px;
+  margin-top: 100px;
   padding-left: 0;
+  margin-left: 80px;
+  background: #FFF;
+  position: relative;
+  font-weight: 400;
+  border-radius: 7px;
 }
 
 .list-group-item {
+  text-align: center;
   position: relative;
   display: block;
-  padding: 10px 15px;
+  padding: 3px 35px;
   margin-bottom: -1px;
-  background-color: #fff;
-  border: 1px solid #ddd;
 }
 .list-group-item:first-child {
-  border-top-right-radius: 4px;
-  border-top-left-radius: 4px;
+  border-top-right-radius: 6px;
+  border-top-left-radius: 6px;
 }
 .list-group-item:last-child {
   margin-bottom: 0;
-  border-bottom-right-radius: 4px;
-  border-bottom-left-radius: 4px;
+  margin-top: 10;
+  padding-top: 6px;
+  border-bottom-right-radius: 6px;
+  border-bottom-left-radius: 6px;
 }
 
 a.list-group-item,

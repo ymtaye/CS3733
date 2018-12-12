@@ -193,7 +193,7 @@ function showScheduleGUI(timeslots){
   var latestDate = getLatestDate(timeslots);
   var earliestDate = getEarliestDate(timeslots);
 
-  columnmax = Math.abs(getLatestDate(timeslots).getDate() - getEarliestDate(timeslots).getDate())+1;
+  columnmax = Math.floor(1+Math.abs((getEarliestDate(timeslots).getTime()-getLatestDate(timeslots).getTime())/(1000*60*60*24)));
   startFullDate = new Date(earliestDate.getTime());
   endFullDate = new Date(latestDate.getTime());
   weekStart = new Date(earliestDate.getTime());
