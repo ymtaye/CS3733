@@ -1,5 +1,31 @@
 <!DOCTYPE html>
 <html>
+
+<!-- jQuery -->
+<script src="motion/js/jquery.min.js"></script>
+<!-- jQuery Easing -->
+<script src="motion/js/jquery.easing.1.3.js"></script>
+<!-- Bootstrap -->
+<script src="motion/js/bootstrap.min.js"></script>
+<!-- Waypoints -->
+<script src="motion/js/jquery.waypoints.min.js"></script>
+<!-- Main -->
+<script src="motion/js/main.js"></script>
+<!-- Modernizr JS -->
+<script src="motion/js/modernizr-2.6.2.min.js"></script>
+<!-- style.css -->
+<link rel="stylesheet" href="motion/css/style.css">
+<!-- Animate.css -->
+<link rel="stylesheet" href="motion/css/animate.css">
+<!-- Icomoon Icon Fonts-->
+<link rel="stylesheet" href="motion/css/icomoon.css">
+<!-- Themify Icons-->
+<link rel="stylesheet" href="motion/css/themify-icons.css">
+<!-- Bootstrap  -->
+<link rel="stylesheet" href="motion/css/bootstrap.css">
+<!-- Theme style  -->
+<link rel="stylesheet" href="motion/css/style.css">
+
 <head><script type="text/javascript">
 var show_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/participantschedule";
 var create_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/register";
@@ -19,9 +45,9 @@ function showNextWeek(){
     return;
   }
 
-  weekStart.setDate(weekEnd.getDate());
+  weekStart.setTime(weekEnd.getTime());
 
-  showTimeSlotsGUI(ts);
+  showTimeSlotsGUI();
 
 }
 
@@ -32,12 +58,12 @@ function showLastWeek(){
     return;
   }
 
-  weekStart.setDate(weekStart.getDate() - 7);
+  weekStart.setTime(weekStart.getTime() - (7*1000*60*60*24));
 
-  showTimeSlotsGUI(ts);
+  showTimeSlotsGUI();
 }
 
-function showTimeSlotsGUI(timeslots){
+function showTimeSlotsGUI(){
   var LastTimeSlotIndex;
   var rowCounter = 1;
   var columnCounter = 1;
@@ -48,18 +74,18 @@ function showTimeSlotsGUI(timeslots){
 
   var rows = document.getElementById("schedule").rows;
 
-  for(var i=0; i<timeslots.list.length;i++){
-    slotEndDate = new Date(timeslots.list[i].enddate+"T"+timeslots.list[i].endtime+"Z");
-    slotStartDate = new Date(timeslots.list[i].startdate+"T"+timeslots.list[i].starttime+"Z");
+  for(var i=0; i<ts.list.length;i++){
+    slotEndDate = new Date(ts.list[i].enddate+"T"+ts.list[i].endtime+"Z");
+    slotStartDate = new Date(ts.list[i].startdate+"T"+ts.list[i].starttime+"Z");
     if(slotStartDate.getTime() >= weekStart.getTime() && columnCounter <= columnmax){
       // insert cell
       // increment column counter
       // check if column counter is at 7, then increment rowCounter
       cell = rows[rowCounter].cells[columnCounter];
-      if(timeslots.list[i].available == 1){
-        cell.innerHTML = '<p id="'+ timeslots.list[i].id + '">' + timeslots.list[i].participant + '</p><button id="' + timeslots.list[i].secretcode + '" onclick="cancelMeeting(this)" value="Unavailable" style="background-color:#DC143C; font-weight: 400;">Unavailable</button>';
+      if(ts.list[i].available == 1){
+        cell.innerHTML = '<p id="'+ ts.list[i].id + '">' + ts.list[i].participant + '</p><button id="' + ts.list[i].secretcode + '" onclick="cancelMeeting(this)" value="Unavailable" style="background-color:#DC143C; font-weight: 400;">Unavailable</button>';
       } else {
-        cell.innerHTML = '<p id="'+ timeslots.list[i].id + '"></p><button id="' + timeslots.list[i].secretcode + '" onclick="createMeeting(this)" value="Join" style="background-color:#20B2AA">Join</button>';
+        cell.innerHTML = '<p id="'+ ts.list[i].id + '"></p><button id="' + ts.list[i].secretcode + '" onclick="createMeeting(this)" value="Join" style="background-color:#20B2AA">Join</button>';
       }
 
       if(rowCounter == rows.length-1){
@@ -74,7 +100,7 @@ function showTimeSlotsGUI(timeslots){
 
   }
 
-  weekEnd = new Date(timeslots.list[LastTimeSlotIndex].enddate+"T"+timeslots.list[LastTimeSlotIndex].endtime+"Z");
+  weekEnd = new Date(ts.list[LastTimeSlotIndex].enddate+"T"+ts.list[LastTimeSlotIndex].endtime+"Z");
   console.log(weekEnd.toUTCString());
   console.log(weekStart.toUTCString());
 }
@@ -162,6 +188,10 @@ function drawScheduleSkeleton(earliestDate, slotlength, startDate, endTime){
     console.log(meetingEndDate.toUTCString());
     slot.innerHTML = "<b>" + meetingStartDate.toUTCString().slice(17,25) + " - " + meetingEndDate.toUTCString().slice(17,25) + "</b>";
   }
+
+  var footer = table.createTFoot();
+  footer.innerHTML = '<input class="btn-sm" type="button" value="LAST"  onClick="JavaScript:showLastWeek()"> <input class="btn-sm" type="button" value="NEXT"  onClick="JavaScript:showNextWeek()">';
+
 }
 
 function drawScheduleHeader(earliestDate, latestDate){
@@ -213,7 +243,7 @@ function showScheduleGUI(timeslots){
   buttons.innerHTML = "<button onclick='showNextWeek()'>Next Week</button> <button onclick='showLastWeek()'>Last Week</button>";
   */
 
-  showTimeSlotsGUI(timeslots);
+  showTimeSlotsGUI();
 }
 
 function showSchedule(){
@@ -254,6 +284,7 @@ function fillParticipantInCell(participant, startdate, starttime, secretcode){
     if(ts.list[i].starttime == starttime && ts.list[i].startdate == startdate){
       ts.list[i].secretcode = secretcode;
       ts.list[i].participant = participant;
+      ts.list[i].available = 1;
       document.getElementById(ts.list[i].id).innerHTML = participant;
       document.getElementById("message").innerHTML = "Your meeting code: " + secretcode;
       document.getElementById("meetingcode").value = secretcode;
@@ -266,6 +297,7 @@ function removeParticipantInCell(secretcode){
   for(var i=0; i<ts.list.length;i++){
     if(ts.list[i].secretcode == secretcode){
       ts.list[i].participant = "";
+      ts.list[i].available = 1;
       document.getElementById(ts.list[i].id).innerHTML = "";
       document.getElementById("meetingcode").value = "";
     }
@@ -449,8 +481,6 @@ function cancelMeetingRequest(e, data){
     <h3>Schedule</h3>
 
     <table id="schedule" border="black"></table>
-
-    <div id="changeweek"></div>
 
   </div>
 
