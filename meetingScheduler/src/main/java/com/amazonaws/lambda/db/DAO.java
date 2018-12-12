@@ -296,7 +296,7 @@ public class DAO {
     		PreparedStatement ps = conn.prepareStatement("DELETE FROM Schedules WHERE creationdate <= ? AND creationtime <= NOW()");
     		ps.setString(1, creatingDate);
     		
-    		int numRows = ps.executeQuery();
+    		int numRows = ps.executeUpdate();
     		if(numRows > 0) {
     			r = true;
     		}
