@@ -128,9 +128,9 @@ function showTimeSlotsGUI(){
       // check if column counter is at 7, then increment rowCounter
       cell = rows[rowCounter].cells[columnCounter];
       if(ts.list[i].available == 1){
-        cell.innerHTML = '<p id="'+ ts.list[i].id + '">' + ts.list[i].participant + '</p><button id="' + ts.list[i].secretcode + '" onclick="cancelMeeting(this)" value="Unavailable" style="background-color:#DC143C; font-weight: 400;">Unavailable</button>';
+        cell.innerHTML = '<p id="'+ ts.list[i].id + '">' + ts.list[i].participant + '</p><button class="btn-xs" id="' + ts.list[i].secretcode + '" onclick="cancelMeeting(this)" value="CLOSED" style="color:#DC143C;">CLOSED</button>';
       } else {
-        cell.innerHTML = '<p id="'+ ts.list[i].id + '"></p><button id="' + ts.list[i].secretcode + '" onclick="createMeeting(this)" value="Join" style="background-color:#20B2AA">Join</button>';
+        cell.innerHTML = '<p id="'+ ts.list[i].id + '"></p><button class="btn-xs" id="' + ts.list[i].secretcode + '" onclick="createMeeting(this)" value="OPEN" style="color:#00e600">OPEN</button>';
       }
 
       if(rowCounter == rows.length-1){
@@ -351,7 +351,7 @@ function removeParticipantInCell(secretcode){
   for(var i=0; i<ts.list.length;i++){
     if(ts.list[i].secretcode == secretcode){
       ts.list[i].participant = "";
-      ts.list[i].available = 1;
+      ts.list[i].available = 0;
       document.getElementById(ts.list[i].id).innerHTML = "";
       document.getElementById("meetingcode").value = "";
     }
@@ -421,9 +421,9 @@ function createMeetingRequest(e, data){
           document.getElementById(e.id).onclick = function () {
       	    cancelMeeting(this);
           }
-          document.getElementById(e.id).value = "Cancel";
-          document.getElementById(e.id).innerHTML = "Cancel";
-          document.getElementById(e.id).style.background = "#DC143C";
+          document.getElementById(e.id).value = "CANCEL";
+          document.getElementById(e.id).innerHTML = "CANCEL";
+          document.getElementById(e.id).style.color = "#DC143C";
           document.getElementById(e.id).id = response.response;
           fillParticipantInCell(data.participant, data.startdate, data.starttime, response.response);
           //console.log(data.starttime);
@@ -482,10 +482,9 @@ function cancelMeetingRequest(e, data){
           document.getElementById(e.id).onclick = function () {
             createMeeting(this);
           }
-          document.getElementById(e.id).value = "Join";
-          document.getElementById(e.id).innerHTML = "Join";
-          document.getElementById(e.id).style.background = "#20B2AA";
-          document.getElementById("message").innerHTML = "";
+          document.getElementById(e.id).value = "OPEN";
+          document.getElementById(e.id).innerHTML = "OPEN";
+          document.getElementById(e.id).style.color = "#00e600";
           removeParticipantInCell(data.secretcode);
           //console.log(data.starttime);
           //console.log(data.startdate);
@@ -527,19 +526,36 @@ function cancelMeetingRequest(e, data){
       <div class="row">
 
         <div class="col-md-1">
-          <div class="container">
-
-          </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-5">
             <div class="dtc animate-box">
               <form name="showForm" method="get">
                 <div class="list-group-2">
                   <fieldset>
                     <div class="list-group-2-item">
-                      Input Schedule ID: <input type="search2" name="scheduleid" value="" /><br>
+                      <div class="dl-horizontal">
+                        <legend>Show Schedule</legend>
+                        Schedule Code<br><input type="search2" name="scheduleid" value="AAAAAAAAAAAAAAA" /><br>
+                      </div>
+                    </div>
+                    <div class="list-group-2-item">
                       <input class="btn" type="button" value="Show"  onClick="JavaScript:showSchedule()">
+                    </div>
+                  </fieldset>
+                </div>
+              </form>
+
+              <form name="nameForm" method="get">
+                <div class="list-group">
+                  <fieldset>
+                    <div class="list-group-item">
+                      <div class="dl-horizontal">
+                        <legend>What's Your Name?</legend>
+                          <div class="list-group-item">
+                            Name <br><input type="search" name="participant" value="" /><br>
+                          </div>
+                      </div>
                     </div>
                   </fieldset>
                 </div>
@@ -552,22 +568,31 @@ function cancelMeetingRequest(e, data){
             <form name="cancelForm" method="post">
               <div class="list-group-2">
                 <fieldset>
-                  <div class="list-group-2-item">
-                    Meeting Code <br><input id="meetingcode" type="search2" name="meetingcode" value="" /><br>
+                  <div class="list-group-item">
+                    <div class="dl-horizontal">
+                      <legend>Enter Meeting Code</legend>
+                      <div class="list-group-2-item">
+                        Meeting Code <br><input id="meetingcode" type="search2" name="meetingcode" value="AAAAAAAAAAAAAAA" /><br>
+                      </div>
+                    </div>
                   </div>
                 </fieldset>
               </div>
             </form>
-          </div>
-        </div>
 
-        <div class="col-md-2">
-          <div class="dtc animate-box">
-            <form name="nameForm" method="get">
-              <div class="list-group-2">
+            <form name="searchForm" method="get">
+              <div class="list-group">
                 <fieldset>
-                  <div class="list-group-2-item">
-                    Name <br><input type="search" name="participant" value="" /><br>
+                  <div class="list-group-item">
+                    <div class="dl-horizontal">
+                      <legend>Search Available Meetings</legend>
+                      <div class="list-group-item">
+                        Schedule Code <br><input id="searchschedule" type="search2" name="searchschedule" value="AAAAAAAAAAAAAAA" /><br>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="list-group-item">
+                    <input class="btn" type="button" value="Search"  onClick="JavaScript:searchMeetings()">
                   </div>
                 </fieldset>
               </div>
@@ -576,16 +601,14 @@ function cancelMeetingRequest(e, data){
         </div>
 
         <div class="col-md-1">
-          <div class="container">
-
-          </div>
         </div>
-
       </div>
+
 
       <div class="row">
         <div class="col-md-1">
         </div>
+
         <div class="col-md-10">
           <div class="dtc animate-box">
             <div class="calendar">
@@ -593,6 +616,7 @@ function cancelMeetingRequest(e, data){
             </div>
           </div>
         </div>
+
         <div class="col-md-1">
         </div>
       </div>
