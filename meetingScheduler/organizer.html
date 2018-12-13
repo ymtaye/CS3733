@@ -43,26 +43,46 @@ var columnmax; // the difference in days between start day and end day, in days
 function showNextWeek(){
   // check to make sure were not at the end the the schedule
   // change start week, then call showTimeSlotsGUI()
-  if(endFullDate.getTime() == weekEnd.getTime()){
+  if(endFullDate.getTime() <= weekEnd.getTime()){
     return;
   }
 
   weekStart.setTime(weekEnd.getTime());
 
   showTimeSlotsGUI();
-
+  redrawHeader();
 }
 
 function showLastWeek(){
   // check to make sure were not at the beginning of the the schedule
   // change start week, then call showTimeSlotsGUI()
-  if(startFullDate.getTime() == weekStart.getTime()){
+  if(startFullDate.getTime() >= weekStart.getTime()){
     return;
   }
 
   weekStart.setTime(weekStart.getTime() - (7*1000*60*60*24));
 
   showTimeSlotsGUI();
+  redrawHeader();
+}
+
+function redrawHeader(){
+  var headerCells = document.getElementById("schedule").rows[0].cells;
+  var day;
+
+  var date = new Date(weekStart.getTime());
+  //console.log(date.toUTCString());
+  var date2 = new Date(weekEnd.getTime());
+  //console.log(date2.toUTCString());
+  var DOWdate;
+  // Days of the Week at the top of the table
+  for(var i=1;i<8;i++){
+    day = headerCells[i];
+    DOWdate = new Date(date.getTime()+(i*1000*60*60*24));
+    var string = DOWdate.toUTCString().slice(0, 12);
+    console.log(string);
+    day.innerHTML = string;
+  }
 }
 
 function showTimeSlotsGUI(){
@@ -79,7 +99,8 @@ function showTimeSlotsGUI(){
   for(var i=0; i<ts.list.length;i++){
     slotEndDate = new Date(ts.list[i].enddate+"T"+ts.list[i].endtime+"Z");
     slotStartDate = new Date(ts.list[i].startdate+"T"+ts.list[i].starttime+"Z");
-    if(slotStartDate.getTime() >= weekStart.getTime() && columnCounter <= columnmax){
+    console.log(slotEndDate.getTime());
+    if(slotStartDate.getTime() >= weekStart.getTime() && slotEndDate.getTime() <= weekEnd.getTime() && columnCounter <= columnmax){
       // insert cell
       // increment column counter
       // check if column counter is at 7, then increment rowCounter
@@ -106,6 +127,16 @@ function showTimeSlotsGUI(){
   console.log(weekEnd.toUTCString());
   console.log(weekStart.toUTCString());
 
+}
+
+function setweekEnd(latestDate){
+    // if the last element isnt within a week of the start, weekEnd is seven days after the start date endtime
+  var lastTimeSlot = new Date(ts.list[ts.list.length-1].enddate+"T"+ts.list[ts.list.length-1].endtime+"Z");
+  var firstTimeSlot = new Date(ts.list[0].enddate+"T"+ts.list[0].endtime+"Z");
+  
+  if(Math.abs(lastTimeSlot.getTime() - firstTimeSlot.getTime()) >= (7*1000*60*60*24)){
+    weekEnd = new Date(firstTimeSlot.getTime() + (7*1000*60*60*24));
+  }
 }
 
 function getSlotLength(timeslots){
@@ -237,6 +268,7 @@ function showScheduleGUI(timeslots){
   startFullDate = new Date(earliestDate.getTime());
   endFullDate = new Date(latestDate.getTime());
   weekStart = new Date(earliestDate.getTime());
+  setweekEnd(latestDate);
   console.log("\n\n\n\n\nEarliest Time: "+endFullDate.getTime());
 
   document.getElementById("schedule").innerHTML = "";
