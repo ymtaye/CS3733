@@ -545,32 +545,7 @@ function deleteSchedule(e){
 }
 
 function extendSchedule(e){
-  var form = document.extendForm;
-  var extendend = form.extendend.value;
-  var extendstart = form.extendstart.value;
 
-  var data = {};
-  data["secretCode"] = secretcode;
-  data["secretCode"] = secretcode;
-  data["secretCode"] = secretcode;
-
-  var js = JSON.stringify(data);
-  console.log("JS:" + js);
-  var xhr = new XMLHttpRequest();
-  xhr.open("POST", delete_url, true);
-
-  // send the collected data as JSON
-  xhr.send(js);
-
-  // This will process results and update HTML as appropriate.
-  xhr.onloadend = function () {
-    if (xhr.readyState == XMLHttpRequest.DONE) {
-      console.log ("XHR:" + xhr.responseText);
-      if(xhr.status == 200){
-        var js = JSON.parse(xhr.responseText);
-      }
-    }
-  };
 }
 
 </script></head><body>
@@ -650,25 +625,25 @@ function extendSchedule(e){
         <div class="col-md-7">
           <div class="dtc animate-box">
             <form name="showForm" method="get">
-                <div class="list-group-2">
-                  <fieldset>
-                    <div class="list-group-2-item">
-                      <div class="dl-horizontal">
-                        <legend>Show Schedule</legend>
-                        <div class="list-group-2-item">
+              <div class="list-group-2">
+                <fieldset>
+                  <div class="list-group-2-item">
+                    <div class="dl-horizontal">
+                      <legend>Show Schedule</legend>
+                      <div class="list-group-2-item">
 
-                        </div>
-                        <div class="list-group-2-item">
-                          <input type="search2" id="message" value="" disabled/>
-                          <input type="search2" id="secretcode" name="secretcode" value="AAAAAAAAAAAAAAA" />
-                        </div>
+                      </div>
+                      <div class="list-group-2-item">
+                        <input type="search2" id="message" value="" disabled/>
+                        <input type="search2" id="secretcode" name="secretcode" value="AAAAAAAAAAAAAAA" />
                       </div>
                     </div>
-                    <div class="list-group-2-item">
-                      <input class="btn" type="button" value="Show Me!"  onClick="JavaScript:showSchedule()">
-                    </div>
-                  </fieldset>
-                </div>
+                  </div>
+                  <div class="list-group-2-item">
+                    <input class="btn" type="button" value="Show Me!"  onClick="JavaScript:showSchedule()">
+                  </div>
+                </fieldset>
+              </div>
             </form>
             <form name="deleteForm" method="post">
               <div class="list-group-2">

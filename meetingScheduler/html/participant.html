@@ -2,29 +2,29 @@
 <html>
 
 <!-- jQuery -->
-<script src="motion/js/jquery.min.js"></script>
+<script src="../motion/js/jquery.min.js"></script>
 <!-- jQuery Easing -->
-<script src="motion/js/jquery.easing.1.3.js"></script>
+<script src="../motion/js/jquery.easing.1.3.js"></script>
 <!-- Bootstrap -->
-<script src="motion/js/bootstrap.min.js"></script>
+<script src="../motion/js/bootstrap.min.js"></script>
 <!-- Waypoints -->
-<script src="motion/js/jquery.waypoints.min.js"></script>
+<script src="../motion/js/jquery.waypoints.min.js"></script>
 <!-- Main -->
-<script src="motion/js/main.js"></script>
+<script src="../motion/js/main.js"></script>
 <!-- Modernizr JS -->
-<script src="motion/js/modernizr-2.6.2.min.js"></script>
+<script src="../motion/js/modernizr-2.6.2.min.js"></script>
 <!-- style.css -->
-<link rel="stylesheet" href="motion/css/style.css">
+<link rel="stylesheet" href="../motion/css/style.css">
 <!-- Animate.css -->
-<link rel="stylesheet" href="motion/css/animate.css">
+<link rel="stylesheet" href="../motion/css/animate.css">
 <!-- Icomoon Icon Fonts-->
-<link rel="stylesheet" href="motion/css/icomoon.css">
+<link rel="stylesheet" href="../motion/css/icomoon.css">
 <!-- Themify Icons-->
-<link rel="stylesheet" href="motion/css/themify-icons.css">
+<link rel="stylesheet" href="../motion/css/themify-icons.css">
 <!-- Bootstrap  -->
-<link rel="stylesheet" href="motion/css/bootstrap.css">
+<link rel="stylesheet" href="../motion/css/bootstrap.css">
 <!-- Theme style  -->
-<link rel="stylesheet" href="motion/css/style.css">
+<link rel="stylesheet" href="../motion/css/style.css">
 
 <head><script type="text/javascript">
 var show_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/participantschedule";
@@ -341,7 +341,6 @@ function fillParticipantInCell(participant, startdate, starttime, secretcode){
       ts.list[i].participant = participant;
       ts.list[i].available = 1;
       document.getElementById(ts.list[i].id).innerHTML = participant;
-      document.getElementById("message").innerHTML = "Your meeting code: " + secretcode;
       document.getElementById("meetingcode").value = secretcode;
       return;
     }
@@ -498,46 +497,132 @@ function cancelMeetingRequest(e, data){
 
 
 </script></head><body>
-  <div id="message"></div>
 
-  <div class="container">
+<div id = "page">
 
-    <h1>Request to show a schedule</h1>
+  <nav class="gtco-nav" role="navigation">
+    <div class="container">
 
-    <form name="showForm" method="get">
-      Input Schedule ID: <input name="scheduleid" value="" /><br>
-      <input type="button" value="Show"  onClick="JavaScript:showSchedule()">
-    </form>
+      <div class="row">
+        <div class="col-sm-2 col-xs-2">
+          <div id="gtco-logo"><a href="index.html">Tarazed</div>
+        </div>
+        <div class="col-xs-10 text-right fh5co-top-social">
+          <ul class="gtco-social">
+            <li><a href="https://github.com/marcuscop/Tarazed" class="icon-github"></i></a></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </nav>
+
+  <div id="gtco-intro">
+
+      <div class="page-header">
+        <div class="container">
+        </div>
+      </div>
+
+      <div class="row">
+
+        <div class="col-md-1">
+          <div class="container">
+
+          </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="dtc animate-box">
+              <form name="showForm" method="get">
+                <div class="list-group-2">
+                  <fieldset>
+                    <div class="list-group-2-item">
+                      Input Schedule ID: <input type="search2" name="scheduleid" value="" /><br>
+                      <input class="btn" type="button" value="Show"  onClick="JavaScript:showSchedule()">
+                    </div>
+                  </fieldset>
+                </div>
+              </form>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+          <div class="dtc animate-box">
+            <form name="cancelForm" method="post">
+              <div class="list-group-2">
+                <fieldset>
+                  <div class="list-group-2-item">
+                    Meeting Code <br><input id="meetingcode" type="search2" name="meetingcode" value="" /><br>
+                  </div>
+                </fieldset>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="col-md-2">
+          <div class="dtc animate-box">
+            <form name="nameForm" method="get">
+              <div class="list-group-2">
+                <fieldset>
+                  <div class="list-group-2-item">
+                    Name <br><input type="search" name="participant" value="" /><br>
+                  </div>
+                </fieldset>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="col-md-1">
+          <div class="container">
+
+          </div>
+        </div>
+
+      </div>
+
+      <div class="row">
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-10">
+          <div class="dtc animate-box">
+            <div class="calendar">
+              <table id="schedule" class="table"></table>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-1">
+        </div>
+      </div>
+
+      <div class="panel-footer">
+        <div class="row">
+          <div class="col-sm-3">
+              <h4>Authors</h4>
+              <ul>
+                <li>Marc Reardon</li>
+                <li>Christian Tweed</li>
+                <li>Thar Min Htet</li>
+                <li>Yared Taye</li>
+              </ul>
+          </div>
+          <div class="col-sm-4">
+            <h4>Contact Us</h4>
+            <p>mdreardon@wpi.edu or mdreardon@gmail.com</p>
+            <p>603-370-3966</p>
+            <p></p>
+          </div>
+          <div class="col-sm-5">
+            <b>Description</b>
+            <p>This project was a final submission for Software Engineering CS3733 at WPI.  Organizers can create a schedule from here, and give out the secret code to participants.  Participants can join a schedule by visiting the participant page. If you want to edit the schedule at any time, visit this page.</p>
+          </div>
+        </div>
+      </div>
 
   </div>
-
-  <div class="container">
-
-    <h1>Type meeting code to enable delete:</h1>
-
-    <form name="cancelForm" method="post">
-      Meeting Code: <input id="meetingcode" name="meetingcode" value="" /><br>
-    </form>
-
-  </div>
-
-  <div class="container">
-
-    <h1>Type Your Name</h1>
-
-    <form name="nameForm" method="get">
-      Name: <input name="participant" value="" /><br>
-    </form>
-
-  </div>
-
-  <div class="container">
-
-    <h3>Schedule</h3>
-
-    <table id="schedule" border="black"></table>
-
-  </div>
+</div>
 
 </body>
 </html>
