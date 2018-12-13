@@ -397,7 +397,8 @@ public class DAO {
 			throw new Exception("Failed in getting timeslots: " + e.getMessage());
 		}
 	}
-
+	
+	//shoutout to Yared for that gross SQL statement
 	public List<TimeSlot> FilterAll(SearchMeetingsRequest req) throws Exception {
 		int Year = req.getYear();
 		int month = req.getMonth();
@@ -455,5 +456,153 @@ public class DAO {
 			throw new Exception("Failed in getting timeslots: " + e.getMessage());
 		}
 	}
+	public int getMeetingLength(String scheduleID) throws Exception{
+    	try {
+    		String eol = System.getProperty("line.separator"); //for testing
+    		PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE scheduleid = ?");
+    		ps.setString(1, scheduleID);
+    		ResultSet rS = ps.executeQuery();
+    		rS.next();
+    		String st = rS.getString("starttime");
+    		System.out.println("________________________________________________________" + eol);
+    		System.out.println("IN GET MEETING LENGTH" + eol);
+    		System.out.println("starttime = " + st + eol);
+    		String et = rS.getString("endtime");
+    		System.out.println("endtime = " + et + eol);
+    		rS.close();
+    		int stH,stM;
+    		int etH,etM;
+    		stH = Integer.parseInt(st.substring(0, 2));
+    		System.out.println("stH = " + Integer.toString(stH) + eol);
+    		etH = Integer.parseInt(et.substring(0, 2));
+    		System.out.println("etH = " + Integer.toString(etH) + eol);
+    		stM = Integer.parseInt(st.substring(3, 5));
+    		System.out.println("stM = " + Integer.toString(stM) + eol);
+    		etM = Integer.parseInt(et.substring(3, 5));
+    		System.out.println("etM = " + Integer.toString(etM) + eol);
+    		System.out.println("Calculating the minutes" + eol);
+    		stM = stM + (stH*60);
+    		System.out.println("stM = " + Integer.toString(stM) + eol);
+    		etM = etM + (etH*60);
+    		System.out.println("etM = " + Integer.toString(etM) + eol);
+    		int returnVal = (etM - stM);
+    		System.out.println("returnVal = " + Integer.toString(returnVal) + eol);
+    		System.out.println("_________________________________" + eol);
+    		return returnVal;
+    	}
+    	catch(Exception e) {
+    		throw new Exception("Failed to get meeting length: " + e.getMessage());
+    	}
+    }
+	public class DateFormatException extends Exception{
+		private String mess;
+		public DateFormatException() {this.mess = "";}
+		public void setMessage(String m) {this.mess = m;}
+		public String getMessage() {return this.mess;}
+	}
+    public boolean extendDateForwards(String scheduleID, String newEndDate, String sc) throws Exception{
+    	try {
+    		String eol = System.getProperty("line.separator"); //for testing
+    		boolean r = false;
+    		SimpleDateFormat dayofyear = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat hourofday = new SimpleDateFormat("HH:mm:ss");
+            SimpleDateFormat fulltime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    		
+    		int meetingLength = getMeetingLength(scheduleID);
+    		System.out.println("Meeting Length = " + Integer.toString(meetingLength) + eol);
+    		PreparedStatement ps = conn.prepareStatement("SELECT * FROM Schedules WHERE id = ? AND secretcode = ?;");
+    		ps.setString(1, scheduleID);
+    		ps.setString(2, sc);
+    		ResultSet rS = ps.executeQuery();
+    		if(rS.next()) {r = true;} //checking to see if there is a schedule
+    		String enddate = rS.getString("enddate");
+    		System.out.println("enddate = "+enddate.toString() + eol);
+    		String dayStartHour = rS.getString("daystarthour");
+    		System.out.println("daystarthour = " + dayStartHour.toString() + eol);
+    		String dayEndHour = rS.getString("dayendhour");
+    		
+    		java.util.Date eD = (java.util.Date) dayofyear.parse(enddate);
+    		eD.setTime(eD.getTime() + (1000*60*60*24));
+    		System.out.println("eD = "+eD.toString() + eol);
+            java.util.Date nED = (java.util.Date) dayofyear.parse(newEndDate);
+            System.out.println("nED = "+nED.toString() + eol);
+            java.util.Date startT = (java.util.Date) hourofday.parse(dayStartHour);
+            System.out.println("startT = "+startT.toString() + eol);
+            java.util.Date endT = (java.util.Date) hourofday.parse(dayEndHour);
+            System.out.println("endT = "+endT.toString() + eol);
+            boolean isAfter = false;
+            if(eD.before(nED)) {isAfter = true;} //checking to see if the dates are in order
+            if(!isAfter) {
+            	String errorMessage = "The Dates for the extension are out of order";
+            	DateFormatException d = new DateFormatException();
+            	d.setMessage(errorMessage);
+            	throw d;
+            }
+            if(isAfter) {
+            	java.util.Date starttimeofdayINIT = (java.util.Date) fulltime.parse(enddate+" "+dayStartHour);
+            	starttimeofdayINIT.setTime(starttimeofdayINIT.getTime() + (1000*60*60*24));
+            	Date starttimeofday = new Date(0);
+            	starttimeofday.setTime(starttimeofdayINIT.getTime());
+            	System.out.println("starttimeofday = " + starttimeofday.toString() + eol);
+            	int numdays = (int) (1+Math.abs((eD.getTime()-nED.getTime())/(1000*60*60*24)));
+            	System.out.println("numdays = " + Integer.toString(numdays) + eol);
+            	int numrows = (int) ((startT.getTime()-endT.getTime())/(meetingLength*60000));
+            	System.out.println("numrows = " + Integer.toString(numrows) + eol);
 
+            	String weekdayString = " ";
+            	String MstartString = " ";
+            	String MendString = " ";
+            	
+            	Date MstartTDate;
+            	Date MendTDate;
+            	System.out.println("Starting the first for loop" + eol);
+            	for (int j=0;j<Math.abs(numdays);j++) {
+            		System.out.println("numdays = " + Integer.toString(numdays));
+            		weekdayString = dayofyear.format(starttimeofday);
+            		System.out.println("weekdaystring = " + weekdayString + eol);
+            		System.out.println("Starting inner for loop" + eol);
+            		for (int i=0;i<Math.abs(numrows);i++) {
+            			System.out.println("numrows = " + Integer.toString(numrows) + eol);
+            		// dates for the start and end time
+            			MstartTDate = new Date((starttimeofday.getTime())+((meetingLength*60000)*i)); 
+            			System.out.println("MstartTDate = " + MstartTDate.toString() + eol);
+            			MendTDate = new Date((starttimeofday.getTime())+((meetingLength*60000)*(i+1)));
+            			System.out.println("MendTDate = " + MendTDate.toString() + eol);
+                    // 	Strings for the start and end time
+            			MstartString = hourofday.format(MstartTDate);
+            			System.out.println("MstartString = " + MstartString.toString() + eol);
+            			MendString = hourofday.format(MendTDate);
+            			System.out.println("MendString = " + MendString.toString() + eol);
+            			
+            			PreparedStatement ps2 = conn.prepareStatement("INSERT INTO TimeSlots (id, secretcode, startdate, enddate, starttime, endtime, participant, available, scheduleid) values(?,?,?,?,?,?,?,?,?);");
+            			ps2.setString(1, getSaltString());
+            			ps2.setString(2, getSaltString());
+            			ps2.setString(3, weekdayString);
+            			ps2.setString(4, weekdayString);
+            			ps2.setString(5, MstartString);
+            			ps2.setString(6, MendString);
+            			ps2.setString(7, "");
+            			ps2.setInt(8, 0);
+            			ps2.setString(9, scheduleID);
+            			ps2.execute();
+                  
+            		}
+            		starttimeofday.setTime(starttimeofday.getTime() + (1000*60*60*24));
+            		System.out.println("starttimeofday = " + starttimeofday.toString() + eol);
+            	}
+            	PreparedStatement ps3 = conn.prepareStatement("UPDATE Schedules SET enddate = ? WHERE id = ?;");
+            	ps3.setString(1, newEndDate);
+            	ps3.setString(2, scheduleID);
+            	ps3.executeUpdate();
+            	}
+            return r && isAfter;
+    	}
+    	catch(DateFormatException d) {
+    		throw new Exception(d.getMessage());
+    	}
+    	catch(Exception e) {
+    		e.printStackTrace();
+    		throw new Exception("Failed to extend date forwards: " + e.getMessage());
+    	}
+    }
 }
