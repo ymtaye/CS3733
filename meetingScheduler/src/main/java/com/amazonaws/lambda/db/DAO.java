@@ -26,6 +26,29 @@ public class DAO {
     		conn = null;
     	}
     }
+    public static int getDayOfWeekAsInt(String day) {
+        if (day == null) {
+            return -1;
+        }
+        switch (day.toLowerCase()) {
+            case "monday":
+                return 2;
+            case "tuesday":
+                return 3;
+            case "wednesday":
+                return 4;
+            case "thursday":
+                return 5;
+            case "friday":
+                return 6;
+            case "saturday":
+                return 7;
+            case "sunday":
+                return 1;
+            default: 
+                return -1;
+        }
+    }
     
     
     public boolean addSchedule(Schedule schedule) throws Exception {
@@ -366,20 +389,22 @@ public class DAO {
          }
     }
     
-     public List<TimeSlot> FilterAll(int month, int Year, int DayOfMonth, String Start, String End ) throws Exception{
+     public List<TimeSlot> FilterAll(int month, int Year, String DayOfWeek, int DayOfMonth, String Start, String End ) throws Exception{
     	
      
      	try {
+     		int DayWeek = getDayOfWeekAsInt(DayOfWeek);
      		List<TimeSlot> ScheduleSYS = new ArrayList<TimeSlot>();
      		java.sql.Time start = java.sql.Time.valueOf(Start);   // Formatting for SQL 
         	java.sql.Time end = java.sql.Time.valueOf(End);
         	 
         // PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots Where available = 0 AND (starttime <= ? AND endtime >= ?) AND YEAR(startdate) = ? AND (MONTH(startdate) OR MONTH(enddate)) = ? AND ;");
             
-     		PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE available = 0 AND YEAR(startdate) = ? AND month(startdate) = ? AND  Day(startdate) = ? AND (starttime >= ? AND endtime <= ?);");
+     		PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE available = 0 AND YEAR(startdate) = ? AND month(startdate) = ? AND  Day(startdate) = ? AND (starttime >= ? AND endtime <= ? AND dayofweek(startdate) = ?);");
      		
      		ps.setInt(1, Year);
      		ps.setInt(2, month);
+     		ps.setInt(6, DayWeek);
      		ps.setInt(3, DayOfMonth);
      		ps.setTime(4, start);
      		ps.setTime(5, end);
