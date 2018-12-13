@@ -12,6 +12,6 @@ public class ExtendDateForwardsRequest {
 	}
 	
 	public String toString() {
-		return "Extend(" + scheduleid + " ," + secretcode + " ," + newEndDate + " ," + ")";
+		return "Extend(" + scheduleid + " ," + secretcode + " ," + newEndDate + ")";
 	}
 }

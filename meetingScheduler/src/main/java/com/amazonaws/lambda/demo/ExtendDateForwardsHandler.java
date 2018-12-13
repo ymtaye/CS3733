@@ -94,11 +94,11 @@ public class ExtendDateForwardsHandler implements RequestStreamHandler{
 			logger.log(req.toString());
 
 			ExtendDateForwardsResponse resp;
-			logger.log("Made the resposne");
+			logger.log("Made the response");
 		
 			
 			try {
-				if (extendDateForwards(req.scheduleid, req.newEndDate, req.secretcode)) {
+				if (extendDateForwards(req.scheduleid, req.secretcode, req.newEndDate)) {
 					resp = new ExtendDateForwardsResponse("Confirmed for extension");
 				} else {
 					resp = new ExtendDateForwardsResponse("Unable to extend date to  [" + req.newEndDate + " for schedule: " + req.scheduleid + "]", 422);
