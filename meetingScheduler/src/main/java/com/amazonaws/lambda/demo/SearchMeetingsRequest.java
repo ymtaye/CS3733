@@ -25,7 +25,22 @@ public class SearchMeetingsRequest {
 	public String toString() {
 		return "Add(" + Integer.toString(Month) + Integer.toString(Year) + DayOfWeek + Integer.toString(DayOfMonth) + Start + End
 				+ ")";
+	}
+	public int getMonth() {
+		return Month;
+	};
+	public int getYear() {
+		return Year;
+	};public int getDayOfMonth() {
+		return DayOfMonth;
+	}
+	public String getStart() {
+		return Start;
+	}
+	public String getEnd() {
+		return End;
+	}public String getDayOfWeek() {
+		return DayOfWeek;
 	}}
-	
 
 	
