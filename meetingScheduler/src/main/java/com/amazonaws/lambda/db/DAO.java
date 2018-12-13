@@ -91,14 +91,19 @@ public class DAO {
                     // Strings for the start and end time
                     MstartString = hourofday.format(MstartTDate);
                     MendString = hourofday.format(MendTDate);
-                    
+            	    java.sql.Time start = java.sql.Time.valueOf(MstartString);   // Formatting for SQL 
+            		java.sql.Time end = java.sql.Time.valueOf(MendString);   // Formatting for SQL
+            		
+            		
+
+
             		PreparedStatement ps = conn.prepareStatement("INSERT INTO TimeSlots (id, secretcode, startdate, enddate, starttime, endtime, participant, available, scheduleid) values(?,?,?,?,?,?,?,?,?);");
                     ps.setString(1, getSaltString());
                     ps.setString(2, getSaltString());
-                    ps.setString(3, weekdayString);
-                    ps.setString(4, weekdayString);
-                    ps.setString(5, MstartString);
-                    ps.setString(6, MendString);
+                    ps.setObject(3, MstartTDate); 
+                    ps.setObject(4, MendTDate); 
+                    ps.setTime(5, start);
+                    ps.setTime(6, end);
                     ps.setString(7, "");
                     ps.setInt(8, 0);
                     ps.setString(9, schedule.id);
@@ -335,7 +340,7 @@ public class DAO {
     }
      public ArrayList<TimeSlot> getSchedules(int hours) throws Exception{
     	try {
-    		ArrayList<TimeSlot> ScheduleSYS = new ArrayList<TimeSlot>();;
+    		ArrayList<TimeSlot> ScheduleSYS = new ArrayList<TimeSlot>();
     		LocalTime time =  LocalTime.now();
     		time = time.minusHours(hours);
     		java.sql.Time formattedTime = java.sql.Time.valueOf( time ); 
@@ -360,4 +365,59 @@ public class DAO {
              throw new Exception("Failed in getting timeslots: " + e.getMessage());
          }
     }
+    
+     public List<TimeSlot> FilterAll(int month, int Year, int DayOfMonth, String Start, String End ) throws Exception{
+    	
+     
+     	try {
+     		List<TimeSlot> ScheduleSYS = new ArrayList<TimeSlot>();
+     		java.sql.Time start = java.sql.Time.valueOf(Start);   // Formatting for SQL 
+        	java.sql.Time end = java.sql.Time.valueOf(End);
+        	 
+        // PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots Where available = 0 AND (starttime <= ? AND endtime >= ?) AND YEAR(startdate) = ? AND (MONTH(startdate) OR MONTH(enddate)) = ? AND ;");
+            
+     		PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE available = 0 AND YEAR(startdate) = ? AND month(startdate) = ? AND  Day(startdate) = ? AND (starttime >= ? AND endtime <= ?);");
+     		
+     		ps.setInt(1, Year);
+     		ps.setInt(2, month);
+     		ps.setInt(3, DayOfMonth);
+     		ps.setTime(4, start);
+     		ps.setTime(5, end);
+     		
+     		ResultSet resultSet = ps.executeQuery();
+     		 while (resultSet.next()) {
+                  ScheduleSYS.add(generateTimeSlot(resultSet));
+              }
+              resultSet.close();
+              ps.close();
+              
+              return ScheduleSYS;
+
+          } catch (Exception e) {
+          	e.printStackTrace();
+              throw new Exception("Failed in getting timeslots: " + e.getMessage());
+          }
+     }
+        	 
+     		
+     		
+     		
+     		
+     		
+     		
+     		
+     		
+     		
+     		
+     		
+     		
+     		
+     		
+     		
+     		
+     		
+     		
+     		
+     		
+     	
 }

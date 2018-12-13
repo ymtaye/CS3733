@@ -1,21 +1,31 @@
 package com.amazonaws.lambda.demo;
 
+import java.sql.Time;
+import java.time.*;
+
 public class SearchMeetingsRequest {
 	int Month;
 	int Year;
-	String DayOfWeek;
-	int DayOfMonth; 
-	String Timeslot;
-	
-	public SearchMeetingsRequest (int Month, int Year, String Day, int Date, String Time) {
+    String DayOfWeek;
+	int DayOfMonth;
+	String Start;
+	String End;
+
+	public SearchMeetingsRequest(int Month, int Year, int Date, String Day, String Start, String End) {
 		this.Month = Month;
-		this.Year=Year;
-		this.DayOfWeek = Day;
+		this.Year = Year;
+	    this.DayOfWeek = Day;
 		this.DayOfMonth = Date;
-		this.Timeslot = Time;
-	}
-	public String toString() {
-		return "Add(" + Integer.toString(Month) +  Integer.toString(Year) + DayOfWeek + Integer.toString(DayOfMonth) + Timeslot +")";
+		this.Start = Start;
+		this.End = End;
+
 	}
 	
-}
+
+	public String toString() {
+		return "Add(" + Integer.toString(Month) + Integer.toString(Year) + DayOfWeek + Integer.toString(DayOfMonth) + Start + End
+				+ ")";
+	}}
+	
+
+	
