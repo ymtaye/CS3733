@@ -12,7 +12,7 @@ import org.junit.Test;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.google.gson.Gson;
 
-public class CreateScheduleHandlerTest {
+public class SearchMeetingHandlerTest {
 	Context createContext(String apiCall) {
         TestContext ctx = new TestContext();
         ctx.setFunctionName(apiCall);
@@ -21,20 +21,20 @@ public class CreateScheduleHandlerTest {
 
     @Test
     public void testshow() throws IOException {
-        CreateScheduleHandler handler = new CreateScheduleHandler();
+    	SearchMeetingsHandler handler = new SearchMeetingsHandler();
 
-        CreateScheduleRequest ar = new CreateScheduleRequest("2018-12-12", "2018-12-24", "09:00:00", "15:00:00", "Thar", 30);
+    	SearchMeetingsRequest ar = new SearchMeetingsRequest(4, 2018, 12, null, null, null);
         String addRequest = new Gson().toJson(ar);
         String jsonRequest = new Gson().toJson(new PostRequest(addRequest));
         
         InputStream input = new ByteArrayInputStream(jsonRequest.getBytes());
         OutputStream output = new ByteArrayOutputStream();
 
-//        handler.handleRequest(input, output, createContext("close"));
+        handler.handleRequest(input, output, createContext("close"));
 
-//        PostResponse post = new Gson().fromJson(output.toString(), PostResponse.class);
-//        CreateScheduleResponse resp = new Gson().fromJson(post.body, CreateScheduleResponse.class);
-//        Assert.assertEquals(resp.response, "Unable to update time slot on  [2018-12-12 at 09:00:00]");
+        PostResponse post = new Gson().fromJson(output.toString(), PostResponse.class);
+        SearchMeetingsResponse resp = new Gson().fromJson(post.body, SearchMeetingsResponse.class);
+        Assert.assertEquals(resp.httpCode, 200);
         
     }
 }
