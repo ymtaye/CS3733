@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
-
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -30,7 +29,6 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
 import com.google.gson.Gson;
 
-
 import com.amazonaws.lambda.db.*;
 import com.amazonaws.lambda.model.*;
 
@@ -38,33 +36,37 @@ public class SearchMeetingsHandler implements RequestStreamHandler {
 
 	public LambdaLogger logger = null;
 
-	/** Load from RDS, if it exists
+	/**
+	 * Load from RDS, if it exists
 	 * 
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-    public List<TimeSlot> FilterAll(SearchMeetingsRequest Req) throws Exception{
-		if (logger != null) { logger.log("in Filter All"); }
+	public List<TimeSlot> FilterAll(SearchMeetingsRequest Req) throws Exception {
+		if (logger != null) {
+			logger.log("in Filter All");
+		}
 		DAO dao = new DAO();
 
 		return dao.FilterAll(Req);
 	}
-	
+
 	@Override
 	public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
 		logger = context.getLogger();
 		logger.log("Loading Java Lambda handler to create constant");
 
 		JSONObject headerJson = new JSONObject();
-		headerJson.put("Content-Type",  "application/json");  // not sure if needed anymore?
+		headerJson.put("Content-Type", "application/json"); // not sure if needed anymore?
 		headerJson.put("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-	    headerJson.put("Access-Control-Allow-Origin",  "*");
-	        
+		headerJson.put("Access-Control-Allow-Origin", "*");
+
 		JSONObject responseJson = new JSONObject();
 		responseJson.put("headers", headerJson);
 
 		CreateScheduleResponse response = null;
-		
-		// extract queryStringParameters from incoming HTTP POST request. If any error, then return 422 error
+
+		// extract queryStringParameters from incoming HTTP POST request. If any error,
+		// then return 422 error
 		String queryStringParameters;
 		boolean processed = false;
 		try {
@@ -72,42 +74,33 @@ public class SearchMeetingsHandler implements RequestStreamHandler {
 			JSONParser parser = new JSONParser();
 			JSONObject event = (JSONObject) parser.parse(reader);
 			logger.log("event:" + event.toJSONString());
-			
+
 			String method = (String) event.get("httpMethod");
 			if (method != null && method.equalsIgnoreCase("OPTIONS")) {
 				logger.log("Options request");
-				response = new CreateScheduleResponse("name", 200);  // OPTIONS needs a 200 response
-		        responseJson.put("queryStringParameters", new Gson().toJson(response));
-		        processed = true;
-		        queryStringParameters = null;
+				response = new CreateScheduleResponse("name", 200); // OPTIONS needs a 200 response
+				responseJson.put("queryStringParameters", new Gson().toJson(response));
+				processed = true;
+				queryStringParameters = null;
 			} else {
 				queryStringParameters = event.get("queryStringParameters").toString();
 				System.out.println(queryStringParameters);
 				logger.log(queryStringParameters);
 				if (queryStringParameters == null) {
-					queryStringParameters = event.toJSONString();  // this is only here to make testing easier
+					queryStringParameters = event.toJSONString(); // this is only here to make testing easier
 				}
 			}
 		} catch (ParseException pe) {
 			logger.log(pe.toString());
-			response = new CreateScheduleResponse("Bad Request:" + pe.getMessage(), 422);  // unable to process input
-	        responseJson.put("queryStringParameters", new Gson().toJson(response));
-	        processed = true;
-	        queryStringParameters = null;
+			response = new CreateScheduleResponse("Bad Request:" + pe.getMessage(), 422); // unable to process input
+			responseJson.put("queryStringParameters", new Gson().toJson(response));
+			processed = true;
+			queryStringParameters = null;
 		}
 
 		if (!processed) {
-			System.out.println("1");
 			SearchMeetingsRequest req = new Gson().fromJson(queryStringParameters, SearchMeetingsRequest.class);
-			System.out.println("2");
-            System.out.println(req.Month);
-            System.out.println(req.DayOfMonth);
-
-            System.out.println(req.Year);
-            System.out.println(req.Start);
-            System.out.println(req.End);
-            
-            
+		
 			logger.log(req.toString());
 
 			SearchMeetingsResponse resp;
@@ -125,13 +118,13 @@ public class SearchMeetingsHandler implements RequestStreamHandler {
 			}
 
 			// compute proper response
-	        responseJson.put("body", new Gson().toJson(resp));  
+			responseJson.put("body", new Gson().toJson(resp));
 		}
-		
-        logger.log("end result:" + responseJson.toJSONString());
-        logger.log(responseJson.toJSONString());
-        OutputStreamWriter writer = new OutputStreamWriter(output, "UTF-8");
-        writer.write(responseJson.toJSONString());  
-        writer.close();
+
+		logger.log("end result:" + responseJson.toJSONString());
+		logger.log(responseJson.toJSONString());
+		OutputStreamWriter writer = new OutputStreamWriter(output, "UTF-8");
+		writer.write(responseJson.toJSONString());
+		writer.close();
 	}
 }
