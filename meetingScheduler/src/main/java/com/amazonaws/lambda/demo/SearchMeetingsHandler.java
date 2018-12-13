@@ -42,11 +42,11 @@ public class SearchMeetingsHandler implements RequestStreamHandler {
 	 * 
 	 * @throws Exception 
 	 */
-	ArrayList<TimeSlot> getFreeTimeSlots(String secretcode) throws Exception {
+    public List<TimeSlot> FilterAll(int month, int Year, String DayOfWeek, int DayOfMonth, String Start, String End ) throws Exception{
 		if (logger != null) { logger.log("in getTimeSlotsForOrg"); }
 		DAO dao = new DAO();
 
-		return dao.getFreeTimeSlots(secretcode);
+		return dao.FilterAll(month, Year,DayOfWeek, DayOfMonth,  Start, End);
 	}
 	
 	@Override
@@ -82,8 +82,8 @@ public class SearchMeetingsHandler implements RequestStreamHandler {
 		        queryStringParameters = null;
 			} else {
 				queryStringParameters = event.get("queryStringParameters").toString();
-				//System.out.println(queryStringParameters);
-				//logger.log(queryStringParameters);
+				System.out.println(queryStringParameters);
+				logger.log(queryStringParameters);
 				if (queryStringParameters == null) {
 					queryStringParameters = event.toJSONString();  // this is only here to make testing easier
 				}
@@ -97,16 +97,31 @@ public class SearchMeetingsHandler implements RequestStreamHandler {
 		}
 
 		if (!processed) {
-			
+			System.out.println("1");
 			SearchMeetingsRequest req = new Gson().fromJson(queryStringParameters, SearchMeetingsRequest.class);
-			logger.log(SearchMeetingsRequest.toString());
+			System.out.println("2");
+            System.out.println(req.Month);
+            System.out.println(req.DayOfMonth);
 
-			ShowScheduleResponse resp;
+            System.out.println(req.Year);
+            System.out.println(req.Start);
+            System.out.println(req.End);
+            
+            
+			logger.log(req.toString());
+
+			SearchMeetingsResponse resp;
 			try {
-				List<TimeSlot> list = getTimeSlotsForOrg(req.secretcode);
-				resp = new ShowScheduleResponse(list, 200);
+				System.out.println("3");
+
+				List<TimeSlot> list = FilterAll(req.Month, req.Year,  req.DayOfWeek,req.DayOfMonth, req.Start, req.End );
+				System.out.println("4");
+
+				resp = new SearchMeetingsResponse(list, 200);
+				System.out.println("5");
+
 			} catch (Exception e) {
-				resp = new ShowScheduleResponse(403);
+				resp = new SearchMeetingsResponse(403);
 			}
 
 			// compute proper response

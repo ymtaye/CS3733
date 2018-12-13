@@ -7,12 +7,11 @@ import com.amazonaws.lambda.model.TimeSlot;
 
 public class SearchMeetingsResponse {
 
-	ArrayList<TimeSlot> list;
-
+	List<TimeSlot> list;
 	int httpCode;
 
-	public SearchMeetingsResponse(ArrayList<TimeSlot> list, int code) {
-		this.list = list;
+	public SearchMeetingsResponse(List<TimeSlot> list2, int code) {
+		this.list = list2;
 		this.httpCode = code;
 
 	}
