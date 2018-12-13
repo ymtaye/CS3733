@@ -12,7 +12,7 @@ import org.junit.Test;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.google.gson.Gson;
 
-public class GetSchedulesHandlerTest {
+public class ParticipantShowScheduleHandlerTest {
 	Context createContext(String apiCall) {
         TestContext ctx = new TestContext();
         ctx.setFunctionName(apiCall);
@@ -21,9 +21,9 @@ public class GetSchedulesHandlerTest {
 
     @Test
     public void testshow() throws IOException {
-    	GetSchedulesHandler handler = new GetSchedulesHandler();
+        ParticipantShowScheduleHandler handler = new ParticipantShowScheduleHandler();
 
-    	GetSchedulesRequest ar = new GetSchedulesRequest(7);
+        ParticipantShowScheduleRequest ar = new ParticipantShowScheduleRequest("7X6R900HAH58YUODR6");
         String addRequest = new Gson().toJson(ar);
         String jsonRequest = new Gson().toJson(new PostRequest(addRequest));
         
@@ -33,7 +33,8 @@ public class GetSchedulesHandlerTest {
         handler.handleRequest(input, output, createContext("close"));
 
         PostResponse post = new Gson().fromJson(output.toString(), PostResponse.class);
-        GetSchedulesResponse resp = new Gson().fromJson(post.body, GetSchedulesResponse.class);
+        ParticipantShowScheduleResponse resp = new Gson().fromJson(post.body, ParticipantShowScheduleResponse.class);
         Assert.assertEquals(resp.httpCode, 200);
+        
     }
 }
