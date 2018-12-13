@@ -43,30 +43,49 @@ var columnmax; // the difference in days between start day and end day, in days
 function showNextWeek(){
   // check to make sure were not at the end the the schedule
   // change start week, then call showTimeSlotsGUI()
-  if(endFullDate.getTime() == weekEnd.getTime()){
+  if(endFullDate.getTime() <= weekEnd.getTime()){
     return;
   }
 
-  weekStart.setTime(weekEnd.getTime());
+  weekStart.setTime(weekStart.getTime() + (7*1000*60*60*24));
+  findWeekEnd();
 
   showTimeSlotsGUI();
-
+  redrawHeader();
 }
 
 function showLastWeek(){
   // check to make sure were not at the beginning of the the schedule
   // change start week, then call showTimeSlotsGUI()
-  if(startFullDate.getTime() == weekStart.getTime()){
+  if(startFullDate.getTime() >= weekStart.getTime()){
     return;
   }
 
   weekStart.setTime(weekStart.getTime() - (7*1000*60*60*24));
+  findWeekEnd();
+  //weekEnd.setTime(weekEnd.getTime() - (7*1000*60*60*24));
 
   showTimeSlotsGUI();
+  redrawHeader();
+}
+
+function redrawHeader(){
+  var headerCells = document.getElementById("schedule").rows[0].cells;
+  var day;
+
+  var date = new Date(weekStart.getTime());
+  var DOWdate;
+  // Days of the Week at the top of the table
+  for(var i=0;i<7;i++){
+    day = headerCells[i+1];
+    DOWdate = new Date(date.getTime()+(i*1000*60*60*24));
+    var string = DOWdate.toUTCString().slice(0, 12);
+    console.log(string);
+    day.innerHTML = string;
+  }
 }
 
 function showTimeSlotsGUI(){
-  var LastTimeSlotIndex;
   var rowCounter = 1;
   var columnCounter = 1;
   var cell;
@@ -79,7 +98,10 @@ function showTimeSlotsGUI(){
   for(var i=0; i<ts.list.length;i++){
     slotEndDate = new Date(ts.list[i].enddate+"T"+ts.list[i].endtime+"Z");
     slotStartDate = new Date(ts.list[i].startdate+"T"+ts.list[i].starttime+"Z");
-    if(slotStartDate.getTime() >= weekStart.getTime() && columnCounter <= columnmax){
+    console.log(slotStartDate.toUTCString());
+    console.log(weekStart.toUTCString());
+    if(slotStartDate.getTime() >= weekStart.getTime() && slotEndDate.getTime() <= weekEnd.getTime() && columnCounter <= columnmax){
+      console.log("\nGHROwg\n");
       // insert cell
       // increment column counter
       // check if column counter is at 7, then increment rowCounter
@@ -97,15 +119,49 @@ function showTimeSlotsGUI(){
         rowCounter++;
       }
 
-      LastTimeSlotIndex = i;
     }
 
   }
 
-  weekEnd = new Date(ts.list[LastTimeSlotIndex].enddate+"T"+ts.list[LastTimeSlotIndex].endtime+"Z");
-  console.log(weekEnd.toUTCString());
-  console.log(weekStart.toUTCString());
+  clearTable(rowCounter, columnCounter);
 
+}
+
+function clearTable(rowCounter, columnCounter){
+  console.log(rowCounter);
+  console.log(columnCounter);
+  var rows = document.getElementById("schedule").rows;
+  for(var i=columnCounter; i<=columnmax; i++){
+    for(var j=rowCounter; j<=rows.length-1; j++){
+      cell = rows[j].cells[i];
+      cell.innerHTML = "";
+    }
+  }
+}
+
+function findWeekEnd(){
+  var lastTimeSlot = new Date(ts.list[ts.list.length-1].enddate+"T"+ts.list[ts.list.length-1].endtime+"Z");
+  var endTimeOfDay = new Date(ts.list[0].startdate+"T"+ts.list[ts.list.length-1].endtime+"Z");
+  var startTimeOfDay = new Date(ts.list[0].startdate+"T"+ts.list[0].starttime+"Z");
+  var lengthOfDay = Math.abs(endTimeOfDay.getTime() - startTimeOfDay.getTime());
+
+  if(lastTimeSlot.getTime() < (weekStart.getTime() + (6*1000*60*60*24) + lengthOfDay)){
+    weekEnd.setTime(lastTimeSlot.getTime());
+  } else {
+    weekEnd.setTime(weekStart.getTime() + (6*1000*60*60*24) + lengthOfDay);
+  }
+
+}
+
+function setweekEnd(){
+  // if the last element isnt within a week of the start, weekEnd is seven days after the start date endtime
+  var lastTimeSlot = new Date(ts.list[ts.list.length-1].enddate+"T"+ts.list[ts.list.length-1].endtime+"Z");
+  var firstTimeSlot = new Date(ts.list[0].startdate+"T"+ts.list[ts.list.length-1].endtime+"Z");
+  if(Math.abs(lastTimeSlot.getTime() - weekStart.getTime()) >= (7*1000*60*60*24)){
+    weekEnd = new Date(firstTimeSlot.getTime() + (6*1000*60*60*24));
+    console.log("\n\n\n\n\n\n\n");
+    console.log(weekEnd.toUTCString());
+  }
 }
 
 function getSlotLength(timeslots){
@@ -237,6 +293,7 @@ function showScheduleGUI(timeslots){
   startFullDate = new Date(earliestDate.getTime());
   endFullDate = new Date(latestDate.getTime());
   weekStart = new Date(earliestDate.getTime());
+  setweekEnd();
   console.log("\n\n\n\n\nEarliest Time: "+endFullDate.getTime());
 
   document.getElementById("schedule").innerHTML = "";
@@ -487,7 +544,34 @@ function deleteSchedule(e){
   };
 }
 
+function extendSchedule(e){
+  var form = document.extendForm;
+  var extendend = form.extendend.value;
+  var extendstart = form.extendstart.value;
 
+  var data = {};
+  data["secretCode"] = secretcode;
+  data["secretCode"] = secretcode;
+  data["secretCode"] = secretcode;
+
+  var js = JSON.stringify(data);
+  console.log("JS:" + js);
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", delete_url, true);
+
+  // send the collected data as JSON
+  xhr.send(js);
+
+  // This will process results and update HTML as appropriate.
+  xhr.onloadend = function () {
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+      console.log ("XHR:" + xhr.responseText);
+      if(xhr.status == 200){
+        var js = JSON.parse(xhr.responseText);
+      }
+    }
+  };
+}
 
 </script></head><body>
 
@@ -575,8 +659,8 @@ function deleteSchedule(e){
 
                         </div>
                         <div class="list-group-2-item">
-                          <input type="search" id="message" value="" disabled/>
-                          <input type="search" id="secretcode" name="secretcode" value="AAAAAAAAAAAAAAA" />
+                          <input type="search2" id="message" value="" disabled/>
+                          <input type="search2" id="secretcode" name="secretcode" value="AAAAAAAAAAAAAAA" />
                         </div>
                       </div>
                     </div>
@@ -593,7 +677,7 @@ function deleteSchedule(e){
                     <div class="dl-horizontal">
                       <legend>Delete Schedule</legend>
                       <div class="list-group-2-item">
-                        <input type="search" id="deletesecretcode" name="deletesecretcode" value="AAAAAAAAAAAAAAA" />
+                        <input type="search2" id="deletesecretcode" name="deletesecretcode" value="AAAAAAAAAAAAAAA" />
                       </div>
                     </div>
                   </div>
@@ -610,20 +694,9 @@ function deleteSchedule(e){
                     <div class="dl-horizontal">
                       <legend>Extend Schedule</legend>
                       <div class="list-group-2-item">
-                        <div class="row">
-                          <div class="col-sm-6">
                             Extend Backwards<br><input type="search" id="extendstart" name="extendstart" value="YYYY-MM-DD" /><br>
                             Extend Forwards<br><input type="search" id="extendend" name="extendend" value="YYYY-MM-DD" />
-                          </div>
-                          <div class="col-sm-4">
-                            <div class="row"><div class="col-sm-12"><p></p><p></p><p></p><p></p></div></div>
-                            <div class="row">
-                              <div class="col-sm-4">
-                                <input class="btn" type="button" value="Extend"  onClick="JavaScript:extendSchedule()">
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                            <br><br><input class="btn" type="button" value="Extend"  onClick="JavaScript:extendSchedule()">
                       </div>
                     </div>
                   </div>
@@ -665,7 +738,6 @@ function deleteSchedule(e){
             <h4>Contact Us</h4>
             <p>mdreardon@wpi.edu or mdreardon@gmail.com</p>
             <p>603-370-3966</p>
-            <p>tminhtet@wpi.edu or kianhtet@gmail.com</p>
             <p></p>
           </div>
           <div class="col-sm-5">

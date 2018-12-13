@@ -45,26 +45,71 @@ function showNextWeek(){
     return;
   }
 
-  weekStart.setTime(weekEnd.getTime());
+  weekStart.setTime(weekStart.getTime() + (7*1000*60*60*24));
+  findWeekEnd();
 
   showTimeSlotsGUI();
+  redrawHeader();
 
 }
 
 function showLastWeek(){
   // check to make sure were not at the beginning of the the schedule
   // change start week, then call showTimeSlotsGUI()
-  if(startFullDate.getTime() == weekStart.getTime()){
+  if(startFullDate.getTime() >= weekStart.getTime()){
     return;
   }
 
   weekStart.setTime(weekStart.getTime() - (7*1000*60*60*24));
+  findWeekEnd();
+  //weekEnd.setTime(weekEnd.getTime() - (7*1000*60*60*24));
 
   showTimeSlotsGUI();
+  redrawHeader();
+}
+
+function redrawHeader(){
+  var headerCells = document.getElementById("schedule").rows[0].cells;
+  var day;
+
+  var date = new Date(weekStart.getTime());
+  var DOWdate;
+  // Days of the Week at the top of the table
+  for(var i=0;i<7;i++){
+    day = headerCells[i+1];
+    DOWdate = new Date(date.getTime()+(i*1000*60*60*24));
+    var string = DOWdate.toUTCString().slice(0, 12);
+    console.log(string);
+    day.innerHTML = string;
+  }
+}
+
+function findWeekEnd(){
+  var lastTimeSlot = new Date(ts.list[ts.list.length-1].enddate+"T"+ts.list[ts.list.length-1].endtime+"Z");
+  var endTimeOfDay = new Date(ts.list[0].startdate+"T"+ts.list[ts.list.length-1].endtime+"Z");
+  var startTimeOfDay = new Date(ts.list[0].startdate+"T"+ts.list[0].starttime+"Z");
+  var lengthOfDay = Math.abs(endTimeOfDay.getTime() - startTimeOfDay.getTime());
+
+  if(lastTimeSlot.getTime() < (weekStart.getTime() + (6*1000*60*60*24) + lengthOfDay)){
+    weekEnd.setTime(lastTimeSlot.getTime());
+  } else {
+    weekEnd.setTime(weekStart.getTime() + (6*1000*60*60*24) + lengthOfDay);
+  }
+
+}
+
+function setweekEnd(){
+  // if the last element isnt within a week of the start, weekEnd is seven days after the start date endtime
+  var lastTimeSlot = new Date(ts.list[ts.list.length-1].enddate+"T"+ts.list[ts.list.length-1].endtime+"Z");
+  var firstTimeSlot = new Date(ts.list[0].startdate+"T"+ts.list[ts.list.length-1].endtime+"Z");
+  if(Math.abs(lastTimeSlot.getTime() - weekStart.getTime()) >= (7*1000*60*60*24)){
+    weekEnd = new Date(firstTimeSlot.getTime() + (6*1000*60*60*24));
+    console.log("\n\n\n\n\n\n\n");
+    console.log(weekEnd.toUTCString());
+  }
 }
 
 function showTimeSlotsGUI(){
-  var LastTimeSlotIndex;
   var rowCounter = 1;
   var columnCounter = 1;
   var cell;
@@ -95,14 +140,23 @@ function showTimeSlotsGUI(){
         rowCounter++;
       }
 
-      LastTimeSlotIndex = i;
     }
 
   }
 
-  weekEnd = new Date(ts.list[LastTimeSlotIndex].enddate+"T"+ts.list[LastTimeSlotIndex].endtime+"Z");
-  console.log(weekEnd.toUTCString());
-  console.log(weekStart.toUTCString());
+  clearTable(rowCounter, columnCounter);
+}
+
+function clearTable(rowCounter, columnCounter){
+  console.log(rowCounter);
+  console.log(columnCounter);
+  var rows = document.getElementById("schedule").rows;
+  for(var i=columnCounter; i<=columnmax; i++){
+    for(var j=rowCounter; j<=rows.length-1; j++){
+      cell = rows[j].cells[i];
+      cell.innerHTML = "";
+    }
+  }
 }
 
 function getSlotLength(timeslots){
@@ -230,6 +284,7 @@ function showScheduleGUI(timeslots){
   startFullDate = new Date(earliestDate.getTime());
   endFullDate = new Date(latestDate.getTime());
   weekStart = new Date(earliestDate.getTime());
+  setweekEnd();
   console.log("\n\n\n\n\nEarliest Time: "+endFullDate.getTime());
 
   document.getElementById("schedule").innerHTML = "";
