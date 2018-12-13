@@ -397,7 +397,8 @@ public class DAO {
 			throw new Exception("Failed in getting timeslots: " + e.getMessage());
 		}
 	}
-
+	
+	//shoutout to Yared for that gross SQL statement
 	public List<TimeSlot> FilterAll(SearchMeetingsRequest req) throws Exception {
 		int Year = req.getYear();
 		int month = req.getMonth();
@@ -493,6 +494,7 @@ public class DAO {
     		throw new Exception("Failed to get meeting length: " + e.getMessage());
     	}
     }
+	
     public boolean extendDateForwards(String scheduleID, String newEndDate, String sc) throws Exception{
     	try {
     		String eol = System.getProperty("line.separator"); //for testing
