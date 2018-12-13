@@ -544,8 +544,12 @@ function deleteSchedule(e){
   };
 }
 
-function extendSchedule(e){
+function extendScheduleEnd(e){
+  var form = document.showForm;
+  var secretcode = form.secretcode.value;
 
+  var form2 = document.extendForm;
+  var extendend =
 }
 
 </script></head><body>
@@ -662,18 +666,36 @@ function extendSchedule(e){
                 </fieldset>
               </div>
             </form>
-            <form name="extendForm" method="post">
+            <form name="extendEndForm" method="post">
               <div class="list-group-2">
                 <fieldset>
                   <div class="list-group-2-item">
                     <div class="dl-horizontal">
-                      <legend>Show Organizer Schedule</legend>
+                      <legend>Change Schedule End Date</legend>
                       <div class="list-group-2-item">
-                            Extend Backwards<br><input type="search" id="extendstart" name="extendstart" value="YYYY-MM-DD" /><br>
                             Extend Forwards<br><input type="search" id="extendend" name="extendend" value="YYYY-MM-DD" />
-                            <br><br><input class="btn" type="button" value="Extend"  onClick="JavaScript:extendSchedule()">
                       </div>
                     </div>
+                  </div>
+                  <div class="list-group-2-item">
+                    <input class="btn" type="button" value="Extend End"  onClick="JavaScript:extendScheduleEnd()">
+                  </div>
+                </fieldset>
+              </div>
+            </form>
+            <form name="extendStartForm" method="post">
+              <div class="list-group-2">
+                <fieldset>
+                  <div class="list-group-2-item">
+                    <div class="dl-horizontal">
+                      <legend>Change Schedule Start Date</legend>
+                      <div class="list-group-2-item">
+                            Extend Backwards<br><input type="search" id="extendstart" name="extendstart" value="YYYY-MM-DD" />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="list-group-2-item">
+                    <input class="btn" type="button" value="Extend Start"  onClick="JavaScript:extendScheduleStart()">
                   </div>
                 </fieldset>
               </div>
