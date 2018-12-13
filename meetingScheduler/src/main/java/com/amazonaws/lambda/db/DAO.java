@@ -1,15 +1,17 @@
 package com.amazonaws.lambda.db;
 // Testing AGAIN
-import java.sql.*;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Time;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
+import com.amazonaws.lambda.demo.SearchMeetingsRequest;
 import com.amazonaws.lambda.model.Schedule;
 import com.amazonaws.lambda.model.TimeSlot;
 
@@ -26,6 +28,12 @@ public class DAO {
     		conn = null;
     	}
     }
+    
+    
+    
+   
+    	
+   
     public static int getDayOfWeekAsInt(String day) {
         if (day == null) {
             return -1;
@@ -203,6 +211,7 @@ public class DAO {
     	String scheduleid = resultSet.getString("scheduleid");
         return new TimeSlot (id, secretcode, startdate, enddate, starttime, endtime, participant, scheduleid, available);
     }
+    
     
     private Schedule generateSchedule(ResultSet resultSet) throws Exception {
     	String id = resultSet.getString("id");
@@ -389,28 +398,62 @@ public class DAO {
          }
     }
     
-     public List<TimeSlot> FilterAll(int month, int Year, String DayOfWeek, int DayOfMonth, String Start, String End ) throws Exception{
+     public List<TimeSlot> FilterAll(SearchMeetingsRequest req) throws Exception{
+    	 int Year = req.getYear();
+    	 int month = req.getMonth();
+    	 int DayOfMonth = req.getDayOfMonth();
+    	 int DayWeek;
+  		if (req.getDayOfWeek() == null) {
+  			DayWeek = 0;
+  		}else  DayWeek = getDayOfWeekAsInt(req.getDayOfWeek());
+    	 
+    	
     	
      
      	try {
-     		int DayWeek = getDayOfWeekAsInt(DayOfWeek);
+     		
+     	
      		List<TimeSlot> ScheduleSYS = new ArrayList<TimeSlot>();
-     		java.sql.Time start = java.sql.Time.valueOf(Start);   // Formatting for SQL 
-        	java.sql.Time end = java.sql.Time.valueOf(End);
+     		java.sql.Time start = java.sql.Time.valueOf(req.getStart());   // Formatting for SQL 
+        	java.sql.Time end = java.sql.Time.valueOf(req.getEnd());
         	 
         // PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots Where available = 0 AND (starttime <= ? AND endtime >= ?) AND YEAR(startdate) = ? AND (MONTH(startdate) OR MONTH(enddate)) = ? AND ;");
             
-     		PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE available = 0 AND YEAR(startdate) = ? AND month(startdate) = ? AND  Day(startdate) = ? AND (starttime >= ? AND endtime <= ? AND dayofweek(startdate) = ?);");
-     		
+     		PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE available = 0 AND(YEAR(startdate) = ? OR  0 =?) AND (month(startdate) = ? OR 0 = ?) AND	(Day(startdate) = ? OR 0 =?) AND ((starttime >= ? AND endtime <= ?) OR ('0' = ?) OR ('0' = ?))  AND	(dayofweek(startdate) = ? OR 0 = ?)");
      		ps.setInt(1, Year);
-     		ps.setInt(2, month);
-     		ps.setInt(6, DayWeek);
-     		ps.setInt(3, DayOfMonth);
-     		ps.setTime(4, start);
-     		ps.setTime(5, end);
+     		ps.setInt(2, Year);
+     		System.out.println(Year);
+
+     		ps.setInt(3, month);     		
+     		ps.setInt(4, month);
+     		System.out.println(month);
+
+     		ps.setInt(5, DayOfMonth);
+     		ps.setInt(6, DayOfMonth);
+     		
+     		System.out.println(DayOfMonth);
+
+     		ps.setTime(7, start);
+     		ps.setTime(8, end);
+     		System.out.println(DayOfMonth);
+
+     		ps.setTime(9, start);
+     		ps.setTime(10, end);
+     		System.out.println(DayOfMonth);
+
+     		ps.setInt(11, DayWeek);
+     		ps.setInt(12, DayWeek);
+     		System.out.println("here");
+
+     	  		
+     		
+     	   		
      		
      		ResultSet resultSet = ps.executeQuery();
+     		System.out.println("here2");
+
      		 while (resultSet.next()) {
+
                   ScheduleSYS.add(generateTimeSlot(resultSet));
               }
               resultSet.close();

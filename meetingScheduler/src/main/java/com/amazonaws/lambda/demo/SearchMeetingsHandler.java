@@ -42,11 +42,11 @@ public class SearchMeetingsHandler implements RequestStreamHandler {
 	 * 
 	 * @throws Exception 
 	 */
-    public List<TimeSlot> FilterAll(int month, int Year, String DayOfWeek, int DayOfMonth, String Start, String End ) throws Exception{
-		if (logger != null) { logger.log("in getTimeSlotsForOrg"); }
+    public List<TimeSlot> FilterAll(SearchMeetingsRequest Req) throws Exception{
+		if (logger != null) { logger.log("in Filter All"); }
 		DAO dao = new DAO();
 
-		return dao.FilterAll(month, Year,DayOfWeek, DayOfMonth,  Start, End);
+		return dao.FilterAll(Req);
 	}
 	
 	@Override
@@ -114,7 +114,7 @@ public class SearchMeetingsHandler implements RequestStreamHandler {
 			try {
 				System.out.println("3");
 
-				List<TimeSlot> list = FilterAll(req.Month, req.Year,  req.DayOfWeek,req.DayOfMonth, req.Start, req.End );
+				List<TimeSlot> list = FilterAll(req);
 				System.out.println("4");
 
 				resp = new SearchMeetingsResponse(list, 200);
