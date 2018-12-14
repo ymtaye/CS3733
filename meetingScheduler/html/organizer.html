@@ -32,6 +32,7 @@ var add_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/sche
 var close_time_slot = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/close-time-slot";
 var open_time_slot = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/open-time-slot";
 var delete_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/deleteschedule";
+var extend_forwards_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/extenddateforwards";
 
 var ts; // timeslots list
 var startFullDate; // start date of the calendar
@@ -146,23 +147,15 @@ function findWeekEnd(){
   var lengthOfDay = Math.abs(endTimeOfDay.getTime() - startTimeOfDay.getTime());
 
   if(lastTimeSlot.getTime() < (weekStart.getTime() + (6*1000*60*60*24) + lengthOfDay)){
-    weekEnd.setTime(lastTimeSlot.getTime());
+    console.log("last slot is within a week");
+    weekEnd = new Date(lastTimeSlot.getTime());
   } else {
-    weekEnd.setTime(weekStart.getTime() + (6*1000*60*60*24) + lengthOfDay);
+    console.log("last slot is not within a week");
+    weekEnd = new Date(weekStart.getTime() + (6*1000*60*60*24) + lengthOfDay);
   }
 
 }
 
-function setweekEnd(){
-  // if the last element isnt within a week of the start, weekEnd is seven days after the start date endtime
-  var lastTimeSlot = new Date(ts.list[ts.list.length-1].enddate+"T"+ts.list[ts.list.length-1].endtime+"Z");
-  var firstTimeSlot = new Date(ts.list[0].startdate+"T"+ts.list[ts.list.length-1].endtime+"Z");
-  if(Math.abs(lastTimeSlot.getTime() - weekStart.getTime()) >= (7*1000*60*60*24)){
-    weekEnd = new Date(firstTimeSlot.getTime() + (6*1000*60*60*24));
-    console.log("\n\n\n\n\n\n\n");
-    console.log(weekEnd.toUTCString());
-  }
-}
 
 function getSlotLength(timeslots){
   var date1 = new Date(timeslots.list[0].startdate+"T"+timeslots.list[0].starttime+"Z");
@@ -293,7 +286,7 @@ function showScheduleGUI(timeslots){
   startFullDate = new Date(earliestDate.getTime());
   endFullDate = new Date(latestDate.getTime());
   weekStart = new Date(earliestDate.getTime());
-  setweekEnd();
+  findWeekEnd();
   console.log("\n\n\n\n\nEarliest Time: "+endFullDate.getTime());
 
   document.getElementById("schedule").innerHTML = "";
@@ -547,9 +540,33 @@ function deleteSchedule(e){
 function extendScheduleEnd(e){
   var form = document.showForm;
   var secretcode = form.secretcode.value;
+  var scheduleid = form.message.value;
 
-  var form2 = document.extendForm;
-  var extendend =
+  var form2 = document.extendEndForm;
+  var newdate = form2.extendend.value;
+
+  var data = {};
+  data["scheduleid"] = scheduleid;
+  data["secretcode"] = secretcode;
+  data["newEndDate"] = newdate;
+
+  var js = JSON.stringify(data);
+  console.log("JS:" + js);
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", extend_forwards_url, true);
+
+  // send the collected data as JSON
+  xhr.send(js);
+
+  // This will process results and update HTML as appropriate.
+  xhr.onloadend = function () {
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+      console.log ("XHR:" + xhr.responseText);
+      if(xhr.status == 200){
+        var js = JSON.parse(xhr.responseText);
+      }
+    }
+  };
 }
 
 </script></head><body>
