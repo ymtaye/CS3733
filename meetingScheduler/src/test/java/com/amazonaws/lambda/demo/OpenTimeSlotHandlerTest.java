@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 import org.junit.Assert;
@@ -13,10 +12,7 @@ import org.junit.Test;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.google.gson.Gson;
 
-/**
- * A simple test harness for locally invoking your Lambda function handler.
- */
-public class ShowScheduleHandlerTest {
+public class OpenTimeSlotHandlerTest {
 
 	Context createContext(String apiCall) {
         TestContext ctx = new TestContext();
@@ -26,9 +22,9 @@ public class ShowScheduleHandlerTest {
 
     @Test
     public void testshow() throws IOException {
-        ShowScheduleHandler handler = new ShowScheduleHandler();
+        OpenTimeSlotHandler handler = new OpenTimeSlotHandler();
 
-        ShowScheduleRequest ar = new ShowScheduleRequest("7X6R900HAH58YUODR6");
+        OpenTimeSlotRequest ar = new OpenTimeSlotRequest("7X6R900HAH58YUODR6", "09:00:00", "2018-12-05");
         String addRequest = new Gson().toJson(ar);
         String jsonRequest = new Gson().toJson(new PostRequest(addRequest));
         
@@ -38,8 +34,7 @@ public class ShowScheduleHandlerTest {
         handler.handleRequest(input, output, createContext("add"));
 
         PostResponse post = new Gson().fromJson(output.toString(), PostResponse.class);
-        ShowScheduleResponse resp = new Gson().fromJson(post.body, ShowScheduleResponse.class);
-        Assert.assertEquals(resp.httpCode, 200);
+        OpenTimeSlotResponse resp = new Gson().fromJson(post.body, OpenTimeSlotResponse.class);
+        Assert.assertEquals(resp.response, "Unable to update time slot on  [2018-12-05 at 09:00:00]");
     }
-
 }

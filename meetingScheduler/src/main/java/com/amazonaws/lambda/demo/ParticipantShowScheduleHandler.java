@@ -81,7 +81,7 @@ public class ParticipantShowScheduleHandler  implements RequestStreamHandler {
 	        queryStringParameters = null;
 		} else {
 			System.out.println("Testing");
-			queryStringParameters = event.get("queryStringParameters").toString();
+			queryStringParameters = event.get("body").toString();
 			//System.out.println(queryStringParameters);
 			//logger.log(queryStringParameters);
 			if (queryStringParameters == null) {

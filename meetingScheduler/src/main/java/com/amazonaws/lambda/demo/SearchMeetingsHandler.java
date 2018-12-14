@@ -83,7 +83,7 @@ public class SearchMeetingsHandler implements RequestStreamHandler {
 				processed = true;
 				queryStringParameters = null;
 			} else {
-				queryStringParameters = event.get("queryStringParameters").toString();
+				queryStringParameters = event.get("body").toString();
 				System.out.println(queryStringParameters);
 				logger.log(queryStringParameters);
 				if (queryStringParameters == null) {
