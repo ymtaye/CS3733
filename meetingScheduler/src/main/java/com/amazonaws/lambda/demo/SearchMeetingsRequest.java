@@ -10,20 +10,23 @@ public class SearchMeetingsRequest {
 	int DayOfMonth;
 	String Start;
 	String End;
+	 String scheduleid;  
 
-	public SearchMeetingsRequest(int Month, int Year, int Date, String Day, String Start, String End) {
+	public SearchMeetingsRequest(int Month, int Year, int Date, String Day, String Start, String End, String id) {
+		
 		this.Month = Month;
 		this.Year = Year;
 		this.DayOfWeek = Day;
 		this.DayOfMonth = Date;
 		this.Start = Start;
 		this.End = End;
+		this.scheduleid = id;
 
 	}
 
 	public String toString() {
 		return "Add(" + Integer.toString(Month) + Integer.toString(Year) + DayOfWeek + Integer.toString(DayOfMonth)
-				+ Start + End + ")";
+				+ Start + End + scheduleid + ")";
 	}
 
 	public int getMonth() {

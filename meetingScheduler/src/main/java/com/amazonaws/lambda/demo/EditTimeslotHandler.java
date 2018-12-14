@@ -6,8 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -32,99 +30,86 @@ import com.google.gson.Gson;
 import com.amazonaws.lambda.db.*;
 import com.amazonaws.lambda.model.*;
 
-public class SearchMeetingsHandler implements RequestStreamHandler {
-
+public class EditTimeslotHandler implements RequestStreamHandler{
 	public LambdaLogger logger = null;
 
-	/**
-	 * Load from RDS, if it exists
+	/** Load from RDS, if it exists
 	 * 
-	 * @throws Exception
+	 * @throws Exception 
 	 */
-	public List<TimeSlot> FilterAll(SearchMeetingsRequest Req, String id) throws Exception {
-		if (logger != null) {
-			logger.log("in Filter All");
-		}
+	boolean Edit(String code, EditTimeslotRequest req) throws Exception {
+		if (logger != null) { logger.log("in edit"); }
 		DAO dao = new DAO();
-
-		return dao.FilterAll(Req, id);
+		return dao.Edit(req.secretcode, req);
 	}
-
+	
 	@Override
 	public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
 		logger = context.getLogger();
-		logger.log("Loading Java Lambda handler to create constant");
+		logger.log("Loading Java Lambda handler to open Time Slot");
 
 		JSONObject headerJson = new JSONObject();
-		headerJson.put("Content-Type", "application/json"); // not sure if needed anymore?
+		headerJson.put("Content-Type",  "application/json");  // not sure if needed anymore?
 		headerJson.put("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-		headerJson.put("Access-Control-Allow-Origin", "*");
-
+	    headerJson.put("Access-Control-Allow-Origin",  "*");
+	        
 		JSONObject responseJson = new JSONObject();
 		responseJson.put("headers", headerJson);
 
-		CreateScheduleResponse response = null;
-
-		// extract queryStringParameters from incoming HTTP POST request. If any error,
-		// then return 422 error
-		String queryStringParameters;
+		OpenTimeSlotResponse response = null;
+		
+		// extract body from incoming HTTP POST request. If any error, then return 422 error
+		String body;
 		boolean processed = false;
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 			JSONParser parser = new JSONParser();
 			JSONObject event = (JSONObject) parser.parse(reader);
 			logger.log("event:" + event.toJSONString());
-
+			
 			String method = (String) event.get("httpMethod");
 			if (method != null && method.equalsIgnoreCase("OPTIONS")) {
 				logger.log("Options request");
-				response = new CreateScheduleResponse("name", 200); // OPTIONS needs a 200 response
-				responseJson.put("queryStringParameters", new Gson().toJson(response));
-				processed = true;
-				queryStringParameters = null;
+				response = new OpenTimeSlotResponse("name", 200);  // OPTIONS needs a 200 response
+		        responseJson.put("body", new Gson().toJson(response));
+		        processed = true;
+		        body = null;
 			} else {
-				queryStringParameters = event.get("queryStringParameters").toString();
-				System.out.println(queryStringParameters);
-				logger.log(queryStringParameters);
-				if (queryStringParameters == null) {
-					queryStringParameters = event.toJSONString(); // this is only here to make testing easier
+				body = (String)event.get("body");
+				if (body == null) {
+					body = event.toJSONString();  // this is only here to make testing easier
 				}
 			}
 		} catch (ParseException pe) {
 			logger.log(pe.toString());
-			response = new CreateScheduleResponse("Bad Request:" + pe.getMessage(), 422); // unable to process input
-			responseJson.put("queryStringParameters", new Gson().toJson(response));
-			processed = true;
-			queryStringParameters = null;
+			response = new OpenTimeSlotResponse("Bad Request:" + pe.getMessage(), 422);  // unable to process input
+	        responseJson.put("body", new Gson().toJson(response));
+	        processed = true;
+	        body = null;
 		}
 
 		if (!processed) {
-			SearchMeetingsRequest req = new Gson().fromJson(queryStringParameters, SearchMeetingsRequest.class);
-		
+			EditTimeslotRequest req = new Gson().fromJson(body, EditTimeslotRequest.class);
 			logger.log(req.toString());
 
-			SearchMeetingsResponse resp;
+			EditTimeslotResponse resp;
+			logger.log("text1");
 			try {
-				System.out.println("3");
-
-				List<TimeSlot> list = FilterAll(req, req.scheduleid);
-				System.out.println("4");
-
-				resp = new SearchMeetingsResponse(list, 200);
-				System.out.println("5");
-
+				if (Edit(req.secretcode, req)) {
+					resp = new EditTimeslotResponse("Confirmed");
+				} else {
+					resp = new EditTimeslotResponse("Unable to update time slot on  [" + req.day + " at " + req.day + "]", 422);
+				}
 			} catch (Exception e) {
-				resp = new SearchMeetingsResponse(403);
+				resp = new EditTimeslotResponse("Unable to update time slot (" + e.getMessage() + ")", 403);
 			}
-
 			// compute proper response
-			responseJson.put("body", new Gson().toJson(resp));
+	        responseJson.put("body", new Gson().toJson(resp));  
 		}
-
-		logger.log("end result:" + responseJson.toJSONString());
-		logger.log(responseJson.toJSONString());
-		OutputStreamWriter writer = new OutputStreamWriter(output, "UTF-8");
-		writer.write(responseJson.toJSONString());
-		writer.close();
+        logger.log("end result:" + responseJson.toJSONString());
+        logger.log(responseJson.toJSONString());
+        OutputStreamWriter writer = new OutputStreamWriter(output, "UTF-8");
+        writer.write(responseJson.toJSONString());  
+        writer.close();
 	}
 }

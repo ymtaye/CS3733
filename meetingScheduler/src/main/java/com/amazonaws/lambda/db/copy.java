@@ -475,17 +475,30 @@ public class DAO {
 				day = java.sql.Date.valueOf(req.getDay());
 			} else
 				day = java.sql.Date.valueOf("0000-00-00");
-					
+			java.sql.Time start;
+			java.sql.Time end;
+
+		
+			if (req.getStart() != null) {
+				start = java.sql.Time.valueOf(req.getStart());
+			} else
+				start = java.sql.Time.valueOf("00:00:00"); // Formatting for SQL and checking if null
+
+			if (req.getEnd() != null) {
+				end = java.sql.Time.valueOf(req.getEnd());
+			} else
+				end = java.sql.Time.valueOf("00:00:00");
 			
 			int open = setAvaliableToInt(req.getOpen());
 			
 			boolean r = false;
 			PreparedStatement ps = conn.prepareStatement(
-					"UPDATE TimeSlots JOIN Schedules ON TimeSlots.scheduleid = Schedules.id SET TimeSlots.available = ? WHERE TimeSlots.startdate = ? and Schedules.secretcode = ?;");
+					"UPDATE TimeSlots JOIN Schedules ON TimeSlots.scheduleid = Schedules.id SET TimeSlots.available = ? WHERE ((TimeSlots.starttime = ? AND TimeSlots.endtime = ?) OR TimeSlots.startdate = ?) and Schedules.secretcode = ?;");
 			ps.setInt(1, open);
-		
-			ps.setDate(2, day);
-			ps.setString(3, code);
+			ps.setTime(2, start);
+			ps.setTime(3, end);
+			ps.setDate(4, day);
+			ps.setString(5, code);
 			
 			int numRows = ps.executeUpdate();
 			if (numRows > 0) {
