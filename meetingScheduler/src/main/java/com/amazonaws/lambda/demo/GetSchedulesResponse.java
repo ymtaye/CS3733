@@ -2,7 +2,6 @@ package com.amazonaws.lambda.demo;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.amazonaws.lambda.model.Schedule;
 import com.amazonaws.lambda.model.TimeSlot;
 
 public class GetSchedulesResponse {

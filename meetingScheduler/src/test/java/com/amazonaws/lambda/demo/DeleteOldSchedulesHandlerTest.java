@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 import org.junit.Assert;
@@ -13,11 +12,7 @@ import org.junit.Test;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.google.gson.Gson;
 
-/**
- * A simple test harness for locally invoking your Lambda function handler.
- */
-public class ShowScheduleHandlerTest {
-
+public class DeleteOldSchedulesHandlerTest {
 	Context createContext(String apiCall) {
         TestContext ctx = new TestContext();
         ctx.setFunctionName(apiCall);
@@ -26,20 +21,19 @@ public class ShowScheduleHandlerTest {
 
     @Test
     public void testshow() throws IOException {
-        ShowScheduleHandler handler = new ShowScheduleHandler();
+    	DeleteOldSchedulesHandler handler = new DeleteOldSchedulesHandler();
 
-        ShowScheduleRequest ar = new ShowScheduleRequest("7X6R900HAH58YUODR6");
+    	DeleteOldSchedulesRequest ar = new DeleteOldSchedulesRequest(7, "yeetcarlswagon");
         String addRequest = new Gson().toJson(ar);
         String jsonRequest = new Gson().toJson(new PostRequest(addRequest));
         
         InputStream input = new ByteArrayInputStream(jsonRequest.getBytes());
         OutputStream output = new ByteArrayOutputStream();
 
-        handler.handleRequest(input, output, createContext("add"));
+        handler.handleRequest(input, output, createContext("close"));
 
         PostResponse post = new Gson().fromJson(output.toString(), PostResponse.class);
-        ShowScheduleResponse resp = new Gson().fromJson(post.body, ShowScheduleResponse.class);
-        Assert.assertEquals(resp.httpCode, 200);
+        DeleteOldSchedulesResponse resp = new Gson().fromJson(post.body, DeleteOldSchedulesResponse.class);
+        Assert.assertEquals(resp.response, "Unable to delete schedules for  [7]");
     }
-
 }

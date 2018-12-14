@@ -6,11 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
-
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -30,28 +27,27 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
 import com.google.gson.Gson;
 
-import com.amazonaws.lambda.db.DAO;
-import com.amazonaws.lambda.model.Schedule;
-import com.amazonaws.lambda.model.TimeSlot;
+import com.amazonaws.lambda.db.*;
+import com.amazonaws.lambda.model.*;
 
-public class GetSchedulesHandler implements RequestStreamHandler {
+public class ExtendDateBackwardsHandler implements RequestStreamHandler{
 	public LambdaLogger logger = null;
 
-/** Load from RDS, if it exists
- * 
- * @throws Exception 
- */
+	/** Load from RDS, if it exists
+	 * 
+	 * @throws Exception 
+	 */
 
-   ArrayList<TimeSlot> getSchedules(int hours, String password) throws Exception{
-	if (logger != null) { logger.log("in getSchedules"); }
-	DAO dao = new DAO();
-
-	return dao.getSchedules(hours, password);
-   }
-   @Override
+	boolean extendDateBackwards(String scheduleid, String secretcode, String newStartDate) throws Exception{
+		if (logger != null) { logger.log("in ExtendDateBackwards");}
+		DAO dao = new DAO();
+		return dao.extendDateBackwards(scheduleid, secretcode, newStartDate);
+	}
+	
+	@Override
 	public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
 		logger = context.getLogger();
-		logger.log("Loading Java Lambda handler to create constant");
+		logger.log("Loading Java Lambda handler to extend date forwards");
 
 		JSONObject headerJson = new JSONObject();
 		headerJson.put("Content-Type",  "application/json");  // not sure if needed anymore?
@@ -61,10 +57,10 @@ public class GetSchedulesHandler implements RequestStreamHandler {
 		JSONObject responseJson = new JSONObject();
 		responseJson.put("headers", headerJson);
 
-		CreateScheduleResponse response = null;
+		ExtendDateBackwardsResponse response = null;
 		
-		// extract queryStringParameters from incoming HTTP POST request. If any error, then return 422 error
-		String queryStringParameters;
+		// extract body from incoming HTTP POST request. If any error, then return 422 error
+		String body;
 		boolean processed = false;
 		try {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(input));
@@ -75,47 +71,50 @@ public class GetSchedulesHandler implements RequestStreamHandler {
 			String method = (String) event.get("httpMethod");
 			if (method != null && method.equalsIgnoreCase("OPTIONS")) {
 				logger.log("Options request");
-				response = new CreateScheduleResponse("name", 200);  // OPTIONS needs a 200 response
-		        responseJson.put("queryStringParameters", new Gson().toJson(response));
+				response = new ExtendDateBackwardsResponse("name", 200);  // OPTIONS needs a 200 response
+		        responseJson.put("body", new Gson().toJson(response));
 		        processed = true;
-		        queryStringParameters = null;
+		        body = null;
 			} else {
-				queryStringParameters = event.get("body").toString();
-				System.out.println(queryStringParameters);
-				logger.log(queryStringParameters);
-				if (queryStringParameters == null) {
-					queryStringParameters = event.toJSONString();  // this is only here to make testing easier
+				body = (String)event.get("body");
+				if (body == null) {
+					body = event.toJSONString();  // this is only here to make testing easier
 				}
 			}
 		} catch (ParseException pe) {
 			logger.log(pe.toString());
-			response = new CreateScheduleResponse("Bad Request:" + pe.getMessage(), 422);  // unable to process input
-	        responseJson.put("queryStringParameters", new Gson().toJson(response));
+			response = new ExtendDateBackwardsResponse("Bad Request:" + pe.getMessage(), 422);  // unable to process input
+	        responseJson.put("body", new Gson().toJson(response));
 	        processed = true;
-	        queryStringParameters = null;
+	        body = null;
 		}
 
 		if (!processed) {
-			
-			GetSchedulesRequest req = new Gson().fromJson(queryStringParameters, GetSchedulesRequest.class);
+			ExtendDateBackwardsRequest req = new Gson().fromJson(body, ExtendDateBackwardsRequest.class);
 			logger.log(req.toString());
 
-			GetSchedulesResponse resp;
+			ExtendDateBackwardsResponse resp;
+			logger.log("Made the response");
+		
+			
 			try {
-				List<TimeSlot> list = getSchedules(req.hours, req.password);
-				resp = new GetSchedulesResponse(list, 200);
+				if (extendDateBackwards(req.scheduleid, req.secretcode, req.newStartDate)) {
+					resp = new ExtendDateBackwardsResponse("Confirmed for extension");
+				} else {
+					resp = new ExtendDateBackwardsResponse("Unable to extend date to  [" + req.newStartDate + " for schedule: " + req.scheduleid + "]", 422);
+				}
 			} catch (Exception e) {
-				resp = new GetSchedulesResponse(403);
+				resp = new ExtendDateBackwardsResponse("Unable to extend date backwards because (" + e.getMessage() + ")", 403);
 			}
 
 			// compute proper response
 	        responseJson.put("body", new Gson().toJson(resp));  
 		}
 		
-       logger.log("end result:" + responseJson.toJSONString());
-       logger.log(responseJson.toJSONString());
-       OutputStreamWriter writer = new OutputStreamWriter(output, "UTF-8");
-       writer.write(responseJson.toJSONString());  
-       writer.close();
+        logger.log("end result:" + responseJson.toJSONString());
+        logger.log(responseJson.toJSONString());
+        OutputStreamWriter writer = new OutputStreamWriter(output, "UTF-8");
+        writer.write(responseJson.toJSONString());  
+        writer.close();
 	}
 }

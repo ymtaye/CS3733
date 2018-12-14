@@ -13,6 +13,6 @@ public class CloseTimeSlotRequest {
 		this.close = 1;
 	}
 	public String toString() {
-		return "Fetch(" + sID + "," + starttime + "," + startdate + "," + Integer.toString(close) + ")";
+		return "Fetch(" + sID + ", " + starttime + ", " + startdate + ", " + Integer.toString(close) + ")";
 	}
 }

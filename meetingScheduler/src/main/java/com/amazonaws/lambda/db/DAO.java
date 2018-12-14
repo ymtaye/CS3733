@@ -253,7 +253,7 @@ public class DAO {
 		try {
 			boolean r = false;
 			PreparedStatement ps = conn.prepareStatement(
-					"UPDATE TimeSlots SET participant = ?, available = ? WHERE startdate = ? AND starttime = ? and scheduleid = ?;");
+					"UPDATE TimeSlots SET participant = ?, available = ? WHERE startdate = ? AND starttime = ? AND scheduleid = ?;");
 			ps.setString(1, "");
 			ps.setInt(2, open);
 			ps.setString(3, startdate);
@@ -356,42 +356,60 @@ public class DAO {
 
 		}
 	}
-
-	public boolean deleteOldSchedules(int days) throws Exception {
+	public class WrongPassException extends Exception{
+		private String mess;
+		public WrongPassException() {this.mess = "";}
+		public void setMessage(String m) {this.mess = m;}
+		@Override public String getMessage() {return this.mess;}
+	}
+	public boolean deleteOldSchedules(int days, String password) throws Exception {
 		try {
+			String pass = "yeetcarlswagon";
 			boolean r = false;
 			LocalDate date = LocalDate.now();
+			System.out.println("The date is" + date.toString());
 			date = date.minusDays(days);
 			java.sql.Date formattedDateTime = java.sql.Date.valueOf(date);
 
-			System.out.println("Entering DAO");
-			System.out.println(date);
-			System.out.println(formattedDateTime);
-
-			PreparedStatement ps = conn.prepareStatement("DELETE FROM Schedules WHERE creationdate <= ?;");
-			ps.setDate(1, formattedDateTime);
-			int numRows = ps.executeUpdate();
-			if (numRows > 0) {
-				r = true;
+			//System.out.println("Entering DAO");
+			//System.out.println(date);
+			//System.out.println(formattedDateTime);
+			if(password.equals(pass)) {
+				PreparedStatement ps = conn.prepareStatement("DELETE FROM Schedules WHERE creationdate <= ?;");
+				ps.setDate(1, formattedDateTime);
+				int numRows = ps.executeUpdate();
+				if (numRows > 0) {
+					r = true;
+				}
+			}
+			else {
+				String skrrrt = "That's the wrong password Jimbo";
+				WrongPassException whoopityscoop = new WrongPassException();
+				whoopityscoop.setMessage(skrrrt);
+				throw whoopityscoop;
 			}
 			return r;
-		} catch (Exception e) {
-			throw new Exception("Failed in deleting old schedules:" + e.getMessage());
 		}
-
+		catch(WrongPassException w) {
+			throw new Exception("Failed in deleting old schedules: " + w.getMessage());
+		}
+		catch (Exception e) {
+			throw new Exception("Failed in deleting old schedules: " + e.getMessage());
+		}
 	}
 
-	public ArrayList<TimeSlot> getSchedules(int hours) throws Exception {
+	public ArrayList<TimeSlot> getSchedules(int hours, String password) throws Exception {
 		try {
+			String pass = "yeetcarlswagon";
 			ArrayList<TimeSlot> ScheduleSYS = new ArrayList<TimeSlot>();
 			LocalTime time = LocalTime.now();
 			time = time.minusHours(hours);
 			java.sql.Time formattedTime = java.sql.Time.valueOf(time);
 
-			System.out.println("Entering DAO");
-			System.out.println(hours);
-			System.out.println(formattedTime);
-
+			//System.out.println("Entering DAO");
+			//System.out.println(hours);
+			//System.out.println(formattedTime);
+			if(password.equals(pass)){
 			PreparedStatement ps = conn.prepareStatement(
 					"SELECT TimeSlots.id, TimeSlots.secretcode, TimeSlots.startDate, TimeSlots.enddate, TimeSlots.starttime, TimeSlots.endtime, TimeSlots.participant, TimeSlots.available, TimeSlots.scheduleid FROM TimeSlots JOIN Schedules ON TimeSlots.scheduleid = Schedules.id  WHERE Schedules.creationtime >= ? ORDER BY TimeSlots.startdate, TimeSlots.starttime;");
 			ps.setTime(1, formattedTime);
@@ -401,16 +419,31 @@ public class DAO {
 			}
 			resultSet.close();
 			ps.close();
-
+			}
+			else {
+				String msg = "That's not the right password Jimbo";
+				WrongPassException beans = new WrongPassException();
+				beans.setMessage(msg);
+				throw beans;
+			}
 			return ScheduleSYS;
-
-		} catch (Exception e) {
+		}
+		catch(WrongPassException w) {
+			throw new Exception("Failed in getting timeslots" + w.getMessage());
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 			throw new Exception("Failed in getting timeslots: " + e.getMessage());
 		}
 	}
 
+
 	public List<TimeSlot> FilterAll(SearchMeetingsRequest req, String id) throws Exception {
+
+	
+	//shoutout to Yared for that gross SQL statement
+	//haha gets the job done
+	//public List<TimeSlot> FilterAll(SearchMeetingsRequest req) throws Exception {
 		int Year = req.getYear();
 		int month = req.getMonth();
 		int DayOfMonth = req.getDayOfMonth();
@@ -452,10 +485,8 @@ public class DAO {
 			ps.setString(13, id);
 
 			ResultSet resultSet = ps.executeQuery();
-			System.out.println("here2");
 
 			while (resultSet.next()) {
-
 				ScheduleSYS.add(generateTimeSlot(resultSet));
 			}
 			resultSet.close();
@@ -497,5 +528,248 @@ public class DAO {
 		}
 	}
 
+	public int getMeetingLength(String scheduleID) throws Exception{
+    	try {
+    		PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE scheduleid = ?");
+    		ps.setString(1, scheduleID);
+    		ResultSet rS = ps.executeQuery();
+    		rS.next();
+    		String st = rS.getString("starttime");
+    		String et = rS.getString("endtime");
+    		rS.close();
+    		int stH,stM;
+    		int etH,etM;
+    		stH = Integer.parseInt(st.substring(0, 2));
+    		etH = Integer.parseInt(et.substring(0, 2));
+    		stM = Integer.parseInt(st.substring(3, 5));
+    		etM = Integer.parseInt(et.substring(3, 5));
+    		stM = stM + (stH*60);
+    		etM = etM + (etH*60);
+    		int returnVal = (etM - stM);
+    		return returnVal;
+    	}
+    	catch(Exception e) {
+    		throw new Exception("Failed to get meeting length: " + e.getMessage());
+    	}
+    }
+	public class DateFormatException extends Exception{
+		private String mess;
+		public DateFormatException() {this.mess = "";}
+		public void setMessage(String m) {this.mess = m;}
+		@Override public String getMessage() {return this.mess;}
+	}
+	public boolean extendDateBackwards(String scheduleid, String secretcode, String newStartDate) throws Exception{
+	    try {
+	    	boolean r = false;
+	    	SimpleDateFormat dayofyear = new SimpleDateFormat("yyyy-MM-dd");
+	        SimpleDateFormat hourofday = new SimpleDateFormat("HH:mm:ss");
+	        SimpleDateFormat fulltime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	    		
+	    	int meetingLength = getMeetingLength(scheduleid);
+	   		PreparedStatement ps = conn.prepareStatement("SELECT * FROM Schedules WHERE id = ? AND secretcode = ?;");
+	   		ps.setString(1, scheduleid);
+	   		ps.setString(2, secretcode);
+    		ResultSet rS = ps.executeQuery();
+    		if(rS.next()) {r = true;} //checking to see if there is a schedule
+	    	String startdate = rS.getString("startdate");
+	   		String dayStartHour = rS.getString("daystarthour");
+	   		String dayEndHour = rS.getString("dayendhour");
+	    		
+    		java.util.Date sD = (java.util.Date) dayofyear.parse(startdate);
+	        java.util.Date nSD = (java.util.Date) dayofyear.parse(newStartDate);
+            java.util.Date startT = (java.util.Date) hourofday.parse(dayStartHour);
+	        java.util.Date endT = (java.util.Date) hourofday.parse(dayEndHour);
+            boolean isBefore = false;
+            if(nSD.before(sD)) {isBefore = true;} //checking to see if the dates are in order
+            sD.setTime(sD.getTime() - (1000*60*60*24));
+            if(!isBefore) {
+	           	String errorMessage = "The Dates for the extension are out of order";
+	           	DateFormatException d = new DateFormatException();
+	           	d.setMessage(errorMessage);
+	           	throw d;
+	        }
+	        if(isBefore) {
+	            java.util.Date starttimeofdayINIT = (java.util.Date) fulltime.parse(newStartDate+" "+dayStartHour);
+	            starttimeofdayINIT.setTime(starttimeofdayINIT.getTime());
+	            Date starttimeofday = new Date(0);
+	            starttimeofday.setTime(starttimeofdayINIT.getTime());
+	            int numdays = (int) (1+Math.abs((sD.getTime()-nSD.getTime())/(1000*60*60*24)));
+	            int numrows = (int) ((startT.getTime()-endT.getTime())/(meetingLength*60000));
 
+            	String weekdayString = " ";
+            	String MstartString = " ";
+            	String MendString = " ";
+            	
+            	Date MstartTDate;
+            	Date MendTDate;
+            	for (int j=0;j<Math.abs(numdays);j++) {
+            		weekdayString = dayofyear.format(starttimeofday);
+            		for (int i=0;i<Math.abs(numrows);i++) {
+            		// dates for the start and end time
+            			MstartTDate = new Date((starttimeofday.getTime())+((meetingLength*60000)*i)); 
+            			MendTDate = new Date((starttimeofday.getTime())+((meetingLength*60000)*(i+1)));
+                    // 	Strings for the start and end time
+            			MstartString = hourofday.format(MstartTDate);
+            			MendString = hourofday.format(MendTDate);
+            			
+            			PreparedStatement ps2 = conn.prepareStatement("INSERT INTO TimeSlots (id, secretcode, startdate, enddate, starttime, endtime, participant, available, scheduleid) values(?,?,?,?,?,?,?,?,?);");
+            			ps2.setString(1, getSaltString());
+            			ps2.setString(2, getSaltString());
+            			ps2.setString(3, weekdayString);
+            			ps2.setString(4, weekdayString);
+            			ps2.setString(5, MstartString);
+            			ps2.setString(6, MendString);
+            			ps2.setString(7, "");
+            			ps2.setInt(8, 0);
+            			ps2.setString(9, scheduleid);
+            			ps2.execute();
+                  
+            		}
+            		starttimeofday.setTime(starttimeofday.getTime() + (1000*60*60*24));
+            	}
+            	PreparedStatement ps3 = conn.prepareStatement("UPDATE Schedules SET startdate = ? WHERE id = ?;");
+            	ps3.setString(1, newStartDate);
+            	ps3.setString(2, scheduleid);
+            	ps3.executeUpdate();
+            	}
+            return r && isBefore;
+    	}
+	    catch(DateFormatException d) {
+	    	throw new Exception(d.getMessage());
+	    }
+	    catch(Exception e) {
+	    	e.printStackTrace();
+	    	throw new Exception("Failed to extend date backwards: " + e.getMessage());
+	    }
+	}
+	public boolean extendDateForwards(String scheduleID, String newEndDate, String sc) throws Exception{
+    	try {
+    		boolean r = false;
+    		SimpleDateFormat dayofyear = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat hourofday = new SimpleDateFormat("HH:mm:ss");
+            SimpleDateFormat fulltime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    		
+    		int meetingLength = getMeetingLength(scheduleID);
+    		PreparedStatement ps = conn.prepareStatement("SELECT * FROM Schedules WHERE id = ? AND secretcode = ?;");
+    		ps.setString(1, scheduleID);
+    		ps.setString(2, sc);
+    		ResultSet rS = ps.executeQuery();
+    		if(rS.next()) {r = true;} //checking to see if there is a schedule
+    		String enddate = rS.getString("enddate");
+    		String dayStartHour = rS.getString("daystarthour");
+    		String dayEndHour = rS.getString("dayendhour");
+    		
+    		java.util.Date eD = (java.util.Date) dayofyear.parse(enddate);
+            java.util.Date nED = (java.util.Date) dayofyear.parse(newEndDate);
+            java.util.Date startT = (java.util.Date) hourofday.parse(dayStartHour);
+            java.util.Date endT = (java.util.Date) hourofday.parse(dayEndHour);
+            boolean isAfter = false;
+            if(nED.after(eD)) {isAfter = true;} //checking to see if the dates are in order
+            if(!isAfter) {
+            	String errorMessage = "The Dates for the extension are out of order";
+            	DateFormatException d = new DateFormatException();
+            	d.setMessage(errorMessage);
+            	throw d;
+            }
+            eD.setTime(eD.getTime() + (1000*60*60*24)); //setting the date forwards
+            if(isAfter) {
+            	java.util.Date starttimeofdayINIT = (java.util.Date) fulltime.parse(enddate+" "+dayStartHour);
+            	starttimeofdayINIT.setTime(starttimeofdayINIT.getTime() + (1000*60*60*24));
+            	Date starttimeofday = new Date(0);
+            	starttimeofday.setTime(starttimeofdayINIT.getTime());
+            	int numdays = (int) (1+Math.abs((eD.getTime()-nED.getTime())/(1000*60*60*24)));
+            	int numrows = (int) ((startT.getTime()-endT.getTime())/(meetingLength*60000));
+
+            	String weekdayString = " ";
+            	String MstartString = " ";
+            	String MendString = " ";
+            	
+            	Date MstartTDate;
+            	Date MendTDate;
+            	for (int j=0;j<Math.abs(numdays);j++) {
+            		weekdayString = dayofyear.format(starttimeofday);
+            		for (int i=0;i<Math.abs(numrows);i++) {
+            		// dates for the start and end time
+            			MstartTDate = new Date((starttimeofday.getTime())+((meetingLength*60000)*i)); 
+            			MendTDate = new Date((starttimeofday.getTime())+((meetingLength*60000)*(i+1)));
+                    // 	Strings for the start and end time
+            			MstartString = hourofday.format(MstartTDate);
+            			MendString = hourofday.format(MendTDate);
+            			
+            			PreparedStatement ps2 = conn.prepareStatement("INSERT INTO TimeSlots (id, secretcode, startdate, enddate, starttime, endtime, participant, available, scheduleid) values(?,?,?,?,?,?,?,?,?);");
+            			ps2.setString(1, getSaltString());
+            			ps2.setString(2, getSaltString());
+            			ps2.setString(3, weekdayString);
+            			ps2.setString(4, weekdayString);
+            			ps2.setString(5, MstartString);
+            			ps2.setString(6, MendString);
+            			ps2.setString(7, "");
+            			ps2.setInt(8, 0);
+            			ps2.setString(9, scheduleID);
+            			ps2.execute();
+                  
+            		}
+            		starttimeofday.setTime(starttimeofday.getTime() + (1000*60*60*24));
+            	}
+            	PreparedStatement ps3 = conn.prepareStatement("UPDATE Schedules SET enddate = ? WHERE id = ?;");
+            	ps3.setString(1, newEndDate);
+            	ps3.setString(2, scheduleID);
+            	ps3.executeUpdate();
+            	}
+            return r && isAfter;
+    	}
+    	catch(DateFormatException d) {
+    		throw new Exception(d.getMessage());
+    	}
+    	catch(Exception e) {
+    		e.printStackTrace();
+    		throw new Exception("Failed to extend date forwards: " + e.getMessage());
+    	}
+    }
+
+	public boolean closeTime(String scheduleid, String secretcode, String time) throws Exception{
+		try {
+			boolean r = false;
+			boolean j = false;
+			PreparedStatement ps = conn.prepareStatement("SELECT * FROM Schedules WHERE id = ? AND secretcode = ?;");
+			ps.setString(1, scheduleid);
+			ps.setString(2, secretcode);
+			ResultSet rS = ps.executeQuery();
+			if(rS.next()) {j = true;}
+			PreparedStatement ps2 = conn.prepareStatement("UPDATE TimeSlots SET participant = ?, available = ? WHERE starttime = ? AND scheduleid = ?;");
+			ps2.setString(1, "");
+			ps2.setInt(2, 1);
+			ps2.setString(3, time);
+			ps2.setString(4, scheduleid);
+			int numRows = ps2.executeUpdate();
+			if (numRows > 0) {
+				r = true;
+			}
+			return r && j;
+			}
+		catch(Exception e) {throw new Exception("Failed in closing for a time: " + e.getMessage());}
+	}
+	public boolean openTime(String scheduleid, String secretcode, String time) throws Exception{
+		try {
+			boolean r = false;
+			boolean j = false;
+			PreparedStatement ps = conn.prepareStatement("SELECT * FROM Schedules WHERE id = ? AND secretcode = ?;");
+			ps.setString(1, scheduleid);
+			ps.setString(2, secretcode);
+			ResultSet rS = ps.executeQuery();
+			if(rS.next()) {j = true;}
+			PreparedStatement ps2 = conn.prepareStatement("UPDATE TimeSlots SET participant = ?, available = ? WHERE starttime = ? AND scheduleid = ?;");
+			ps2.setString(1, "");
+			ps2.setInt(2, 0);
+			ps2.setString(3, time);
+			ps2.setString(4, scheduleid);
+			int numRows = ps2.executeUpdate();
+			if (numRows > 0) {
+				r = true;
+			}
+			return r && j;
+			}
+		catch(Exception e) {throw new Exception("Failed in opening for a time: " + e.getMessage());}
+	}
+	
 }
