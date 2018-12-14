@@ -469,7 +469,7 @@ public class DAO {
 				end = java.sql.Time.valueOf("23:00:00");
 			
 			PreparedStatement ps = conn.prepareStatement(
-					"SELECT * FROM TimeSlots WHERE available = 0 AND(YEAR(startdate) = ? OR  0 =?) AND (month(startdate) = ? OR 0 = ?) AND	(Day(startdate) = ? OR 0 =?) AND ((starttime >= ? AND endtime <= ?) OR ('0' = ?) OR ('0' = ?))  AND	(dayofweek(startdate) = ? OR 0 = ?) AND scheduleid = ?");
+					"SELECT * FROM TimeSlots WHERE available = 0 AND(YEAR(startdate) = ? OR  0 =?) AND (month(startdate) = ? OR 0 = ?) AND	(Day(startdate) = ? OR 0 =?) AND ((starttime >= ? AND endtime <= ?) OR ('0' = ?) OR ('0' = ?))  AND	(dayofweek(startdate) = ? OR 0 = ?) AND scheduleid = ? ORDER BY starttime, startdate;");
 			ps.setInt(1, Year);
 			ps.setInt(2, Year);
 			ps.setInt(3, month);
