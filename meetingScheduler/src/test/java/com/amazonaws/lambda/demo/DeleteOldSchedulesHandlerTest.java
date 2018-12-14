@@ -23,7 +23,7 @@ public class DeleteOldSchedulesHandlerTest {
     public void testshow() throws IOException {
     	DeleteOldSchedulesHandler handler = new DeleteOldSchedulesHandler();
 
-    	DeleteOldSchedulesRequest ar = new DeleteOldSchedulesRequest(7);
+    	DeleteOldSchedulesRequest ar = new DeleteOldSchedulesRequest(7, "yeetcarlswagon");
         String addRequest = new Gson().toJson(ar);
         String jsonRequest = new Gson().toJson(new PostRequest(addRequest));
         

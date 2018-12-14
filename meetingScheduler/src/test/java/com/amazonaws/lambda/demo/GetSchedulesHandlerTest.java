@@ -23,7 +23,7 @@ public class GetSchedulesHandlerTest {
     public void testshow() throws IOException {
     	GetSchedulesHandler handler = new GetSchedulesHandler();
 
-    	GetSchedulesRequest ar = new GetSchedulesRequest(7);
+    	GetSchedulesRequest ar = new GetSchedulesRequest(7, "yeetcarlswagon");
         String addRequest = new Gson().toJson(ar);
         String jsonRequest = new Gson().toJson(new PostRequest(addRequest));
         

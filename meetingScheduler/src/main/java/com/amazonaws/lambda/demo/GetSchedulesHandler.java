@@ -81,8 +81,8 @@ public class GetSchedulesHandler implements RequestStreamHandler {
 		        queryStringParameters = null;
 			} else {
 				queryStringParameters = event.get("body").toString();
-				//System.out.println(queryStringParameters);
-				//logger.log(queryStringParameters);
+				System.out.println(queryStringParameters);
+				logger.log(queryStringParameters);
 				if (queryStringParameters == null) {
 					queryStringParameters = event.toJSONString();  // this is only here to make testing easier
 				}
