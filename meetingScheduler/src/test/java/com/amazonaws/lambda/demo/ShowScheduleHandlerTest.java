@@ -38,8 +38,8 @@ public class ShowScheduleHandlerTest {
         handler.handleRequest(input, output, createContext("add"));
 
         PostResponse post = new Gson().fromJson(output.toString(), PostResponse.class);
-        ShowScheduleRequest resp = new Gson().fromJson(post.body, ShowScheduleRequest.class);
-        Assert.assertEquals(resp.secretcode, "7X6R900HAH58YUODR6");
+        ShowScheduleResponse resp = new Gson().fromJson(post.body, ShowScheduleResponse.class);
+        Assert.assertEquals(resp.httpCode, 200);
     }
 
 }
