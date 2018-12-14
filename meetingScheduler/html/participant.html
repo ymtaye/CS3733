@@ -92,22 +92,11 @@ function findWeekEnd(){
   var lengthOfDay = Math.abs(endTimeOfDay.getTime() - startTimeOfDay.getTime());
 
   if(lastTimeSlot.getTime() < (weekStart.getTime() + (6*1000*60*60*24) + lengthOfDay)){
-    weekEnd.setTime(lastTimeSlot.getTime());
+    weekEnd = new Date(lastTimeSlot.getTime());
   } else {
-    weekEnd.setTime(weekStart.getTime() + (6*1000*60*60*24) + lengthOfDay);
+    weekEnd = new Date(weekStart.getTime() + (6*1000*60*60*24) + lengthOfDay);
   }
 
-}
-
-function setweekEnd(){
-  // if the last element isnt within a week of the start, weekEnd is seven days after the start date endtime
-  var lastTimeSlot = new Date(ts.list[ts.list.length-1].enddate+"T"+ts.list[ts.list.length-1].endtime+"Z");
-  var firstTimeSlot = new Date(ts.list[0].startdate+"T"+ts.list[ts.list.length-1].endtime+"Z");
-  if(Math.abs(lastTimeSlot.getTime() - weekStart.getTime()) >= (7*1000*60*60*24)){
-    weekEnd = new Date(firstTimeSlot.getTime() + (6*1000*60*60*24));
-    console.log("\n\n\n\n\n\n\n");
-    console.log(weekEnd.toUTCString());
-  }
 }
 
 function showTimeSlotsGUI(){
@@ -285,7 +274,7 @@ function showScheduleGUI(timeslots){
   startFullDate = new Date(earliestDate.getTime());
   endFullDate = new Date(latestDate.getTime());
   weekStart = new Date(earliestDate.getTime());
-  setweekEnd();
+  findWeekEnd();
   console.log("\n\n\n\n\nEarliest Time: "+endFullDate.getTime());
 
   document.getElementById("schedule").innerHTML = "";
@@ -350,7 +339,7 @@ function fillParticipantInCell(participant, startdate, starttime, secretcode){
 
 function removeParticipantInCell(secretcode){
   for(var i=0; i<ts.list.length;i++){
-    if(ts.list[i].secretcode == secretcode){
+    if(ts.list[i].secretcode == secretcode || ts.list[i].secretcode == "+"+secretcode){
       ts.list[i].participant = "";
       ts.list[i].available = 0;
       document.getElementById(ts.list[i].id).innerHTML = "";
@@ -377,7 +366,7 @@ function createMeeting(e){
 
   // search for a timeslot with a matching secretcode
   for(var i=0; i<ts.list.length; i++){
-    if(e.id == ts.list[i].secretcode){
+    if(e.id == ts.list[i].secretcode || e.id == "+"+ts.list[i].secretcode){
       scheduleID = ts.list[i].scheduleid;
     	starttime = ts.list[i].starttime;
     	startdate = ts.list[i].startdate;
@@ -427,8 +416,6 @@ function createMeetingRequest(e, data){
           document.getElementById(e.id).style.color = "#DC143C";
           document.getElementById(e.id).id = response.response;
           fillParticipantInCell(data.participant, data.startdate, data.starttime, response.response);
-          //console.log(data.starttime);
-          //console.log(data.startdate);
         }
       }
     }
@@ -442,7 +429,7 @@ function cancelMeeting(e){
   // find the timeslot that corresponds to the button and generate an input over it
   // search for a timeslot with a matching secretcode
   for(var i=0; i<ts.list.length; i++){
-    if(e.id == ts.list[i].secretcode){
+    if(e.id == ts.list[i].secretcode || e.id == "+"+ts.list[i].secretcode){
       var scheduleid = ts.list[i].scheduleid;
     	var starttime = ts.list[i].starttime;
     	var startdate = ts.list[i].startdate;
@@ -500,59 +487,98 @@ function searchMeetingsGUIHeader(){
 
   // insert header
   var colHeader;
-  var header = table.createTHead();
-  var row = header.insertRow();
+  var header = table.createTHead(0);
+  var row = header.insertRow(0);
 
-  colHeader = row.insertCell(0);
+  colHeader = row.insertCell();
   colHeader.innerHTML = "Date";
 
-  colHeader = row.insertCell(1);
+  colHeader = row.insertCell();
   colHeader.innerHTML = "Start Time";
 
-  colHeader = row.insertCell(2);
+  colHeader = row.insertCell();
   colHeader.innerHTML = "End Time";
 
-  colHeader = row.insertCell(3);
+  colHeader = row.insertCell();
   colHeader.innerHTML = "";// button
 }
 
 function searchMeetingsGUI(timeslots){
-
-  searchMeetingsGUIHeader();
-
   var table = document.getElementById("meetings");
   table.innerHTML = "";
 
+  searchMeetingsGUIHeader();
+
   var row;
   var cell;
+  var date;
+  var date2;
   for (var i=0; i<timeslots.list.length; i++){
+    date = new Date(timeslots.list[i].startdate+"T"+timeslots.list[i].starttime+"Z");
+    date2 = new Date(timeslots.list[i].startdate+"T"+timeslots.list[i].endtime+"Z");
+
     row = table.insertRow();
 
     cell = row.insertCell();
-    cell.innerHTML = timeslots.list[i].startdate.toUTCString().slice(17,25);
+    cell.innerHTML = date.toUTCString().slice(0,16);
 
     cell = row.insertCell();
-    cell.innerHTML = timeslots.list[i].starttime.slice(0,5);
+    cell.innerHTML = date.toUTCString().slice(16,22);
 
     cell = row.insertCell();
-    cell.innerHTML = timeslots.list[i].endtime.slice(0,5);
+    cell.innerHTML = date2.toUTCString().slice(16,22);
 
     cell = row.insertCell();
-    cell.innerHTML = '<p id="'+ ts.list[i].id + '"></p><button class="btn-xs" id="' + ts.list[i].secretcode + '" onclick="createMeeting(this)" value="OPEN" style="color:#00e600">OPEN</button>';
+    cell.innerHTML = '<p id="'+ timeslots.list[i].id + '"></p><button class="btn-xs" id="+' + timeslots.list[i].secretcode + '" onclick="createMeeting(this)" value="OPEN" style="color:#00e600">OPEN</button>';
   }
 
 }
 
 function searchMeetings(){
-  var form = document.searchForm;
-  var month = form.month.value;
-  var year = form.year.value;
-  var dow = form.dow.value;
-  var dom = form.dom.value;
-  var starttime = form.starttime.value;
-  var endtime = form.endtime.value;
+  var form = document.showForm;
+  var scheduleid = form.scheduleid.value;
 
-  var params = "Month="+month+"&Year="+year+"&DayOfWeek='"+dow+"'&DayOfMonth="+dom+"&Start='"+starttime+"'&End='"+endtime+ "'";
+  var form2 = document.searchForm;
+  var month = form2.month.value;
+  var year = form2.year.value;
+  var dow = form2.dow.value;
+  var dom = form2.dom.value;
+  var starttime = form2.starttime.value;
+  var endtime = form2.endtime.value;
+  var params = "";
+
+  if(month != ""){
+    if(params == "") params = "Month="+month;
+    else params = params + "&Month="+month;
+  }
+  if(year != ""){
+    if(params == "") params = "Year="+year;
+    else params = params + "&Year="+year;
+  }
+  if(dow != ""){
+    if(params == "") params = "DayOfWeek="+dow;
+    else params = params + "&DayOfWeek="+dow;
+  }
+  if(dom != ""){
+    if (params == "") params = "DayOfMonth="+dom;
+    else params = params + "&DayOfMonth="+dom;
+  }
+  if(starttime != ""){
+    if(params == "") params = "Start="+starttime;
+    else params = params + "&Start="+starttime;
+  }
+  if(endtime != ""){
+    if(params == "") params = "End="+endtime;
+    else params = params + "&End="+endtime;
+  }
+  if(params == ""){
+    params = "scheduleid="+scheduleid;
+  } else{
+    params = params + "&scheduleid="+scheduleid;
+  }
+
+  console.log("\n\n\n\n\n\n\n\n\n"+params);
+
   var xhr = new XMLHttpRequest();
   xhr.open("GET", search_url+"?"+params, true);
 
@@ -618,22 +644,22 @@ function searchMeetings(){
                     <div class="dl-horizontal">
                       <legend>Search Available Meetings</legend>
                       <div class="list-group-item">
-                        Month <br><input id="month" type="search" name="month" value="11" /><br>
+                        Month (11)<br><input id="month" type="search" name="month" value="" /><br>
                       </div>
                       <div class="list-group-item">
-                        Year <br><input id="year" type="search" name="year" value="2012" /><br>
+                        Year (2000)<br><input id="year" type="search" name="year" value="" /><br>
                       </div>
                       <div class="list-group-item">
-                        Day of the Week <br><input id="dow" type="search" name="dow" value="Wednesday" /><br>
+                        Day of the Week (Monday)<br><input id="dow" type="search" name="dow" value="" /><br>
                       </div>
                       <div class="list-group-item">
-                        Day of the Month <br><input id="dom" type="search" name="dom" value="5" /><br>
+                        Day of the Month (5)<br><input id="dom" type="search" name="dom" value="" /><br>
                       </div>
                       <div class="list-group-item">
-                        Start Time <br><input id="starttime" type="search" name="starttime" value="9:00:00" /><br>
+                        Start Time (09:00:00)<br><input id="starttime" type="search" name="starttime" value="" /><br>
                       </div>
                       <div class="list-group-item">
-                        End Time <br><input id="endtime" type="search" name="endtime" value="10:00:00" /><br>
+                        End Time (09:00:00)<br><input id="endtime" type="search" name="endtime" value="" /><br>
                       </div>
                     </div>
                   </div>
@@ -700,15 +726,14 @@ function searchMeetings(){
         </div>
       </div>
 
-
       <div class="row">
         <div class="col-md-1">
         </div>
 
         <div class="col-md-10">
           <div class="dtc animate-box">
-            <div class="meetings">
-              <table id="meetings" class="table"></table>
+            <div class="calendar">
+              <table id="schedule" class="table"></table>
             </div>
           </div>
         </div>
@@ -724,7 +749,7 @@ function searchMeetings(){
         <div class="col-md-10">
           <div class="dtc animate-box">
             <div class="calendar">
-              <table id="schedule" class="table"></table>
+              <table class="table" id="meetings"></table>
             </div>
           </div>
         </div>
