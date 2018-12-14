@@ -13,6 +13,6 @@ public class DeleteMeetingRequest {
 		this.starttime = starttime;
 	}
 	public String toString() {
-		return "Delete(" + scheduleid + "," + secretcode + ")";
+		return "Delete(" + scheduleid + ", " + secretcode + ")";
 	}
 }

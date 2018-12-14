@@ -30,6 +30,7 @@
 var show_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/participantschedule";
 var create_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/register";
 var cancel_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/deletemeeting";
+var search_url = "https://rbnqasw5vg.execute-api.us-east-2.amazonaws.com/Alpha/searchmeetings";
 
 var ts; // timeslots list
 var startFullDate; // start date of the calendar
@@ -128,9 +129,9 @@ function showTimeSlotsGUI(){
       // check if column counter is at 7, then increment rowCounter
       cell = rows[rowCounter].cells[columnCounter];
       if(ts.list[i].available == 1){
-        cell.innerHTML = '<p id="'+ ts.list[i].id + '">' + ts.list[i].participant + '</p><button id="' + ts.list[i].secretcode + '" onclick="cancelMeeting(this)" value="Unavailable" style="background-color:#DC143C; font-weight: 400;">Unavailable</button>';
+        cell.innerHTML = '<p id="'+ ts.list[i].id + '">' + ts.list[i].participant + '</p><button class="btn-xs" id="' + ts.list[i].secretcode + '" onclick="cancelMeeting(this)" value="CLOSED" style="color:#DC143C;">CLOSED</button>';
       } else {
-        cell.innerHTML = '<p id="'+ ts.list[i].id + '"></p><button id="' + ts.list[i].secretcode + '" onclick="createMeeting(this)" value="Join" style="background-color:#20B2AA">Join</button>';
+        cell.innerHTML = '<p id="'+ ts.list[i].id + '"></p><button class="btn-xs" id="' + ts.list[i].secretcode + '" onclick="createMeeting(this)" value="OPEN" style="color:#00e600">OPEN</button>';
       }
 
       if(rowCounter == rows.length-1){
@@ -351,7 +352,7 @@ function removeParticipantInCell(secretcode){
   for(var i=0; i<ts.list.length;i++){
     if(ts.list[i].secretcode == secretcode){
       ts.list[i].participant = "";
-      ts.list[i].available = 1;
+      ts.list[i].available = 0;
       document.getElementById(ts.list[i].id).innerHTML = "";
       document.getElementById("meetingcode").value = "";
     }
@@ -421,9 +422,9 @@ function createMeetingRequest(e, data){
           document.getElementById(e.id).onclick = function () {
       	    cancelMeeting(this);
           }
-          document.getElementById(e.id).value = "Cancel";
-          document.getElementById(e.id).innerHTML = "Cancel";
-          document.getElementById(e.id).style.background = "#DC143C";
+          document.getElementById(e.id).value = "CANCEL";
+          document.getElementById(e.id).innerHTML = "CANCEL";
+          document.getElementById(e.id).style.color = "#DC143C";
           document.getElementById(e.id).id = response.response;
           fillParticipantInCell(data.participant, data.startdate, data.starttime, response.response);
           //console.log(data.starttime);
@@ -482,14 +483,92 @@ function cancelMeetingRequest(e, data){
           document.getElementById(e.id).onclick = function () {
             createMeeting(this);
           }
-          document.getElementById(e.id).value = "Join";
-          document.getElementById(e.id).innerHTML = "Join";
-          document.getElementById(e.id).style.background = "#20B2AA";
-          document.getElementById("message").innerHTML = "";
+          document.getElementById(e.id).value = "OPEN";
+          document.getElementById(e.id).innerHTML = "OPEN";
+          document.getElementById(e.id).style.color = "#00e600";
           removeParticipantInCell(data.secretcode);
           //console.log(data.starttime);
           //console.log(data.startdate);
         }
+      }
+    }
+  };
+}
+
+function searchMeetingsGUIHeader(){
+  var table = document.getElementById("meetings");
+
+  // insert header
+  var colHeader;
+  var header = table.createTHead();
+  var row = header.insertRow();
+
+  colHeader = row.insertCell(0);
+  colHeader.innerHTML = "Date";
+
+  colHeader = row.insertCell(1);
+  colHeader.innerHTML = "Start Time";
+
+  colHeader = row.insertCell(2);
+  colHeader.innerHTML = "End Time";
+
+  colHeader = row.insertCell(3);
+  colHeader.innerHTML = "";// button
+}
+
+function searchMeetingsGUI(timeslots){
+
+  searchMeetingsGUIHeader();
+
+  var table = document.getElementById("meetings");
+  table.innerHTML = "";
+
+  var row;
+  var cell;
+  for (var i=0; i<timeslots.list.length; i++){
+    row = table.insertRow();
+
+    cell = row.insertCell();
+    cell.innerHTML = timeslots.list[i].startdate.toUTCString().slice(17,25);
+
+    cell = row.insertCell();
+    cell.innerHTML = timeslots.list[i].starttime.slice(0,5);
+
+    cell = row.insertCell();
+    cell.innerHTML = timeslots.list[i].endtime.slice(0,5);
+
+    cell = row.insertCell();
+    cell.innerHTML = '<p id="'+ ts.list[i].id + '"></p><button class="btn-xs" id="' + ts.list[i].secretcode + '" onclick="createMeeting(this)" value="OPEN" style="color:#00e600">OPEN</button>';
+  }
+
+}
+
+function searchMeetings(){
+  var form = document.searchForm;
+  var month = form.month.value;
+  var year = form.year.value;
+  var dow = form.dow.value;
+  var dom = form.dom.value;
+  var starttime = form.starttime.value;
+  var endtime = form.endtime.value;
+
+  var params = "Month="+month+"&Year="+year+"&DayOfWeek='"+dow+"'&DayOfMonth="+dom+"&Start='"+starttime+"'&End='"+endtime+ "'";
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", search_url+"?"+params, true);
+
+  // send the collected data as JSON
+  xhr.send();
+
+  // This will process results and update HTML as appropriate.
+  xhr.onloadend = function () {
+    console.log(xhr);
+    console.log(xhr.request);
+    if (xhr.readyState == XMLHttpRequest.DONE) {
+      console.log ("XHR:" + xhr.responseText);
+      if(xhr.status == 200){
+        var timeslots = JSON.parse(xhr.responseText);
+        console.log(timeslots);
+        searchMeetingsGUI(timeslots);
       }
     }
   };
@@ -527,65 +606,121 @@ function cancelMeetingRequest(e, data){
       <div class="row">
 
         <div class="col-md-1">
-          <div class="container">
+        </div>
 
+        <div class="col-md-5">
+          <div class="dtc animate-box">
+
+            <form name="searchForm" method="get">
+              <div class="list-group">
+                <fieldset>
+                  <div class="list-group-item">
+                    <div class="dl-horizontal">
+                      <legend>Search Available Meetings</legend>
+                      <div class="list-group-item">
+                        Month <br><input id="month" type="search" name="month" value="11" /><br>
+                      </div>
+                      <div class="list-group-item">
+                        Year <br><input id="year" type="search" name="year" value="2012" /><br>
+                      </div>
+                      <div class="list-group-item">
+                        Day of the Week <br><input id="dow" type="search" name="dow" value="Wednesday" /><br>
+                      </div>
+                      <div class="list-group-item">
+                        Day of the Month <br><input id="dom" type="search" name="dom" value="5" /><br>
+                      </div>
+                      <div class="list-group-item">
+                        Start Time <br><input id="starttime" type="search" name="starttime" value="9:00:00" /><br>
+                      </div>
+                      <div class="list-group-item">
+                        End Time <br><input id="endtime" type="search" name="endtime" value="10:00:00" /><br>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="list-group-item">
+                    <input class="btn" type="button" value="Search"  onClick="JavaScript:searchMeetings()">
+                  </div>
+                </fieldset>
+              </div>
+            </form>
           </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-5">
             <div class="dtc animate-box">
               <form name="showForm" method="get">
                 <div class="list-group-2">
                   <fieldset>
                     <div class="list-group-2-item">
-                      Input Schedule ID: <input type="search2" name="scheduleid" value="" /><br>
+                      <div class="dl-horizontal">
+                        <legend>Show Schedule</legend>
+                        Schedule Code<br><input type="search2" name="scheduleid" value="AAAAAAAAAAAAAAA" /><br>
+                      </div>
+                    </div>
+                    <div class="list-group-2-item">
                       <input class="btn" type="button" value="Show"  onClick="JavaScript:showSchedule()">
                     </div>
                   </fieldset>
                 </div>
               </form>
+
+              <form name="nameForm" method="get">
+                <div class="list-group-2">
+                  <fieldset>
+                    <div class="list-group-2-item">
+                      <div class="dl-horizontal">
+                        <legend>What's Your Name?</legend>
+                          <div class="list-group-2-item">
+                            Name <br><input type="search" name="participant" value="" /><br>
+                          </div>
+                      </div>
+                    </div>
+                  </fieldset>
+                </div>
+              </form>
+
+              <form name="cancelForm" method="post">
+                <div class="list-group-2">
+                  <fieldset>
+                    <div class="list-group-2-item">
+                      <div class="dl-horizontal">
+                        <legend>Enter Meeting Code</legend>
+                        <div class="list-group-2-item">
+                          Meeting Code <br><input id="meetingcode" type="search2" name="meetingcode" value="AAAAAAAAAAAAAAA" /><br>
+                        </div>
+                      </div>
+                    </div>
+                  </fieldset>
+                </div>
+              </form>
+
             </div>
         </div>
+        <div class="col-md-1">
+        </div>
+      </div>
 
-        <div class="col-md-5">
-          <div class="dtc animate-box">
-            <form name="cancelForm" method="post">
-              <div class="list-group-2">
-                <fieldset>
-                  <div class="list-group-2-item">
-                    Meeting Code <br><input id="meetingcode" type="search2" name="meetingcode" value="" /><br>
-                  </div>
-                </fieldset>
-              </div>
-            </form>
-          </div>
+
+      <div class="row">
+        <div class="col-md-1">
         </div>
 
-        <div class="col-md-2">
+        <div class="col-md-10">
           <div class="dtc animate-box">
-            <form name="nameForm" method="get">
-              <div class="list-group-2">
-                <fieldset>
-                  <div class="list-group-2-item">
-                    Name <br><input type="search" name="participant" value="" /><br>
-                  </div>
-                </fieldset>
-              </div>
-            </form>
+            <div class="meetings">
+              <table id="meetings" class="table"></table>
+            </div>
           </div>
         </div>
 
         <div class="col-md-1">
-          <div class="container">
-
-          </div>
         </div>
-
       </div>
 
       <div class="row">
         <div class="col-md-1">
         </div>
+
         <div class="col-md-10">
           <div class="dtc animate-box">
             <div class="calendar">
@@ -593,6 +728,7 @@ function cancelMeetingRequest(e, data){
             </div>
           </div>
         </div>
+
         <div class="col-md-1">
         </div>
       </div>

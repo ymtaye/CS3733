@@ -18,6 +18,6 @@ public class CreateMeetingRequest {
 	}
 	
 	public String toString() {
-		return "Create(" + startdate + "," + enddate + "," + starttime + "," + endtime + "," + participant + "," + scheduleID + ")";
+		return "Create(" + startdate + ", " + enddate + ", " + starttime + ", " + endtime + ", " + participant + ", " + scheduleID + ")";
 	}
 }

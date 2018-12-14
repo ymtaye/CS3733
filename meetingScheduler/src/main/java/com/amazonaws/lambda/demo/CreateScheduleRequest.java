@@ -18,6 +18,6 @@ public class CreateScheduleRequest {
 	}
 	
 	public String toString() {
-		return "Create(" + startdate + "," + enddate + "," + daystarthour + "," + dayendhour + "," + organizer + ")";
+		return "Create(" + startdate + ", " + enddate + ", " + daystarthour + ", " + dayendhour + ", " + organizer + ")";
 	}
 }

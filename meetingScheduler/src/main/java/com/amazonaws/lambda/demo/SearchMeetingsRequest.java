@@ -22,8 +22,8 @@ public class SearchMeetingsRequest {
 	}
 
 	public String toString() {
-		return "Add(" + Integer.toString(Month) + Integer.toString(Year) + DayOfWeek + Integer.toString(DayOfMonth)
-				+ Start + End + ")";
+		return "Add(" + Integer.toString(Month) + ", " + Integer.toString(Year) + ", " + DayOfWeek + ", " + Integer.toString(DayOfMonth)
+		+ ", " + Start + ", " + End + ")";
 	}
 
 	public int getMonth() {
