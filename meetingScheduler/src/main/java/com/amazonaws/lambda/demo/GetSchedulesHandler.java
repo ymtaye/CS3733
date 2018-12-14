@@ -42,13 +42,11 @@ public class GetSchedulesHandler implements RequestStreamHandler {
  * @throws Exception 
  */
 
-   ArrayList<TimeSlot> getSchedules(int hours) throws Exception{
+   ArrayList<TimeSlot> getSchedules(int hours, String password) throws Exception{
 	if (logger != null) { logger.log("in getSchedules"); }
 	DAO dao = new DAO();
 
-	return dao.getSchedules(hours);
-
-	
+	return dao.getSchedules(hours, password);
    }
    @Override
 	public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
@@ -104,7 +102,7 @@ public class GetSchedulesHandler implements RequestStreamHandler {
 
 			GetSchedulesResponse resp;
 			try {
-				List<TimeSlot> list = getSchedules(req.hours);
+				List<TimeSlot> list = getSchedules(req.hours, req.password);
 				resp = new GetSchedulesResponse(list, 200);
 			} catch (Exception e) {
 				resp = new GetSchedulesResponse(403);

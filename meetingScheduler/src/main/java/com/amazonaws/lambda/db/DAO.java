@@ -344,42 +344,60 @@ public class DAO {
 
 		}
 	}
-
-	public boolean deleteOldSchedules(int days) throws Exception {
+	public class WrongPassException extends Exception{
+		private String mess;
+		public WrongPassException() {this.mess = "";}
+		public void setMessage(String m) {this.mess = m;}
+		@Override public String getMessage() {return this.mess;}
+	}
+	public boolean deleteOldSchedules(int days, String password) throws Exception {
 		try {
+			String pass = "yeetcarlswagon";
 			boolean r = false;
 			LocalDate date = LocalDate.now();
+			System.out.println("The date is" + date.toString());
 			date = date.minusDays(days);
 			java.sql.Date formattedDateTime = java.sql.Date.valueOf(date);
 
-			System.out.println("Entering DAO");
-			System.out.println(date);
-			System.out.println(formattedDateTime);
-
-			PreparedStatement ps = conn.prepareStatement("DELETE FROM Schedules WHERE creationdate <= ?;");
-			ps.setDate(1, formattedDateTime);
-			int numRows = ps.executeUpdate();
-			if (numRows > 0) {
-				r = true;
+			//System.out.println("Entering DAO");
+			//System.out.println(date);
+			//System.out.println(formattedDateTime);
+			if(password.equals(pass)) {
+				PreparedStatement ps = conn.prepareStatement("DELETE FROM Schedules WHERE creationdate <= ?;");
+				ps.setDate(1, formattedDateTime);
+				int numRows = ps.executeUpdate();
+				if (numRows > 0) {
+					r = true;
+				}
+			}
+			else {
+				String skrrrt = "That's the wrong password Jimbo";
+				WrongPassException whoopityscoop = new WrongPassException();
+				whoopityscoop.setMessage(skrrrt);
+				throw whoopityscoop;
 			}
 			return r;
-		} catch (Exception e) {
-			throw new Exception("Failed in deleting old schedules:" + e.getMessage());
 		}
-
+		catch(WrongPassException w) {
+			throw new Exception("Failed in deleting old schedules: " + w.getMessage());
+		}
+		catch (Exception e) {
+			throw new Exception("Failed in deleting old schedules: " + e.getMessage());
+		}
 	}
 
-	public ArrayList<TimeSlot> getSchedules(int hours) throws Exception {
+	public ArrayList<TimeSlot> getSchedules(int hours, String password) throws Exception {
 		try {
+			String pass = "yeetcarlswagon";
 			ArrayList<TimeSlot> ScheduleSYS = new ArrayList<TimeSlot>();
 			LocalTime time = LocalTime.now();
 			time = time.minusHours(hours);
 			java.sql.Time formattedTime = java.sql.Time.valueOf(time);
 
-			System.out.println("Entering DAO");
-			System.out.println(hours);
-			System.out.println(formattedTime);
-
+			//System.out.println("Entering DAO");
+			//System.out.println(hours);
+			//System.out.println(formattedTime);
+			if(password.equals(pass)){
 			PreparedStatement ps = conn.prepareStatement(
 					"SELECT TimeSlots.id, TimeSlots.secretcode, TimeSlots.startDate, TimeSlots.enddate, TimeSlots.starttime, TimeSlots.endtime, TimeSlots.participant, TimeSlots.available, TimeSlots.scheduleid FROM TimeSlots JOIN Schedules ON TimeSlots.scheduleid = Schedules.id  WHERE Schedules.creationtime >= ? ORDER BY TimeSlots.startdate, TimeSlots.starttime;");
 			ps.setTime(1, formattedTime);
@@ -389,10 +407,19 @@ public class DAO {
 			}
 			resultSet.close();
 			ps.close();
-
+			}
+			else {
+				String msg = "That's not the right password Jimbo";
+				WrongPassException beans = new WrongPassException();
+				beans.setMessage(msg);
+				throw beans;
+			}
 			return ScheduleSYS;
-
-		} catch (Exception e) {
+		}
+		catch(WrongPassException w) {
+			throw new Exception("Failed in getting timeslots" + w.getMessage());
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 			throw new Exception("Failed in getting timeslots: " + e.getMessage());
 		}

@@ -28,12 +28,12 @@ public class DeleteOldSchedulesHandler implements RequestStreamHandler {
 	 * 
 	 * @throws Exception 
 	 */
-	boolean deleteOldSchedules(int days) throws Exception {
+	boolean deleteOldSchedules(int days, String password) throws Exception {
 		if (logger != null) { logger.log("in deleteOldSchedules"); }		
 				
 		DAO dao = new DAO();
 	
-		return dao.deleteOldSchedules(days);
+		return dao.deleteOldSchedules(days, password);
 	}
 	
 	@Override
@@ -86,9 +86,8 @@ public class DeleteOldSchedulesHandler implements RequestStreamHandler {
 			logger.log(req.toString());
 
 			DeleteOldSchedulesResponse resp;
-			logger.log("text1");
 			try {
-				if (deleteOldSchedules(req.days)) {
+				if (deleteOldSchedules(req.days, req.password)) {
 					resp = new DeleteOldSchedulesResponse("Confirmed");
 				} else {
 					resp = new DeleteOldSchedulesResponse("Unable to delete schedules for  [" + req.days + "]", 422);
@@ -98,7 +97,8 @@ public class DeleteOldSchedulesHandler implements RequestStreamHandler {
 			}
 			// compute proper response
 	        responseJson.put("body", new Gson().toJson(resp));  
-		}
+			}
+		
         logger.log("end result:" + responseJson.toJSONString());
         logger.log(responseJson.toJSONString());
         OutputStreamWriter writer = new OutputStreamWriter(output, "UTF-8");
