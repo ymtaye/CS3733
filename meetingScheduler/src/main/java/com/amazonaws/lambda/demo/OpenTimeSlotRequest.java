@@ -14,7 +14,7 @@ public class OpenTimeSlotRequest {
 	}
 	
 	public String toString() {
-		return "Fetch(" + sID + "," + starttime + "," + startdate + "," + Integer.toString(open) + ")";
+		return "Fetch(" + sID + ", " + starttime + ", " + startdate + ", " + Integer.toString(open) + ")";
 	}
 
 }
