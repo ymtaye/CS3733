@@ -241,7 +241,7 @@ public class DAO {
 		try {
 			boolean r = false;
 			PreparedStatement ps = conn.prepareStatement(
-					"UPDATE TimeSlots SET participant = ?, available = ? WHERE startdate = ? AND starttime = ? and scheduleid = ?;");
+					"UPDATE TimeSlots SET participant = ?, available = ? WHERE startdate = ? AND starttime = ? AND scheduleid = ?;");
 			ps.setString(1, "");
 			ps.setInt(2, open);
 			ps.setString(3, startdate);
@@ -440,10 +440,8 @@ public class DAO {
 			ps.setInt(12, DayWeek);
 
 			ResultSet resultSet = ps.executeQuery();
-			System.out.println("here2");
 
 			while (resultSet.next()) {
-
 				ScheduleSYS.add(generateTimeSlot(resultSet));
 			}
 			resultSet.close();
@@ -458,36 +456,22 @@ public class DAO {
 	}
 	public int getMeetingLength(String scheduleID) throws Exception{
     	try {
-    		String eol = System.getProperty("line.separator"); //for testing
     		PreparedStatement ps = conn.prepareStatement("SELECT * FROM TimeSlots WHERE scheduleid = ?");
     		ps.setString(1, scheduleID);
     		ResultSet rS = ps.executeQuery();
     		rS.next();
     		String st = rS.getString("starttime");
-    		System.out.println("________________________________________________________" + eol);
-    		System.out.println("IN GET MEETING LENGTH" + eol);
-    		System.out.println("starttime = " + st + eol);
     		String et = rS.getString("endtime");
-    		System.out.println("endtime = " + et + eol);
     		rS.close();
     		int stH,stM;
     		int etH,etM;
     		stH = Integer.parseInt(st.substring(0, 2));
-    		System.out.println("stH = " + Integer.toString(stH) + eol);
     		etH = Integer.parseInt(et.substring(0, 2));
-    		System.out.println("etH = " + Integer.toString(etH) + eol);
     		stM = Integer.parseInt(st.substring(3, 5));
-    		System.out.println("stM = " + Integer.toString(stM) + eol);
     		etM = Integer.parseInt(et.substring(3, 5));
-    		System.out.println("etM = " + Integer.toString(etM) + eol);
-    		System.out.println("Calculating the minutes" + eol);
     		stM = stM + (stH*60);
-    		System.out.println("stM = " + Integer.toString(stM) + eol);
     		etM = etM + (etH*60);
-    		System.out.println("etM = " + Integer.toString(etM) + eol);
     		int returnVal = (etM - stM);
-    		System.out.println("returnVal = " + Integer.toString(returnVal) + eol);
-    		System.out.println("_________________________________" + eol);
     		return returnVal;
     	}
     	catch(Exception e) {
@@ -584,7 +568,7 @@ public class DAO {
 	    	throw new Exception("Failed to extend date backwards: " + e.getMessage());
 	    }
 	}
-    public boolean extendDateForwards(String scheduleID, String newEndDate, String sc) throws Exception{
+	public boolean extendDateForwards(String scheduleID, String newEndDate, String sc) throws Exception{
     	try {
     		boolean r = false;
     		SimpleDateFormat dayofyear = new SimpleDateFormat("yyyy-MM-dd");
@@ -668,4 +652,49 @@ public class DAO {
     		throw new Exception("Failed to extend date forwards: " + e.getMessage());
     	}
     }
+
+	public boolean closeTime(String scheduleid, String secretcode, String time) throws Exception{
+		try {
+			boolean r = false;
+			boolean j = false;
+			PreparedStatement ps = conn.prepareStatement("SELECT * FROM Schedules WHERE id = ? AND secretcode = ?;");
+			ps.setString(1, scheduleid);
+			ps.setString(2, secretcode);
+			ResultSet rS = ps.executeQuery();
+			if(rS.next()) {j = true;}
+			PreparedStatement ps2 = conn.prepareStatement("UPDATE TimeSlots SET participant = ?, available = ? WHERE starttime = ? AND scheduleid = ?;");
+			ps2.setString(1, "");
+			ps2.setInt(2, 1);
+			ps2.setString(3, time);
+			ps2.setString(4, scheduleid);
+			int numRows = ps2.executeUpdate();
+			if (numRows > 0) {
+				r = true;
+			}
+			return r && j;
+			}
+		catch(Exception e) {throw new Exception("Failed in closing for a time: " + e.getMessage());}
+	}
+	public boolean openTime(String scheduleid, String secretcode, String time) throws Exception{
+		try {
+			boolean r = false;
+			boolean j = false;
+			PreparedStatement ps = conn.prepareStatement("SELECT * FROM Schedules WHERE id = ? AND secretcode = ?;");
+			ps.setString(1, scheduleid);
+			ps.setString(2, secretcode);
+			ResultSet rS = ps.executeQuery();
+			if(rS.next()) {j = true;}
+			PreparedStatement ps2 = conn.prepareStatement("UPDATE TimeSlots SET participant = ?, available = ? WHERE starttime = ? AND scheduleid = ?;");
+			ps2.setString(1, "");
+			ps2.setInt(2, 0);
+			ps2.setString(3, time);
+			ps2.setString(4, scheduleid);
+			int numRows = ps2.executeUpdate();
+			if (numRows > 0) {
+				r = true;
+			}
+			return r && j;
+			}
+		catch(Exception e) {throw new Exception("Failed in opening for a time: " + e.getMessage());}
+	}
 }
