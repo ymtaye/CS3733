@@ -42,7 +42,7 @@ public class GetSchedulesHandler implements RequestStreamHandler {
  * @throws Exception 
  */
 
-   ArrayList<TimeSlot> getSchedules(int hours, String password) throws Exception{
+	public ArrayList<Schedule> getSchedules(int hours, String password) throws Exception {
 	if (logger != null) { logger.log("in getSchedules"); }
 	DAO dao = new DAO();
 
@@ -80,7 +80,7 @@ public class GetSchedulesHandler implements RequestStreamHandler {
 		        processed = true;
 		        queryStringParameters = null;
 			} else {
-				queryStringParameters = event.get("body").toString();
+				queryStringParameters = event.get("queryStringParameters").toString();
 				System.out.println(queryStringParameters);
 				logger.log(queryStringParameters);
 				if (queryStringParameters == null) {
@@ -102,7 +102,7 @@ public class GetSchedulesHandler implements RequestStreamHandler {
 
 			GetSchedulesResponse resp;
 			try {
-				List<TimeSlot> list = getSchedules(req.hours, req.password);
+				List<Schedule> list = getSchedules(req.hours, req.password);
 				resp = new GetSchedulesResponse(list, 200);
 			} catch (Exception e) {
 				resp = new GetSchedulesResponse(403);

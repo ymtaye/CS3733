@@ -398,10 +398,10 @@ public class DAO {
 		}
 	}
 
-	public ArrayList<TimeSlot> getSchedules(int hours, String password) throws Exception {
+	public ArrayList<Schedule> getSchedules(int hours, String password) throws Exception {
 		try {
 			String pass = "yeetcarlswagon";
-			ArrayList<TimeSlot> ScheduleSYS = new ArrayList<TimeSlot>();
+			ArrayList<Schedule> ScheduleSYS = new ArrayList<Schedule>();
 			LocalTime time = LocalTime.now();
 			time = time.minusHours(hours);
 			java.sql.Time formattedTime = java.sql.Time.valueOf(time);
@@ -411,11 +411,11 @@ public class DAO {
 			//System.out.println(formattedTime);
 			if(password.equals(pass)){
 			PreparedStatement ps = conn.prepareStatement(
-					"SELECT TimeSlots.id, TimeSlots.secretcode, TimeSlots.startDate, TimeSlots.enddate, TimeSlots.starttime, TimeSlots.endtime, TimeSlots.participant, TimeSlots.available, TimeSlots.scheduleid FROM TimeSlots JOIN Schedules ON TimeSlots.scheduleid = Schedules.id  WHERE Schedules.creationtime >= ? ORDER BY TimeSlots.startdate, TimeSlots.starttime;");
+					"SELECT * FROM  Schedules WHERE creationtime >= ? ORDER BY startdate, daystarthour;");
 			ps.setTime(1, formattedTime);
 			ResultSet resultSet = ps.executeQuery();
 			while (resultSet.next()) {
-				ScheduleSYS.add(generateTimeSlot(resultSet));
+				ScheduleSYS.add(generateSchedule(resultSet));
 			}
 			resultSet.close();
 			ps.close();
